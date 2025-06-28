@@ -1,0 +1,26 @@
+[
+  {
+    "id": 1,
+    "title": "Top 10 Fuel-Efficient Cars in Kenya (2025)",
+    "excerpt": "Discover the most fuel-efficient and eco-friendly cars in the Kenyan market...",
+    "author": "Daniel Maina",
+    "date": "2025-06-18",
+    "image": "/images/fuel-efficient.jpg"
+  },
+  {
+    "id": 2,
+    "title": "Why You Should Book a Test Drive Before Buying",
+    "excerpt": "A test drive can reveal more than just how the car drives...",
+    "author": "Naomi Chebet",
+    "date": "2025-06-12",
+    "image": "/images/test-drive.jpg"
+  },
+  {
+    "id": 3,
+    "title": "Car Loans vs Subscriptions: What’s Better?",
+    "excerpt": "Learn the pros and cons of taking a loan versus using monthly car subscriptions...",
+    "author": "Daniwest AI",
+    "date": "2025-05-20",
+    "image": "/images/loans-vs-subscriptions.jpg"
+  }
+]

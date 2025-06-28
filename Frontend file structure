@@ -1,0 +1,73 @@
+ULTIMATE/
+├── backend/
+├── frontend/
+│   ├── justice-chat/
+│   │   ├── assets/
+│   │   ├── scripts/
+│   │   │   └── chat.js
+│   │   ├── styles/
+│   │   │   └── chat.css
+│   │   ├── index.html
+│   │   ├── justice-chat.html
+│   │   ├── node_modules/
+│   │   ├── public/
+│   │   │   └── vite.svg
+│   │   └── src/
+│   │       ├── assets/
+│   │       ├── components/
+│   │       │   └── ChatBot/
+│   │       │   │   └── ChatBotWidget.tsx
+│   │       │   └── dashboard/
+│   │       │       ├── ai/
+│   │       │       │   └── VirtualCarConsultant.tsx
+│   │       │       ├── uploads/
+│   │       │       │   └── DocumentUploader.tsx
+│   │       │       ├── widgets/
+│   │       │       │   ├── AddOnStore.tsx
+│   │       │       │   ├── AffiliatePanel.tsx
+│   │       │       │   ├── AIRecommendations.tsx
+│   │       │       │   ├── FinanceCalculator.tsx
+│   │       │       │   ├── LanguageCurrencySwitcher.tsx
+│   │       │       │   ├── NotificationsCenter.tsx
+│   │       │       │   ├── NotificationsFeed.tsx
+│   │       │       │   ├── OffersCarousel.tsx
+│   │       │       │   ├── SecurityPanel.tsx
+│   │       │       │   ├── StatsOverview.tsx
+│   │       │       │   ├── TradeInEvaluator.tsx
+│   │       │       │   ├── UpcomingAppointments.tsx
+│   │       │       │   ├── VehicleTracker.tsx
+│   │       │       │   └── WelcomeCard.tsx
+│   │       │       └── ui/
+│   │       │           ├── button.tsx
+│   │       │           ├── card.tsx
+│   │       │           ├── Footer.tsx
+│   │       │           └── Header.tsx
+│   │       ├── hooks/
+│   │       │   └── useAuth.ts
+│   │       ├── lib/
+│   │       │   ├── api.ts
+│   │       │   └── utils.ts
+│   │       └── pages/
+│   │           ├── Dashboard/
+│   │           │   ├── AdminDashboard.tsx
+│   │           │   ├── CustomerDashboard.tsx
+│   │           │   └── GuestDashboard.tsx
+│   │           ├── About.tsx
+│   │           ├── BookTestDrive.tsx
+│   │           ├── Contact.tsx
+│   │           ├── Cookies.tsx
+│   │           ├── Dashboard.tsx
+│   │           └── LandingPage.tsx
+│   ├── .env
+│   ├── .gitignore
+│   ├── eslint.config.js
+│   ├── index.html
+│   ├── package.json
+│   ├── pnpm-lock.yaml
+│   ├── postcss.config.js
+│   ├── README.md
+│   ├── tailwind.config.js
+│   ├── tsconfig.app.json
+│   ├── tsconfig.json
+│   ├── tsconfig.node.json
+│   └── vite.config.ts

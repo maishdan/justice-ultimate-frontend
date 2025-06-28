@@ -1,0 +1,17 @@
+# Node junk
+node_modules/
+pnpm-lock.yaml
+package-lock.json
+
+# System files
+.env
+.DS_Store
+.vscode/
+
+# Build output
+dist/
+build/
+
+# Others
+*.log
+justice-ultimate-frontend.git/

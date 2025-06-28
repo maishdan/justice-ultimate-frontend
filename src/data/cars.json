@@ -1,0 +1,57 @@
+[
+  {
+    "id": 1,
+    "name": "Toyota Land Cruiser",
+    "brand": "Toyota",
+    "model": "Land Cruiser Prado",
+    "year": 2022,
+    "fuel": "Diesel",
+    "transmission": "Automatic",
+    "priceKES": 11200000,
+    "image": "/images/toyota_land_cruiser.jpg"
+  },
+  {
+    "id": 2,
+    "name": "Honda CR-V",
+    "brand": "Honda",
+    "model": "CR-V",
+    "year": 2021,
+    "fuel": "Petrol",
+    "transmission": "Automatic",
+    "priceKES": 4700000,
+    "image": "/images/honda_crv.jpg"
+  },
+  {
+    "id": 3,
+    "name": "Nissan X-Trail",
+    "brand": "Nissan",
+    "model": "X-Trail",
+    "year": 2020,
+    "fuel": "Petrol",
+    "transmission": "CVT",
+    "priceKES": 3900000,
+    "image": "/images/nissan_xtrail.jpg"
+  },
+  {
+    "id": 4,
+    "name": "Mazda CX-5",
+    "brand": "Mazda",
+    "model": "CX-5",
+    "year": 2022,
+    "fuel": "Petrol",
+    "transmission": "Automatic",
+    "priceKES": 5200000,
+    "image": "/images/mazda_cx5.jpg"
+  },
+  {
+    "id": 5,
+    "name": "Subaru Forester",
+    "brand": "Subaru",
+    "model": "Forester",
+    "year": 2023,
+    "fuel": "Petrol",
+    "transmission": "Automatic",
+    "priceKES": 5600000,
+    "image": "/images/subaru_forester.jpg"
+  }
+]
