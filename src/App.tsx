@@ -21,7 +21,7 @@ import SuccessStories from "./pages/SuccessStories";
 import BookTestDrive from "./pages/BookTestDrive";
 import VehicleCatalogue from "./pages/VehicleCatalogue";
 import ChatBotWidget from "./components/ChatBot/ChatBotWidget";
-
+import ApplyForFinancing from "./pages/ApplyForFinancing";
 import AdminDashboard from './pages/Dashboard/AdminDashboard';
 import CustomerDashboard from './pages/CustomerDashboard';
 import GuestDashboard from './pages/Dashboard/GuestDashboard';
@@ -43,6 +43,7 @@ function App() {
             <Route path="/success-stories" element={<SuccessStories />} />
             <Route path="/contact" element={<Contact />} />
             <Route path="/login" element={<LoginPage />} />
+            <Route path="/apply-financing" element={<ApplyForFinancing />} />
             <Route path="/register" element={<RegisterPage />} />
             <Route path="/terms" element={<Terms />} />
             <Route path="/privacy" element={<PrivacyPolicy />} />

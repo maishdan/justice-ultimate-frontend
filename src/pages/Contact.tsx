@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { Link } from "react-router-dom";
 import {
   FaFacebook,
   FaWhatsapp,
@@ -139,17 +140,28 @@ export default function Contact() {
               ></iframe>
             </div>
 
-            <div className="mt-6">
-              <a href="/vehicle-catalogue" className="inline-block bg-green-600 hover:bg-green-700 text-white font-semibold py-2 px-4 rounded mr-2 shadow-md hover:drop-shadow-[0_0_10px_#22c55e]">
-                🚘 View Cars for Sale
-              </a>
-              <a href="/book-test-drive" className="inline-block bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-4 rounded mr-2 shadow-md hover:drop-shadow-[0_0_10px_#3b82f6]">
-                📝 Book a Test Drive
-              </a>
-              <a href="/finance-application" className="inline-block bg-yellow-400 hover:bg-yellow-500 text-black font-semibold py-2 px-4 rounded shadow-md hover:drop-shadow-[0_0_10px_#facc15]">
-                💳 Apply for Financing
-              </a>
-            </div>
+           <div className="mt-6">
+  <Link
+    to="/vehicle-catalogue"
+    className="inline-block bg-green-600 hover:bg-green-700 text-white font-semibold py-2 px-4 rounded mr-2 shadow-md hover:drop-shadow-[0_0_10px_#22c55e]"
+  >
+    🚘 View Cars for Sale
+  </Link>
+
+  <Link
+    to="/book-test-drive"
+    className="inline-block bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-4 rounded mr-2 shadow-md hover:drop-shadow-[0_0_10px_#3b82f6]"
+  >
+    📝 Book a Test Drive
+  </Link>
+
+  <Link
+    to="/apply-financing"
+    className="inline-block bg-yellow-400 hover:bg-yellow-500 text-black font-semibold py-2 px-4 rounded shadow-md hover:drop-shadow-[0_0_10px_#facc15]"
+  >
+    💳 Apply for Financing
+  </Link>
+</div>
           </div>
         </div>
       </div>
