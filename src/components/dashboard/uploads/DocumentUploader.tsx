@@ -2,62 +2,44 @@
 import React, { useState } from 'react';
 
 const DocumentUploader = () => {
-  const [idFile, setIdFile] = useState<File | null>(null);
-  const [licenseFile, setLicenseFile] = useState<File | null>(null);
-  const [proofAddress, setProofAddress] = useState<File | null>(null);
+  const [file, setFile] = useState<File | null>(null);
+  const [uploadStatus, setUploadStatus] = useState('');
 
-  const handleFileChange = (
-    e: React.ChangeEvent<HTMLInputElement>,
-    setFile: React.Dispatch<React.SetStateAction<File | null>>
-  ) => {
-    const file = e.target.files?.[0];
-    if (file) setFile(file);
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files && e.target.files.length > 0) {
+      setFile(e.target.files[0]);
+      setUploadStatus('');
+    }
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    console.log('Uploading files:', { idFile, licenseFile, proofAddress });
-    // Implement actual file upload logic here (e.g., API call to backend)
+  const handleUpload = () => {
+    if (!file) {
+      setUploadStatus('❌ Please select a file first.');
+      return;
+    }
+
+    // Simulate upload logic
+    setTimeout(() => {
+      setUploadStatus(`✅ File "${file.name}" uploaded successfully!`);
+      setFile(null);
+    }, 1500);
   };
 
   return (
-    <div className="bg-zinc-900 text-white p-6 rounded-xl shadow-xl hover:shadow-2xl transition-all">
-      <h3 className="text-2xl font-bold mb-4">📤 Upload Documents</h3>
-      <form onSubmit={handleSubmit} className="space-y-4">
-        <div>
-          <label className="block mb-1">ID/Passport:</label>
-          <input
-            type="file"
-            accept=".jpg,.png,.pdf"
-            onChange={(e) => handleFileChange(e, setIdFile)}
-            className="block w-full bg-zinc-800 text-white p-2 rounded"
-          />
-        </div>
-        <div>
-          <label className="block mb-1">Driver's License:</label>
-          <input
-            type="file"
-            accept=".jpg,.png,.pdf"
-            onChange={(e) => handleFileChange(e, setLicenseFile)}
-            className="block w-full bg-zinc-800 text-white p-2 rounded"
-          />
-        </div>
-        <div>
-          <label className="block mb-1">Proof of Address:</label>
-          <input
-            type="file"
-            accept=".jpg,.png,.pdf"
-            onChange={(e) => handleFileChange(e, setProofAddress)}
-            className="block w-full bg-zinc-800 text-white p-2 rounded"
-          />
-        </div>
-        <button
-          type="submit"
-          className="mt-4 bg-green-700 hover:bg-green-600 text-white font-semibold px-6 py-2 rounded-lg transition-all"
-        >
-          Upload Documents
-        </button>
-      </form>
+    <div className="bg-white dark:bg-gray-900 p-6 rounded-xl shadow-lg">
+      <h3 className="text-xl font-bold mb-4">📤 Upload Legal Documents</h3>
+      <input
+        type="file"
+        onChange={handleFileChange}
+        className="mb-3 text-sm text-gray-500 dark:text-gray-300"
+      />
+      <button
+        onClick={handleUpload}
+        className="bg-green-600 hover:bg-green-500 text-white px-4 py-2 rounded"
+      >
+        Upload
+      </button>
+      {uploadStatus && <p className="mt-3 text-sm text-blue-500">{uploadStatus}</p>}
     </div>
   );
 };
