@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 // src/pages/Dashboard/AdminDashboard.tsx
 import React, { useEffect, useState } from 'react';
 import useAuth from '../../hooks/useAuth'; // ✅ Protect route
@@ -6,8 +5,8 @@ import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { Card, CardContent } from '../../components/ui/card';
 import { Button } from '../../components/ui/button';
-// Update the import path below to the correct relative path if needed
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '../../components/ui/tabs';
+
 import { BarChart, LineChart, PieChart } from '../../components/dashboard/widgets/Charts';
 import WelcomeCard from '../../components/dashboard/widgets/WelcomeCard';
 import UserManagementPanel from '../../components/dashboard/panels/UserManagementPanel';
@@ -46,11 +45,24 @@ export default function AdminDashboard() {
     monthlySales: 0,
   });
 
+  const [selectedTab, setSelectedTab] = React.useState("users");
+
   useEffect(() => {
     axios.get('/api/admin/overview').then((res) => {
       setStats(res.data);
     });
   }, []);
+
+  const tabOptions = [
+    { label: "User Management", key: "users" },
+    { label: "Vehicle Listings", key: "listings" },
+    { label: "Transactions", key: "transactions" },
+    { label: "Staff Scheduling", key: "schedules" },
+    { label: "Advanced Analytics", key: "analytics" },
+    { label: "Security", key: "security" },
+    { label: "Support", key: "support" },
+    { label: "Tools", key: "tools" },
+  ];
 
   return (
     <div className="min-h-screen bg-gray-900 text-white flex flex-col">
@@ -72,78 +84,70 @@ export default function AdminDashboard() {
       <div className="p-4">
         <WelcomeCard />
 
-        {/* Tab state management */}
-        {(() => {
-          const tabOptions = [
-            { label: "User Management", key: "users" },
-            { label: "Vehicle Listings", key: "listings" },
-            { label: "Transactions", key: "transactions" },
-            { label: "Staff Scheduling", key: "schedules" },
-            { label: "Advanced Analytics", key: "analytics" },
-            { label: "Security", key: "security" },
-            { label: "Support", key: "support" },
-            { label: "Tools", key: "tools" },
-          ];
-          const [selectedTab, setSelectedTab] = React.useState(tabOptions[0].key);
+        <Tabs>
+          <TabsList>
+            {tabOptions.map((tab) => (
+              <TabsTrigger
+                key={tab.key}
+                label={tab.label}
+                selected={selectedTab === tab.key}
+                onClick={() => setSelectedTab(tab.key)}
+              />
+            ))}
+          </TabsList>
 
-          return (
-            <Tabs>
-              <TabsList>
-                {tabOptions.map((tab) => (
-                  <TabsTrigger
-                    key={tab.key}
-                    label={tab.label}
-                    selected={selectedTab === tab.key}
-                    onClick={() => setSelectedTab(tab.key)}
-                  />
-                ))}
-              </TabsList>
+          {selectedTab === "users" && (
+            <TabsContent>
+              <UserManagementPanel />
+            </TabsContent>
+          )}
 
-              {selectedTab === "users" && (
-                <TabsContent>
-                  <UserManagementPanel />
-                </TabsContent>
-              )}
-              {selectedTab === "listings" && (
-                <TabsContent>
-                  <ListingsManager />
-                </TabsContent>
-              )}
-              {selectedTab === "transactions" && (
-                <TabsContent>
-                  <TransactionManager />
-                </TabsContent>
-              )}
-              {selectedTab === "schedules" && (
-                <TabsContent>
-                  <ScheduleManager />
-                </TabsContent>
-              )}
-              {selectedTab === "analytics" && (
-                <TabsContent>
-                  <AnalyticsPanel />
-                </TabsContent>
-              )}
-              {selectedTab === "security" && (
-                <TabsContent>
-                  <SecurityPanel />
-                </TabsContent>
-              )}
-              {selectedTab === "support" && (
-                <TabsContent>
-                  <SupportFeedbackPanel />
-                </TabsContent>
-              )}
-              {selectedTab === "tools" && (
-                <TabsContent>
-                  <ImpersonatorTool />
-                  <SystemHealthMonitor />
-                  <ThemeAccessibilityControls />
-                </TabsContent>
-              )}
-            </Tabs>
-          );
-        })()}
+          {selectedTab === "listings" && (
+            <TabsContent>
+              <ListingsManager />
+            </TabsContent>
+          )}
+
+          {selectedTab === "transactions" && (
+            <TabsContent>
+              <TransactionManager />
+            </TabsContent>
+          )}
+
+          {selectedTab === "schedules" && (
+            <TabsContent>
+              <ScheduleManager />
+            </TabsContent>
+          )}
+
+          {selectedTab === "analytics" && (
+            <TabsContent>
+              <AnalyticsPanel />
+            </TabsContent>
+          )}
+
+          {selectedTab === "security" && (
+            <TabsContent>
+              <SecurityPanel />
+            </TabsContent>
+          )}
+
+          {selectedTab === "support" && (
+            <TabsContent>
+              <SupportFeedbackPanel />
+            </TabsContent>
+          )}
+
+          {selectedTab === "tools" && (
+            <TabsContent>
+              <>
+                <ImpersonatorTool />
+                <SystemHealthMonitor />
+                <ThemeAccessibilityControls />
+              </>
+            </TabsContent>
+          )}
+        </Tabs>
 
         <div className="mt-6">
           <NotificationsFeed />
@@ -152,14 +156,3 @@ export default function AdminDashboard() {
     </div>
   );
 }
-=======
-import useAuth from '../../hooks/useAuth';
-
-const AdminDashboard = () => {
-  useAuth(); // protect this page
-
-  return <div>Welcome to Admin Dashboard 🎉</div>;
-};
-
-export default AdminDashboard;
->>>>>>> 8202cd886166243aae7d13ab04e8ede3607ebf1c
