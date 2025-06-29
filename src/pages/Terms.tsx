@@ -1,11 +1,7 @@
 // File: src/pages/Terms.tsx
 
 import { useState } from "react";
-<<<<<<< HEAD
-import { FaSearch, FaInfoCircle, FaGlobe, FaShieldAlt, FaFilePdf, FaLanguage } from "react-icons/fa";
-=======
 import { FaDownload, FaSearch, FaInfoCircle, FaGlobe, FaShieldAlt, FaFilePdf, FaLanguage } from "react-icons/fa";
->>>>>>> 8202cd886166243aae7d13ab04e8ede3607ebf1c
 
 const sections = [
   {
