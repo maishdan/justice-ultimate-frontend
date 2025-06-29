@@ -28,16 +28,20 @@ import GuestDashboard from './pages/Dashboard/GuestDashboard';
 function App() {
   const [darkMode, setDarkMode] = useState(false);
 
-  // Detect system preference on first load
+  // Detect preference from localStorage or system
   useEffect(() => {
-    const prefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
-    setDarkMode(prefersDark);
-    document.documentElement.classList.toggle("dark", prefersDark);
+    const localPref = localStorage.getItem("darkMode");
+    const systemPref = window.matchMedia("(prefers-color-scheme: dark)").matches;
+    const shouldUseDark = localPref !== null ? localPref === "true" : systemPref;
+
+    setDarkMode(shouldUseDark);
+    document.documentElement.classList.toggle("dark", shouldUseDark);
   }, []);
 
-  // Toggle <html> dark class
+  // Apply class and persist to localStorage
   useEffect(() => {
     document.documentElement.classList.toggle("dark", darkMode);
+    localStorage.setItem("darkMode", darkMode.toString());
   }, [darkMode]);
 
   return (
@@ -68,21 +72,21 @@ function App() {
                   <AdminDashboard />
                 </PrivateRoute>
               </ProtectedRoute>
-            }/>
+            } />
             <Route path="/dashboard/customer" element={
               <ProtectedRoute>
                 <PrivateRoute>
                   <CustomerDashboard />
                 </PrivateRoute>
               </ProtectedRoute>
-            }/>
+            } />
             <Route path="/dashboard/guest" element={
               <ProtectedRoute>
                 <PrivateRoute>
                   <GuestDashboard />
                 </PrivateRoute>
               </ProtectedRoute>
-            }/>
+            } />
           </Routes>
         </main>
 
