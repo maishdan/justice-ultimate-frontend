@@ -1,11 +1,8 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
-<<<<<<< HEAD
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
-=======
->>>>>>> 8202cd886166243aae7d13ab04e8ede3607ebf1c
 
 const countries = [
   { code: "KE", name: "Kenya", dial: "+254" },
@@ -27,34 +24,24 @@ export default function RegisterPage() {
   const [ntsaPhone, setNtsaPhone] = useState("");
   const [phoneNumber, setPhoneNumber] = useState("");
   const [password, setPassword] = useState("");
-<<<<<<< HEAD
   const [confirmPassword, setConfirmPassword] = useState("");
   const [loading, setLoading] = useState(false);
-=======
->>>>>>> 8202cd886166243aae7d13ab04e8ede3607ebf1c
   const navigate = useNavigate();
 
   const handleRegister = async (e: React.FormEvent) => {
     e.preventDefault();
 
-<<<<<<< HEAD
     if (password !== confirmPassword) {
       toast.error("Passwords do not match!");
       return;
     }
 
-=======
-    // ✅ Fix added: ensure phoneNumber starts with 0
->>>>>>> 8202cd886166243aae7d13ab04e8ede3607ebf1c
     const finalPhoneNumber = phoneNumber.startsWith("0")
       ? phoneNumber
       : "0" + phoneNumber;
 
-<<<<<<< HEAD
     setLoading(true);
 
-=======
->>>>>>> 8202cd886166243aae7d13ab04e8ede3607ebf1c
     try {
       await axios.post("http://localhost:5000/api/auth/register", {
         firstName,
@@ -68,7 +55,6 @@ export default function RegisterPage() {
         password,
       });
 
-<<<<<<< HEAD
       toast.success("Registration successful. Redirecting to login...");
       setTimeout(() => {
         navigate("/login");
@@ -78,13 +64,6 @@ export default function RegisterPage() {
       toast.error(err.response?.data?.message || "Registration failed");
     } finally {
       setLoading(false);
-=======
-      alert("Registration successful");
-      navigate("/login");
-    } catch (err: any) {
-      console.error("Registration error:", err.response?.data || err.message);
-      alert(err.response?.data?.message || "Registration failed");
->>>>>>> 8202cd886166243aae7d13ab04e8ede3607ebf1c
     }
   };
 
@@ -189,7 +168,6 @@ export default function RegisterPage() {
           className="p-3 bg-gray-800 rounded w-full"
           required
         />
-<<<<<<< HEAD
 
         <input
           type="password"
@@ -232,15 +210,6 @@ export default function RegisterPage() {
 
       {/* Toast container */}
       <ToastContainer position="top-center" autoClose={3000} hideProgressBar />
-=======
-        <button
-          type="submit"
-          className="w-full bg-blue-600 hover:bg-blue-700 p-3 rounded font-bold"
-        >
-          Register
-        </button>
-      </form>
->>>>>>> 8202cd886166243aae7d13ab04e8ede3607ebf1c
     </div>
   );
 }
