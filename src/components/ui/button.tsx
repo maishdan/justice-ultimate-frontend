@@ -7,22 +7,16 @@ export function Button({
   onClick,
   size = "md",
   variant = "default",
-<<<<<<< HEAD
   type = "button",
   disabled = false,
-=======
->>>>>>> 8202cd886166243aae7d13ab04e8ede3607ebf1c
 }: {
   children: React.ReactNode;
   className?: string;
   onClick?: () => void;
   size?: "sm" | "md" | "lg";
   variant?: "default" | "outline";
-<<<<<<< HEAD
   type?: "button" | "submit";
   disabled?: boolean;
-=======
->>>>>>> 8202cd886166243aae7d13ab04e8ede3607ebf1c
 }) {
   const sizeClass = {
     sm: "px-3 py-1 text-sm",
@@ -36,36 +30,32 @@ export function Button({
   }[variant];
 
   return (
-<<<<<<< HEAD
     <button
       type={type}
       onClick={onClick}
       className={`rounded ${sizeClass} ${variantClass} ${className}`}
       disabled={disabled}
     >
-=======
-    <button onClick={onClick} className={`rounded ${sizeClass} ${variantClass} ${className}`}>
->>>>>>> 8202cd886166243aae7d13ab04e8ede3607ebf1c
       {children}
     </button>
   );
 }
-<<<<<<< HEAD
+
 export function IconButton({
   icon: Icon,
   onClick,
-  className = '',
-  size = 'md',
+  className = "",
+  size = "md",
 }: {
   icon: React.ComponentType<{ size?: number }>;
   onClick?: () => void;
   className?: string;
-  size?: 'sm' | 'md' | 'lg';
+  size?: "sm" | "md" | "lg";
 }) {
   const sizeClass = {
-    sm: 'w-6 h-6',
-    md: 'w-8 h-8',
-    lg: 'w-10 h-10',
+    sm: "w-6 h-6",
+    md: "w-8 h-8",
+    lg: "w-10 h-10",
   }[size];
 
   return (
@@ -73,10 +63,11 @@ export function IconButton({
       onClick={onClick}
       className={`flex items-center justify-center rounded-full bg-blue-600 hover:bg-blue-700 text-white ${sizeClass} ${className}`}
     >
-      <Icon size={size === 'sm' ? 16 : size === 'md' ? 20 : 24} />
+      <Icon size={size === "sm" ? 16 : size === "md" ? 20 : 24} />
     </button>
   );
 }
+
 export function LoadingButton({
   loading,
   children,
@@ -101,6 +92,7 @@ export function LoadingButton({
     </Button>
   );
 }
+
 export function SubmitButton({
   children,
   className = "",
@@ -123,6 +115,7 @@ export function SubmitButton({
     </Button>
   );
 }
+
 export function CancelButton({
   children,
   className = "",
@@ -144,6 +137,7 @@ export function CancelButton({
     </Button>
   );
 }
+
 export function DangerButton({
   children,
   className = "",
@@ -165,6 +159,7 @@ export function DangerButton({
     </Button>
   );
 }
+
 export function PrimaryButton({
   children,
   className = "",
@@ -186,5 +181,24 @@ export function PrimaryButton({
     </Button>
   );
 }
-=======
->>>>>>> 8202cd886166243aae7d13ab04e8ede3607ebf1c
+export function SecondaryButton({
+  children,
+  className = "",
+  onClick,
+  size = "md",
+}: {
+  children: React.ReactNode;
+  className?: string;
+  onClick?: () => void;
+  size?: "sm" | "md" | "lg";
+}) {
+  return (
+    <Button
+      onClick={onClick}
+      className={`bg-gray-500 hover:bg-gray-600 text-white ${className}`}
+      size={size}
+    >
+      {children}
+    </Button>
+  );
+}
