@@ -12,10 +12,6 @@ export default {
     require('@tailwindcss/forms'),
     require('@tailwindcss/typography'),
     require('@tailwindcss/aspect-ratio'),
-<<<<<<< HEAD
-    //require('@tailwindcss/line-clamp'),
-=======
-    require('@tailwindcss/line-clamp'),
->>>>>>> 8202cd886166243aae7d13ab04e8ede3607ebf1c
+    require('@tailwindcss/line-clamp')
   ],
 }

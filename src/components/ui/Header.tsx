@@ -1,7 +1,3 @@
-<<<<<<< HEAD
-// ✅ FIXED: Header.tsx
-=======
->>>>>>> 8202cd886166243aae7d13ab04e8ede3607ebf1c
 import { useEffect, useRef, useState } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { Sun, Moon } from "lucide-react";
@@ -60,21 +56,12 @@ export default function Header({
   };
 
   const handleLogout = () => {
-<<<<<<< HEAD
     localStorage.removeItem("token");
     window.location.href = "/login";
   };
-=======
-  localStorage.removeItem("token");
-  window.location.href = "/login";
-};
-
->>>>>>> 8202cd886166243aae7d13ab04e8ede3607ebf1c
 
   return (
-    <header className={`w-full shadow-md z-50 sticky top-0 ${
-      darkMode ? "bg-blue-950 text-white" : "bg-white text-black border-b border-gray-200"
-    }`}>
+    <header className={`w-full shadow-md z-50 sticky top-0 ${darkMode ? "bg-blue-950 text-white" : "bg-white text-black border-b border-gray-200"}`}>
       <div className="max-w-7xl mx-auto px-4 py-2 flex items-center justify-between text-sm">
         <div className="flex items-center gap-2">
           <div className="rounded-full bg-green-600 text-white w-8 h-8 flex items-center justify-center font-bold text-sm">
@@ -86,11 +73,7 @@ export default function Header({
         </div>
 
         <nav className="hidden md:flex items-center gap-4">
-<<<<<<< HEAD
           {navLinks.map((link) =>
-=======
-          {navLinks.map((link) => (
->>>>>>> 8202cd886166243aae7d13ab04e8ede3607ebf1c
             link.subMenu ? (
               <div
                 className="relative"
@@ -122,14 +105,11 @@ export default function Header({
               <Link
                 key={link.path}
                 to={link.path}
-                className={`hover:text-green-400 ${
-                  location.pathname === link.path ? activeLinkClass : ""
-                }`}
+                className={`hover:text-green-400 ${location.pathname === link.path ? activeLinkClass : ""}`}
               >
                 {link.label}
               </Link>
             )
-<<<<<<< HEAD
           )}
 
           <Link to="/register" className="border border-green-400 px-3 py-1 rounded hover:bg-green-400 hover:text-black">
@@ -148,108 +128,33 @@ export default function Header({
           </button>
 
           <button onClick={handleLanguageToggle} className="ml-2 border px-2 py-1 rounded hover:bg-green-100 text-xs">
-=======
-          ))}
-
-          <Link
-            to="/register"
-            className="border border-green-400 px-3 py-1 rounded hover:bg-green-400 hover:text-black"
-          >
-            📝 Register
-          </Link>
-          <Link
-            to="/login"
-            className="bg-green-500 px-3 py-1 rounded text-white hover:bg-green-400"
-          >
-            🔐 Login
-          </Link>
-
-          <button
-            onClick={handleLogout}
-            className="text-sm bg-red-600 px-3 py-2 rounded"
-          >
-            Logout
-          </button>
-
-          <button
-            onClick={() => setDarkMode(!darkMode)}
-            className="ml-2 hover:text-yellow-400"
-            aria-label="Toggle Dark Mode"
-          >
-            {darkMode ? <Sun size={18} /> : <Moon size={18} />}
-          </button>
-
-          <button
-            onClick={handleLanguageToggle}
-            className="ml-2 border px-2 py-1 rounded hover:bg-green-100 text-xs"
-          >
->>>>>>> 8202cd886166243aae7d13ab04e8ede3607ebf1c
             🌍 {language}
           </button>
         </nav>
 
-<<<<<<< HEAD
         <Button className="md:hidden" onClick={() => setMenuOpen(!menuOpen)} aria-label="Toggle Menu">
-=======
-        <Button
-          className="md:hidden"
-          onClick={() => setMenuOpen(!menuOpen)}
-          aria-label="Toggle Menu"
-        >
->>>>>>> 8202cd886166243aae7d13ab04e8ede3607ebf1c
           ☰
         </Button>
       </div>
 
       {menuOpen && (
-<<<<<<< HEAD
         <div className={`md:hidden px-4 pb-4 space-y-2 ${darkMode ? "bg-blue-900 text-white" : "bg-white text-black"}`}>
           {navLinks.map((link) =>
-=======
-        <div
-          className={`md:hidden px-4 pb-4 space-y-2 ${
-            darkMode ? "bg-blue-900 text-white" : "bg-white text-black"
-          }`}
-        >
-          {navLinks.map((link) => (
->>>>>>> 8202cd886166243aae7d13ab04e8ede3607ebf1c
             link.subMenu ? (
               <div className="space-y-1">
                 <span className="font-semibold cursor-pointer">{link.label}</span>
                 {link.subMenu.map((sub) => (
-<<<<<<< HEAD
                   <Link key={sub.path} to={sub.path} className="block ml-4" onClick={() => setMenuOpen(false)}>
-=======
-                  <Link
-                    key={sub.path}
-                    to={sub.path}
-                    className="block ml-4"
-                    onClick={() => setMenuOpen(false)}
-                  >
->>>>>>> 8202cd886166243aae7d13ab04e8ede3607ebf1c
                     {sub.label}
                   </Link>
                 ))}
               </div>
             ) : (
-<<<<<<< HEAD
               <Link key={link.path} to={link.path} className="block" onClick={() => setMenuOpen(false)}>
                 {link.label}
               </Link>
             )
           )}
-=======
-              <Link
-                key={link.path}
-                to={link.path}
-                className="block"
-                onClick={() => setMenuOpen(false)}
-              >
-                {link.label}
-              </Link>
-            )
-          ))}
->>>>>>> 8202cd886166243aae7d13ab04e8ede3607ebf1c
 
           <Link to="/register" className="block" onClick={() => setMenuOpen(false)}>
             📝 Register
@@ -258,14 +163,7 @@ export default function Header({
             🔐 Login
           </Link>
 
-<<<<<<< HEAD
           <button onClick={handleLogout} className="text-sm bg-red-600 px-3 py-2 rounded">
-=======
-          <button
-            onClick={handleLogout}
-            className="text-sm bg-red-600 px-3 py-2 rounded"
-          >
->>>>>>> 8202cd886166243aae7d13ab04e8ede3607ebf1c
             Logout
           </button>
 
@@ -280,14 +178,7 @@ export default function Header({
             Toggle Theme
           </button>
 
-<<<<<<< HEAD
           <button onClick={handleLanguageToggle} className="block mt-2 border px-2 py-1 rounded text-sm">
-=======
-          <button
-            onClick={handleLanguageToggle}
-            className="block mt-2 border px-2 py-1 rounded text-sm"
-          >
->>>>>>> 8202cd886166243aae7d13ab04e8ede3607ebf1c
             🌍 {language}
           </button>
         </div>
