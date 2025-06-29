@@ -8,7 +8,6 @@ import Header from "./components/ui/Header";
 import LandingPage from "./pages/LandingPage";
 import LoginPage from "./pages/LoginPage";
 import RegisterPage from "./pages/RegisterPage";
-import Dashboard from "./pages/Dashboard";
 import Services from "./pages/Services";
 import About from "./pages/About";
 import Contact from "./pages/Contact";
@@ -22,7 +21,7 @@ import VehicleCatalogue from "./pages/VehicleCatalogue";
 import ChatBotWidget from "./components/ChatBot/ChatBotWidget";
 
 import AdminDashboard from './pages/Dashboard/AdminDashboard';
-import CustomerDashboard from './pages/Dashboard/CustomerDashboard';
+import CustomerDashboard from './pages/CustomerDashboard';
 import GuestDashboard from './pages/Dashboard/GuestDashboard';
 
 function App() {
@@ -43,7 +42,6 @@ function App() {
             <Route path="/contact" element={<Contact />} />
             <Route path="/login" element={<LoginPage />} />
             <Route path="/register" element={<RegisterPage />} />
-            <Route path="/dashboard" element={<Dashboard />} />
             <Route path="/terms" element={<Terms />} />
             <Route path="/privacy" element={<PrivacyPolicy />} />
             <Route path="/cookies" element={<Cookies />} />
