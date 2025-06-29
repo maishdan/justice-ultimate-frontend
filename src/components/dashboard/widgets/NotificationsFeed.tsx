@@ -20,7 +20,6 @@ const notifications = [
 
 export default function NotificationsFeed() {
   return (
-<<<<<<< HEAD
     <div className="grid md:grid-cols-2 gap-6">
       {/* First Notification Panel */}
       <div className="bg-green-900/70 p-6 rounded-xl shadow-lg hover:shadow-2xl transition">
@@ -47,21 +46,6 @@ export default function NotificationsFeed() {
           <li>🚗 New car listing approved.</li>
         </ul>
       </div>
-=======
-    <div className="bg-green-900/70 p-6 rounded-xl shadow-lg hover:shadow-2xl transition">
-      <h3 className="text-2xl font-bold text-white mb-4">🔔 Notifications</h3>
-      <ul className="space-y-4">
-        {notifications.map((note, idx) => (
-          <li
-            key={idx}
-            className="p-4 bg-green-800/80 rounded-lg hover:scale-[1.02] transition"
-          >
-            <div className="text-white text-sm">{note.message}</div>
-            <div className="text-green-200 text-xs mt-1">⏰ {note.time}</div>
-          </li>
-        ))}
-      </ul>
->>>>>>> 8202cd886166243aae7d13ab04e8ede3607ebf1c
     </div>
   );
 }
