@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+import allCountries from '../data/allCountries';
 
 const countries = [
   { code: "KE", name: "Kenya", dial: "+254" },
@@ -19,12 +20,13 @@ export default function RegisterPage() {
   const [middleName, setMiddleName] = useState("");
   const [lastName, setLastName] = useState("");
   const [email, setEmail] = useState("");
-  const [idNumber, setIdNumber] = useState("");
-  const [kraPin, setKraPin] = useState("");
-  const [ntsaPhone, setNtsaPhone] = useState("");
+  const [idNumber, setIdNumber] = useState(""); // Unused, but preserved if backend requires
+  const [kraPin, setKraPin] = useState("");     // Unused, but preserved
+  const [ntsaPhone, setNtsaPhone] = useState(""); // Unused, but preserved
   const [phoneNumber, setPhoneNumber] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
+  const [address, setAddress] = useState(""); // ✅ FIXED: Added missing state
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
@@ -53,6 +55,7 @@ export default function RegisterPage() {
         ntsaPhone,
         phoneNumber: finalPhoneNumber,
         password,
+        address, // ✅ Added to request payload if backend expects it
       });
 
       toast.success("Registration successful. Redirecting to login...");
@@ -108,58 +111,39 @@ export default function RegisterPage() {
         <div className="grid grid-cols-2 gap-4">
           <input
             type="text"
-            value={idNumber}
-            onChange={(e) => setIdNumber(e.target.value)}
-            placeholder="ID Number"
-            className="p-3 bg-gray-800 rounded"
-            required
-          />
-          <input
-            type="text"
-            value={kraPin}
-            onChange={(e) => setKraPin(e.target.value)}
-            placeholder="KRA PIN"
-            className="p-3 bg-gray-800 rounded"
-            required
-          />
-          <input
-            type="text"
-            value={ntsaPhone}
-            onChange={(e) => setNtsaPhone(e.target.value)}
-            placeholder="NTSA Phone Number"
-            className="p-3 bg-gray-800 rounded"
+            value={address}
+            onChange={(e) => setAddress(e.target.value)}
+            placeholder="123 ...city"
+            className="p-3 bg-gray-800 text-white rounded"
             required
           />
         </div>
 
-        <div className="flex items-center gap-4">
-          <select
-            className="bg-gray-800 p-2 rounded"
-            value={selectedCountry.code}
-            onChange={(e) =>
-              setSelectedCountry(
-                countries.find((c) => c.code === e.target.value) || countries[0]
-              )
-            }
-          >
-            {countries.map((country) => (
-              <option key={country.code} value={country.code}>
-                {country.name} ({country.dial})
-              </option>
-            ))}
-          </select>
-          <input
-            type="tel"
-            value={phoneNumber}
-            onChange={(e) => setPhoneNumber(e.target.value)}
-            placeholder="Phone Number"
-            className="p-3 bg-gray-800 rounded w-full"
-            minLength={10}
-            maxLength={20}
-            required
-          />
-        </div>
+        <div className="grid grid-cols-3 gap-2 items-center">
+  <select
+    className="bg-gray-800 text-white p-2 rounded col-span-1"
+    value={selectedCountry.code}
+    onChange={(e) => {
+      const country = allCountries.find(c => c.code === e.target.value);
+      if (country) setSelectedCountry(country);
+    }}
+  >
+    {allCountries.map((country) => (
+      <option key={country.code} value={country.code}>
+        {country.name} ({country.dial})
+      </option>
+    ))}
+  </select>
 
+  <input
+    type="tel"
+    value={phoneNumber}
+    onChange={(e) => setPhoneNumber(e.target.value)}
+    placeholder={`${selectedCountry.dial}790293895`}
+    className="p-3 bg-gray-800 text-white rounded col-span-2"
+    required
+  />
+</div>
         <input
           type="password"
           value={password}
@@ -208,7 +192,6 @@ export default function RegisterPage() {
         </button>
       </form>
 
-      {/* Toast container */}
       <ToastContainer position="top-center" autoClose={3000} hideProgressBar />
     </div>
   );
