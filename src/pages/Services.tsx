@@ -2,10 +2,7 @@ import { useState } from "react";
 import { Button } from "../components/ui/button";
 import { motion } from "framer-motion";
 import { Link } from "react-router-dom";
-<<<<<<< HEAD
-=======
 import { Moon, Sun } from "lucide-react";
->>>>>>> 8202cd886166243aae7d13ab04e8ede3607ebf1c
 
 const services = [
   {
@@ -56,12 +53,8 @@ const services = [
 ];
 
 export default function Services() {
-<<<<<<< HEAD
-  const [darkMode] = useState(true);
-=======
   const [menuOpen, setMenuOpen] = useState(false);
   const [darkMode, setDarkMode] = useState(true);
->>>>>>> 8202cd886166243aae7d13ab04e8ede3607ebf1c
 
   return (
     <div className={darkMode ? "min-h-screen bg-gradient-to-r from-blue-950 to-black text-white" : "min-h-screen bg-gray-100 text-black"}>
