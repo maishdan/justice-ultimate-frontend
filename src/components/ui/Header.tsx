@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import { Link, useLocation } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import { Sun, Moon } from "lucide-react";
 import { Button } from "./button";
 
@@ -15,6 +15,7 @@ export default function Header({
   const dropdownTimeout = useRef<NodeJS.Timeout | null>(null);
 
   const location = useLocation();
+  const navigate = useNavigate();
 
   useEffect(() => {
     const systemPrefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
@@ -56,8 +57,9 @@ export default function Header({
   };
 
   const handleLogout = () => {
-    localStorage.removeItem("token");
-    window.location.href = "/login";
+    localStorage.clear();
+    sessionStorage.clear();
+    navigate("/login");
   };
 
   return (
