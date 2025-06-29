@@ -106,135 +106,91 @@ export default function LandingPage() {
       <footer className="bg-blue-950 py-12 px-6 md:px-20 text-gray-400">
         <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-6 text-sm">
           <div>
-  <h5 className="font-semibold text-white mb-2">
-    Justice Ultimate Automobiles
-  </h5>
-  <ul className="space-y-2 text-blue-300">
-    <li>
-      <Link
-        to="/"
-        className="flex items-center gap-2 hover:text-yellow-400 transition duration-200 hover:drop-shadow-[0_0_6px_#facc15]"
-      >
-        <FaHome /> Home
-      </Link>
-    </li>
-<<<<<<< HEAD
-<li>
-  <Link
-    to="/dashboard/customer"
-    className="flex items-center gap-2 hover:text-yellow-400 transition duration-200 hover:drop-shadow-[0_0_6px_#facc15]"
-  >
-    <FaTachometerAlt /> Customer Dashboard
-  </Link>
-</li>
+            <h5 className="font-semibold text-white mb-2">Justice Ultimate Automobiles</h5>
+            <ul className="space-y-2 text-blue-300">
+              <li>
+                <Link
+                  to="/"
+                  className="flex items-center gap-2 hover:text-yellow-400 transition duration-200 hover:drop-shadow-[0_0_6px_#facc15]"
+                >
+                  <FaHome /> Home
+                </Link>
+              </li>
+              <li>
+                <Link
+                  to="/dashboard/customer"
+                  className="flex items-center gap-2 hover:text-yellow-400 transition duration-200 hover:drop-shadow-[0_0_6px_#facc15]"
+                >
+                  <FaTachometerAlt /> Customer Dashboard
+                </Link>
+              </li>
+              <li>
+                <Link
+                  to="/contact"
+                  className="flex items-center gap-2 hover:text-yellow-400 transition duration-200 hover:drop-shadow-[0_0_6px_#facc15]"
+                >
+                  <FaEnvelopeOpenText /> Contact Us
+                </Link>
+              </li>
+            </ul>
+          </div>
 
-<li>
-  <Link
-    to="/contact"
-    className="flex items-center gap-2 hover:text-yellow-400 transition duration-200 hover:drop-shadow-[0_0_6px_#facc15]"
-  >
-    <FaEnvelopeOpenText /> Contact Us
-  </Link>
-</li>
-=======
-    <li>
-      <Link
-        to="/dashboard"
-        className="flex items-center gap-2 hover:text-yellow-400 transition duration-200 hover:drop-shadow-[0_0_6px_#facc15]"
-      >
-        <FaTachometerAlt /> Dashboard
-      </Link>
-    </li>
-    <li>
-      <Link
-        to="/contact"
-        className="flex items-center gap-2 hover:text-yellow-400 transition duration-200 hover:drop-shadow-[0_0_6px_#facc15]"
-      >
-        <FaEnvelopeOpenText /> Contact Us
-      </Link>
-    </li>
->>>>>>> 8202cd886166243aae7d13ab04e8ede3607ebf1c
-  </ul>
-</div>
           <div>
-  <h5 className="font-semibold text-white mb-2">Our Services</h5>
-  <ul className="space-y-2 text-blue-300">
-    <li>
-      <a href="/vehicle-catalogue" className="hover:text-yellow-400 transition duration-200">Vehicle Catalogue</a>
-    </li>
-    <li>
-      <a href="/book-test-drive" className="hover:text-yellow-400 transition duration-200">Car Booking</a>
-    </li>
-    <li>
-      <a href="/vehicle-insurance" className="hover:text-yellow-400 transition duration-200">Vehicle Insurance (Coming Soon)</a>
-    </li>
-    <li>
-      <a href="/auto-consultations" className="hover:text-yellow-400 transition duration-200">Auto Consultations (Coming Soon)</a>
-    </li>
-  </ul>
-</div>
-          
-          <div>
-  <h5 className="font-semibold text-white mb-2">Legal</h5>
-  <ul className="space-y-2 text-blue-300">
-    <li>
-      <Link
-        to="/terms"
-        className="hover:text-yellow-400 transition duration-200 hover:drop-shadow-[0_0_6px_#facc15]"
-      >
-        📜 Terms of Use
-      </Link>
-    </li>
-    <li>
-      <Link
-        to="/privacy"
-        className="hover:text-yellow-400 transition duration-200 hover:drop-shadow-[0_0_6px_#facc15]"
-      >
-        🔒 Privacy Policy
-      </Link>
-    </li>
-    <li>
-      <Link
-        to="/cookies"
-        className="hover:text-yellow-400 transition duration-200 hover:drop-shadow-[0_0_6px_#facc15]"
-      >
-        🍪 Cookie Policy
-      </Link>
-    </li>
-  </ul>
-</div>
+            <h5 className="font-semibold text-white mb-2">Our Services</h5>
+            <ul className="space-y-2 text-blue-300">
+              <li><a href="/vehicle-catalogue" className="hover:text-yellow-400 transition duration-200">Vehicle Catalogue</a></li>
+              <li><a href="/book-test-drive" className="hover:text-yellow-400 transition duration-200">Car Booking</a></li>
+              <li><a href="/vehicle-insurance" className="hover:text-yellow-400 transition duration-200">Vehicle Insurance (Coming Soon)</a></li>
+              <li><a href="/auto-consultations" className="hover:text-yellow-400 transition duration-200">Auto Consultations (Coming Soon)</a></li>
+            </ul>
+          </div>
 
-         <div>
-  <h5 className="font-semibold text-white mb-2">Connect With Us</h5>
-  <ul className="space-y-2 text-blue-300">
-    <li>
-      <a
-        href="mailto:info@justiceauto.com"
-        className="flex items-center gap-2 hover:text-yellow-400 transition duration-200 hover:drop-shadow-[0_0_6px_#facc15]"
-      >
-        <FaEnvelope /> Email: info@justiceauto.com
-      </a>
-    </li>
-    <li>
-      <a
-        href="tel:+254722827458"
-        className="flex items-center gap-2 hover:text-yellow-400 transition duration-200 hover:drop-shadow-[0_0_6px_#facc15]"
-      >
-        <FaPhoneAlt /> Phone: +254 722 827 458
-      </a>
-    </li>
-    <li>
-      <a
-        href="https://wa.me/254722827458?text=Hello%2C%20I%20need%20assistance%20from%20Justice%20Ultimate%20Automobiles."
-        target="_blank"
-        rel="noopener noreferrer"
-        className="flex items-center gap-2 hover:text-green-400 transition duration-200 hover:drop-shadow-[0_0_6px_#22c55e]"
-      >
-        <FaWhatsapp /> WhatsApp Support
-      </a>
-    </li>
-  </ul>
-</div>
+          <div>
+            <h5 className="font-semibold text-white mb-2">Legal</h5>
+            <ul className="space-y-2 text-blue-300">
+              <li>
+                <Link to="/terms" className="hover:text-yellow-400 transition duration-200 hover:drop-shadow-[0_0_6px_#facc15]">
+                  📜 Terms of Use
+                </Link>
+              </li>
+              <li>
+                <Link to="/privacy" className="hover:text-yellow-400 transition duration-200 hover:drop-shadow-[0_0_6px_#facc15]">
+                  🔒 Privacy Policy
+                </Link>
+              </li>
+              <li>
+                <Link to="/cookies" className="hover:text-yellow-400 transition duration-200 hover:drop-shadow-[0_0_6px_#facc15]">
+                  🍪 Cookie Policy
+                </Link>
+              </li>
+            </ul>
+          </div>
+
+          <div>
+            <h5 className="font-semibold text-white mb-2">Connect With Us</h5>
+            <ul className="space-y-2 text-blue-300">
+              <li>
+                <a href="mailto:info@justiceauto.com" className="flex items-center gap-2 hover:text-yellow-400 transition duration-200 hover:drop-shadow-[0_0_6px_#facc15]">
+                  <FaEnvelope /> Email: info@justiceauto.com
+                </a>
+              </li>
+              <li>
+                <a href="tel:+254722827458" className="flex items-center gap-2 hover:text-yellow-400 transition duration-200 hover:drop-shadow-[0_0_6px_#facc15]">
+                  <FaPhoneAlt /> Phone: +254 722 827 458
+                </a>
+              </li>
+              <li>
+                <a
+                  href="https://wa.me/254722827458?text=Hello%2C%20I%20need%20assistance%20from%20Justice%20Ultimate%20Automobiles."
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex items-center gap-2 hover:text-green-400 transition duration-200 hover:drop-shadow-[0_0_6px_#22c55e]"
+                >
+                  <FaWhatsapp /> WhatsApp Support
+                </a>
+              </li>
+            </ul>
+          </div>
         </div>
         <div className="text-center text-xs mt-8">&copy; 2025 Justice Ultimate Automobiles. All rights reserved.</div>
       </footer>
