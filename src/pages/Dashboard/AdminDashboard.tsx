@@ -66,6 +66,7 @@ export default function AdminDashboard() {
 
   return (
     <div className="min-h-screen bg-gray-900 text-white flex flex-col">
+      
       <div className="flex justify-between p-4 border-b border-gray-700">
         <h1 className="text-2xl font-bold">Justice Ultimate Automobiles Admin Panel</h1>
         <LanguageCurrencySwitcher />

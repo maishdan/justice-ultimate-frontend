@@ -1,7 +1,6 @@
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import React from 'react';
-
 
 import ProtectedRoute from "./routes/ProtectedRoute";
 import PrivateRoute from "./routes/PrivateRoute";
@@ -27,14 +26,26 @@ import CustomerDashboard from './pages/CustomerDashboard';
 import GuestDashboard from './pages/Dashboard/GuestDashboard';
 
 function App() {
-  const [darkMode, setDarkMode] = useState(true);
+  const [darkMode, setDarkMode] = useState(false);
+
+  // Detect system preference on first load
+  useEffect(() => {
+    const prefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
+    setDarkMode(prefersDark);
+    document.documentElement.classList.toggle("dark", prefersDark);
+  }, []);
+
+  // Toggle <html> dark class
+  useEffect(() => {
+    document.documentElement.classList.toggle("dark", darkMode);
+  }, [darkMode]);
 
   return (
     <Router>
-      <div className={darkMode ? "dark bg-gradient-to-r from-blue-950 to-black text-white min-h-screen" : "bg-gray-100 text-black min-h-screen"}>
+      <div className={`min-h-screen transition-colors duration-300 ${darkMode ? "bg-gray-900 text-white" : "bg-white text-black"}`}>
         <Header darkMode={darkMode} setDarkMode={setDarkMode} />
 
-        <main className="transition-colors duration-300">
+        <main>
           <Routes>
             <Route path="/" element={<LandingPage />} />
             <Route path="/services" element={<Services />} />
@@ -51,7 +62,6 @@ function App() {
             <Route path="/book-test-drive" element={<BookTestDrive />} />
             <Route path="/vehicle-catalogue" element={<VehicleCatalogue />} />
 
-            {/* ✅ Role-based Secured Dashboards */}
             <Route path="/dashboard/admin" element={
               <ProtectedRoute>
                 <PrivateRoute>
