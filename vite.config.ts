@@ -1,13 +1,8 @@
-import { defineConfig } from 'vite'; 
+import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
-import path from 'path';
 
+// https://vitejs.dev/config/
 export default defineConfig({
   plugins: [react()],
-  base: './', // ✅ ensures assets and styles load correctly on Vercel
-  resolve: {
-    alias: {
-      '@': path.resolve(__dirname, 'src'),
-    },
-  },
+  base: './', // Important for Vercel and local serve!
 });
