@@ -1,9 +1,18 @@
 import { NavLink } from 'react-router-dom';
-<<<<<<< HEAD
-import { FiHome, FiUser, FiSettings, FiLogOut, FiTruck, FiCalendar, FiCreditCard, FiBell, FiMap, FiGift, FiShield } from 'react-icons/fi';
-=======
-import { FiHome, FiUser, FiSettings, FiLogOut, FiTruck, FiCalendar, FiCreditCard, FiBell, FiMap, FiDollarSign, FiGift, FiShield } from 'react-icons/fi';
->>>>>>> 8202cd886166243aae7d13ab04e8ede3607ebf1c
+import {
+  FiHome,
+  FiUser,
+  FiSettings,
+  FiLogOut,
+  FiTruck,
+  FiCalendar,
+  FiCreditCard,
+  FiBell,
+  FiMap,
+  FiGift,
+  FiShield,
+  FiDollarSign
+} from 'react-icons/fi';
 
 const Sidebar = () => {
   const menuItems = [
