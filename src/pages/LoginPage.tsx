@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 import { useState } from 'react'; 
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
@@ -49,43 +48,10 @@ const Login = () => {
       toast.error('Login failed. Please check your password.');
     } finally {
       setLoading(false);
-=======
-import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import axios from 'axios';
-
-const Login = () => {
-  const navigate = useNavigate();
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [error, setError] = useState('');
-
-  const handleLogin = async (e: React.FormEvent) => {
-    e.preventDefault();
-    try {
-      const res = await axios.post('http://localhost:5000/api/auth/login', { email, password });
-
-      const { token, user } = res.data;
-      localStorage.setItem('token', token);
-      localStorage.setItem('user', JSON.stringify(user));
-
-      // 🔁 Redirect based on role
-      if (user.role === 'admin') {
-        navigate('/frontend/src/pages/Dashboard/AdminDashboard.tsx');
-      } else if (user.role === 'customer') {
-        navigate('/frontend/src/pages/Dashboard.tsx');
-      } else {
-        navigate('/frontend/src/pages/dashboard/GuestDashboard.tsx');
-      }
-
-    } catch (err: any) {
-      setError(err.response?.data?.error || 'Login failed');
->>>>>>> 8202cd886166243aae7d13ab04e8ede3607ebf1c
     }
   };
 
   return (
-<<<<<<< HEAD
     <div className="flex justify-center items-center h-screen bg-gradient-to-br from-blue-50 via-white to-green-50 dark:from-gray-900 dark:to-gray-800 transition-colors duration-500">
       <form
         onSubmit={handleLogin}
@@ -174,74 +140,6 @@ const Login = () => {
 
       {/* Toast container */}
       <ToastContainer position="top-center" autoClose={3000} hideProgressBar />
-=======
-    <div
-      className="flex justify-center items-center h-screen"
-      style={{
-        backgroundColor: 'var(--aiinhbfoop-html-bg-color)',
-        transition: 'background 0.5s ease',
-      }}
-    >
-      <form
-        onSubmit={handleLogin}
-        className="bg-white p-8 rounded-lg shadow-xl w-96"
-        style={{
-          borderRadius: 'var(--aiinhbfoop-border-radius-lg)',
-          boxShadow: '0px 8px 20px rgba(1, 167, 125, 0.2)',
-          transition: 'all 0.3s ease',
-        }}
-      >
-        <h2 className="text-2xl font-bold mb-6 text-center" style={{ color: 'rgba(var(--aiinhbfoop-main-color), 1)' }}>
-          Login
-        </h2>
-
-        {error && <p className="text-red-500 mb-4 text-sm">{error}</p>}
-
-        <input
-          type="email"
-          placeholder="Email"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-          className="w-full p-2 mb-4 border border-gray-300 rounded-md focus:outline-none focus:ring-2"
-          style={{
-            borderRadius: 'var(--aiinhbfoop-border-radius)',
-            boxShadow: 'inset 0 1px 3px rgba(0,0,0,0.1)',
-          }}
-        />
-
-        <input
-          type="password"
-          placeholder="Password"
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-          className="w-full p-2 mb-4 border border-gray-300 rounded-md focus:outline-none focus:ring-2"
-          style={{
-            borderRadius: 'var(--aiinhbfoop-border-radius)',
-            boxShadow: 'inset 0 1px 3px rgba(0,0,0,0.1)',
-          }}
-        />
-
-        <button
-          type="submit"
-          className="w-full text-white py-2 rounded-md"
-          style={{
-            backgroundColor: 'rgba(var(--aiinhbfoop-main-color), 1)',
-            boxShadow: '0 0 10px rgba(1, 167, 125, 0.6)',
-            transition: 'all 0.3s ease',
-          }}
-          onMouseOver={(e) => {
-            e.currentTarget.style.backgroundColor = 'rgba(var(--aiinhbfoop-main-color), 0.85)';
-            e.currentTarget.style.boxShadow = '0 0 15px rgba(1, 167, 125, 0.8)';
-          }}
-          onMouseOut={(e) => {
-            e.currentTarget.style.backgroundColor = 'rgba(var(--aiinhbfoop-main-color), 1)';
-            e.currentTarget.style.boxShadow = '0 0 10px rgba(1, 167, 125, 0.6)';
-          }}
-        >
-          Login
-        </button>
-      </form>
->>>>>>> 8202cd886166243aae7d13ab04e8ede3607ebf1c
     </div>
   );
 };
