@@ -1,10 +1,6 @@
 // src/pages/SuccessStories.tsx
 import { useState } from "react";
-<<<<<<< HEAD
-import { FaMapMarkerAlt, FaStar, FaGlobeAfrica, FaUpload } from "react-icons/fa";
-=======
 import { FaMapMarkerAlt, FaStar, FaGlobeAfrica, FaCar, FaUserCheck, FaPlus, FaPlay, FaUpload } from "react-icons/fa";
->>>>>>> 8202cd886166243aae7d13ab04e8ede3607ebf1c
 
 const stories = [
   {
