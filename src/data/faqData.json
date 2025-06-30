@@ -1,0 +1,32 @@
+[
+  {
+    "question": "What cars are available?",
+    "tags": ["inventory", "models", "current cars"],
+    "answer": "🚗 Here's what we have right now: Mazda CX-5 2017, BMW X3 2017, Nissan Note 2018, Toyota Prado 2018 and more! Visit our catalogue or ask about a specific model!"
+  },
+  {
+    "question": "How do I book a test drive?",
+    "tags": ["book", "drive", "appointment"],
+    "answer": "🛣️ To book a test drive, go to the 'Book Test Drive' page or call us at 0722827458 to schedule!"
+  },
+  {
+    "question": "Can I pay using M-Pesa or PayPal?",
+    "tags": ["payment", "M-Pesa", "PayPal"],
+    "answer": "💳 Yes! We accept M-Pesa, bank transfer, cheque, and even PayPal for international clients."
+  },
+  {
+    "question": "Where are you located?",
+    "tags": ["location", "address", "office"],
+    "answer": "📍 Our main showroom is in Westlands, Nairobi, Kenya. We also offer delivery nationwide!"
+  },
+  {
+    "question": "Do you offer financing?",
+    "tags": ["loan", "installments", "credit", "financing"],
+    "answer": "💰 Absolutely! Salaried clients enjoy up to 100% financing. Ask us to check your eligibility!"
+  },
+  {
+    "question": "Tell me about Justice Ultimate Automobiles",
+    "tags": ["about", "company", "background"],
+    "answer": "🚘 Justice Ultimate Automobiles, founded in 1999, specializes in brand-new and premium used cars with flexible financing. GM: Justice Vincent. Slogan: 'Drive Excellence, Own Prestige'."
+  }
+]

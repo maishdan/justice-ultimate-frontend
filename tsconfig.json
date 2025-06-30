@@ -3,9 +3,10 @@
     "forceConsistentCasingInFileNames": true,
     "strict": true,
     "typeRoots": ["./node_modules/@types", "./src/types"],
-    "baseUrl": "src",
+    "baseUrl": "./",
     "paths": {
-      "@/*": ["*"]
+      "@/*": ["src/*"],
+      "*": ["src/types/*"]
     }
   },
   "files": [],
@@ -18,3 +19,4 @@
     }
   ]
 }
+
