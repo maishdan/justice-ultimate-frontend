@@ -135,15 +135,31 @@ export default function LandingPage() {
             </ul>
           </div>
 
-          <div>
-            <h5 className="font-semibold text-white mb-2">Our Services</h5>
-            <ul className="space-y-2 text-blue-300">
-              <li><a href="/vehicle-catalogue" className="hover:text-yellow-400 transition duration-200">Vehicle Catalogue</a></li>
-              <li><a href="/book-test-drive" className="hover:text-yellow-400 transition duration-200">Car Booking</a></li>
-              <li><a href="/vehicle-insurance" className="hover:text-yellow-400 transition duration-200">Vehicle Insurance (Coming Soon)</a></li>
-              <li><a href="/auto-consultations" className="hover:text-yellow-400 transition duration-200">Auto Consultations (Coming Soon)</a></li>
-            </ul>
-          </div>
+         <div>
+  <h5 className="font-semibold text-white mb-2">Our Services</h5>
+  <ul className="space-y-2 text-blue-300">
+    <li>
+      <Link to="/vehicle-catalogue" className="hover:text-yellow-400 transition duration-200">
+        Vehicle Catalogue
+      </Link>
+    </li>
+    <li>
+      <Link to="/book-test-drive" className="hover:text-yellow-400 transition duration-200">
+        Car Booking
+      </Link>
+    </li>
+    <li>
+      <Link to="/vehicle-insurance" className="hover:text-yellow-400 transition duration-200">
+        Vehicle Insurance (Coming Soon)
+      </Link>
+    </li>
+    <li>
+      <Link to="/auto-consultations" className="hover:text-yellow-400 transition duration-200">
+        Auto Consultations (Coming Soon)
+      </Link>
+    </li>
+  </ul>
+</div>
 
           <div>
             <h5 className="font-semibold text-white mb-2">Legal</h5>
