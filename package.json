@@ -9,6 +9,7 @@
     "serve": "serve dist"
   },
   "dependencies": {
+    "@radix-ui/react-tooltip": "^1.2.7",
     "axios": "^1.10.0",
     "framer-motion": "^12.19.2",
     "fuse.js": "^7.1.0",
