@@ -8,37 +8,37 @@ const cars = [
     category: "Luxury",
     name: "Mercedes-Benz S-Class",
     description: "Elegant design with unmatched comfort. Ideal for executive travel.",
-    image: "/frontend/images/Toyota land cruiser.jpeg",
+    image: "/images/Mercedes-Benz S-Class.png",
   },
   {
     category: "SUV",
     name: "Toyota Land Cruiser V8",
     description: "Rugged performance, off-road beast. Perfect for African terrain.",
-    image: "/images/landcruiser.jpg",
+    image: "/images/Toyota Land Cruiser V8.png",
   },
   {
     category: "Electric",
     name: "Tesla Model X",
     description: "Futuristic design with zero emissions and full autopilot.",
-    image: "/images/tesla.jpg",
+    image: "/images/Tesla Model X.png",
   },
   {
     category: "Economy",
     name: "Toyota Axio",
     description: "Affordable, fuel-efficient and ideal for city movement.",
-    image: "/frontend/images/fielder 1.jpeg",
+    image: "/images/Toyota Axio.jpg",
   },
   {
     category: "Van/Commercial",
     name: "Toyota Hiace",
     description: "Spacious, reliable and perfect for group travel or logistics.",
-    image: "/frontend/images/fielder.jpeg",
+    image: "/images/Toyota Hiace.png",
   },
   {
     category: "Vintage",
     name: "1967 Ford Mustang",
     description: "A classic masterpiece. Rare collector car available for hire.",
-    image: "/frontend/images/Toyota land cruiser.jpeg",
+    image: "/images/1967 Ford Mustang.png",
   },
 ];
 
