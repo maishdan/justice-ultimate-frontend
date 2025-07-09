@@ -6,7 +6,11 @@ module.exports = {
     "./src/**/*.{js,ts,jsx,tsx}"
   ],
   theme: {
-    extend: {},
+    extend: {
+     // backgroundImage: {
+       // 'landing': "url('/images/bg-landing.jpg')",// // ✅ added this line
+     // },
+    },
   },
   plugins: [],
 };

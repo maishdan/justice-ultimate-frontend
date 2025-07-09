@@ -1,8 +1,12 @@
 // src/components/ui/tooltip.tsx
 
-import React, { ReactNode } from "react";
+import React from "react";
+import type { ReactNode } from "react";
 import * as TooltipPrimitive from "@radix-ui/react-tooltip";
-import { cn } from "@/lib/utils"; // Optional: for merging Tailwind classes
+// Simple utility to merge class names
+function cn(...classes: (string | undefined | false)[]) {
+  return classes.filter(Boolean).join(" ");
+}
 
 interface TooltipProps {
   children: ReactNode;

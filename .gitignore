@@ -1,7 +1,6 @@
 # Node junk
 node_modules/
 pnpm-lock.yaml
-package-lock.json
 
 # System files
 .env

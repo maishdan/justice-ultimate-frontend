@@ -8,39 +8,43 @@ const cars = [
     category: "Luxury",
     name: "Mercedes-Benz S-Class",
     description: "Elegant design with unmatched comfort. Ideal for executive travel.",
-    image: "/images/mercedes-benz-s-class.png",
+    image: "/public/images/mercedes-benz-s-class.png",
   },
   {
     category: "SUV",
     name: "Toyota Land Cruiser V8",
     description: "Rugged performance, off-road beast. Perfect for African terrain.",
-    image: "/images/toyota-land-cruiser-v8.png",
+    image: "/public/images/toyota-land-cruiser-v8.png",
   },
   {
     category: "Electric",
     name: "Tesla Model X",
     description: "Futuristic design with zero emissions and full autopilot.",
-    image: "/images/tesla-model-x.png",
+    image: "/public/images/tesla-model-x.png",
   },
   {
     category: "Economy",
     name: "Toyota Axio",
     description: "Affordable, fuel-efficient and ideal for city movement.",
-    image: "/images/toyota-axio.jpg",
+    image: "/public/images/toyota-axio.jpg",
   },
   {
     category: "Van/Commercial",
     name: "Toyota Hiace",
     description: "Spacious, reliable and perfect for group travel or logistics.",
-    image: "/images/toyota-hiace.png",
+    image: "/public/images/toyota-hiace.png",
   },
   {
     category: "Vintage",
     name: "1967 Ford Mustang",
     description: "A classic masterpiece. Rare collector car available for hire.",
-    image: "/images/1967-ford-mustang.png",
+    image: "/public/images/1967-ford-mustang.png",
   },
 ];
+
+// Rendering Example (e.g., in a React component)
+// (Removed invalid top-level return statement and JSX)
+
 
 export default function VehicleCatalogue() {
   return (
