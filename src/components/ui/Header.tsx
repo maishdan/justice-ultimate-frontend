@@ -3,7 +3,6 @@ import { Link, useLocation, useNavigate } from "react-router-dom";
 import { Sun, Moon } from "lucide-react";
 import { Button } from "./button";
 import logo from "../../assets/logo.png";
-// Make sure this path points to your logo image
 
 export default function Header({
   darkMode,
@@ -44,8 +43,8 @@ export default function Header({
   };
 
   const activeLinkClass = darkMode
-    ? "bg-green-500 text-black px-3 py-1 rounded"
-    : "bg-green-600 text-white px-3 py-1 rounded";
+    ? "animate-pulse shadow-xl shadow-green-400 bg-green-500 text-black px-3 py-1 rounded"
+    : "animate-pulse shadow-xl shadow-green-600 bg-green-600 text-white px-3 py-1 rounded";
 
   const handleDropdownOpen = () => {
     if (dropdownTimeout.current) clearTimeout(dropdownTimeout.current);
@@ -68,8 +67,8 @@ export default function Header({
     <header className={`w-full z-50 fixed top-0 left-0 transition-colors duration-1000 animate-gradientShift ${darkMode ? "bg-blue-950 text-white" : "bg-white text-black border-b border-gray-200"}`}>
       <div className="max-w-7xl mx-auto px-4 py-2 flex items-center justify-between text-sm">
         <div className="flex items-center gap-2">
-          <img src={logo} alt="Logo" className="w-8 h-8 rounded-full" />
-          <span className="text-lg font-bold text-green-400 whitespace-nowrap">
+          <img src={logo} alt="Logo" className="w-8 h-8 rounded-full animate-pulse shadow-md" />
+          <span className="text-lg font-bold text-green-400 whitespace-nowrap animate-pulse">
             Justice Ultimate Automobiles
           </span>
         </div>
@@ -95,7 +94,7 @@ export default function Header({
                         key={sub.path}
                         to={sub.path}
                         onClick={() => setDropdownOpen(false)}
-                        className="block px-4 py-2 hover:bg-green-600 hover:text-white transition-all"
+                        className="block px-4 py-2 hover:bg-green-600 hover:text-white transition-all rounded-md"
                       >
                         {sub.label}
                       </Link>
@@ -134,7 +133,7 @@ export default function Header({
           </button>
         </nav>
 
-        <Button className="md:hidden" onClick={() => setMenuOpen(!menuOpen)} aria-label="Toggle Menu">
+        <Button className="md:hidden ml-auto" onClick={() => setMenuOpen(!menuOpen)} aria-label="Toggle Menu">
           ☰
         </Button>
       </div>
@@ -144,7 +143,9 @@ export default function Header({
           {navLinks.map((link) =>
             link.subMenu ? (
               <div className="space-y-1">
-                <span className="font-semibold cursor-pointer">{link.label}</span>
+                <span className="font-semibold cursor-pointer animate-pulse shadow-md rounded-md px-2 py-1 bg-gradient-to-r from-green-500 to-blue-500">
+                  {link.label}
+                </span>
                 {link.subMenu.map((sub) => (
                   <Link key={sub.path} to={sub.path} className="block ml-4" onClick={() => setMenuOpen(false)}>
                     {sub.label}
@@ -176,8 +177,7 @@ export default function Header({
             }}
             className="mt-2 flex items-center gap-2"
           >
-            {darkMode ? <Sun size={18} /> : <Moon size={18} />}
-            Toggle Theme
+            {darkMode ? <Sun size={18} /> : <Moon size={18} />} Toggle Theme
           </button>
 
           <button onClick={handleLanguageToggle} className="block mt-2 border px-2 py-1 rounded text-sm">

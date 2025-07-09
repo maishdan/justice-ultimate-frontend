@@ -8,13 +8,13 @@ module.exports = {
   theme: {
     extend: {
       animation: {
-        gradientShift: "gradientShift 12s ease infinite", // ✅ Gradient animation
+        gradientShift: "gradientShift 12s ease-in-out infinite", // ✅ Smooth gradient animation
       },
       keyframes: {
         gradientShift: {
-          '0%': { backgroundPosition: '0% 50%' },
-          '50%': { backgroundPosition: '100% 50%' },
-          '100%': { backgroundPosition: '0% 50%' },
+          '0%': { backgroundColor: '#001f3f' },
+          '50%': { backgroundColor: '#004080' },
+          '100%': { backgroundColor: '#001f3f' },
         },
       },
       backgroundSize: {
