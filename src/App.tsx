@@ -1,4 +1,4 @@
-import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+import { BrowserRouter as Router, Routes, Route, useLocation } from "react-router-dom";
 import { useEffect, useState } from "react";
 import React from 'react';
 
@@ -36,7 +36,22 @@ import Unauthorized401 from "./pages/errors/Unauthorized401";
 import GenericErrorPage from "./pages/errors/GenericErrorPage";
 
 function App() {
+  const location = useLocation();
   const [darkMode, setDarkMode] = useState(false);
+
+  // ✅ Car Start Sound: Play only on initial homepage load with debug log
+  useEffect(() => {
+    if (location.pathname === "/") {
+      const audio = new Audio("/car-start.mp3");
+      const hasPlayed = sessionStorage.getItem("carStartPlayed");
+      if (!hasPlayed) {
+        audio.play()
+          .then(() => console.log("✅ Sound played"))
+          .catch((e) => console.warn("🚫 Autoplay blocked:", e));
+        sessionStorage.setItem("carStartPlayed", "true");
+      }
+    }
+  }, [location.pathname]);
 
   // Detect preference from localStorage or system
   useEffect(() => {
@@ -55,68 +70,72 @@ function App() {
   }, [darkMode]);
 
   return (
-    <Router>
-      <div className={`min-h-screen transition-colors duration-300 ${darkMode ? "bg-gray-900 text-white" : "bg-white text-black"}`}>
-        <Header darkMode={darkMode} setDarkMode={setDarkMode} />
+    <div className={`min-h-screen transition-colors duration-300 ${darkMode ? "bg-gray-900 text-white" : "bg-white text-black"}`}>
+      <Header darkMode={darkMode} setDarkMode={setDarkMode} />
 
-        <main>
-          <Routes>
-            <Route path="/" element={<LandingPage />} />
-            <Route path="/services" element={<Services />} />
-            <Route path="/about" element={<About />} />
-            <Route path="/news" element={<News />} />
-            <Route path="/success-stories" element={<SuccessStories />} />
-            <Route path="/contact" element={<Contact />} />
-            <Route path="/login" element={<LoginPage />} />
-            <Route path="/apply-financing" element={<ApplyForFinancing />} />
-            <Route path="/register" element={<RegisterPage />} />
-            <Route path="/terms" element={<Terms />} />
-            <Route path="/privacy" element={<PrivacyPolicy />} />
-            <Route path="/cookies" element={<Cookies />} />
-            <Route path="/book-test-drive" element={<BookTestDrive />} />
-            <Route path="/vehicle-catalogue" element={<VehicleCatalogue />} />
+      <main>
+        <Routes>
+          <Route path="/" element={<LandingPage />} />
+          <Route path="/services" element={<Services />} />
+          <Route path="/about" element={<About />} />
+          <Route path="/news" element={<News />} />
+          <Route path="/success-stories" element={<SuccessStories />} />
+          <Route path="/contact" element={<Contact />} />
+          <Route path="/login" element={<LoginPage />} />
+          <Route path="/apply-financing" element={<ApplyForFinancing />} />
+          <Route path="/register" element={<RegisterPage />} />
+          <Route path="/terms" element={<Terms />} />
+          <Route path="/privacy" element={<PrivacyPolicy />} />
+          <Route path="/cookies" element={<Cookies />} />
+          <Route path="/book-test-drive" element={<BookTestDrive />} />
+          <Route path="/vehicle-catalogue" element={<VehicleCatalogue />} />
 
-            {/* ✅ Dynamic Car Details Route */}
-            <Route path="/cars/:slug" element={<CarDetails />} />
+          {/* ✅ Dynamic Car Details Route */}
+          <Route path="/cars/:slug" element={<CarDetails />} />
 
-            {/* Dashboards */}
-            <Route path="/dashboard/admin" element={
-              <ProtectedRoute>
-                <PrivateRoute>
-                  <AdminDashboard />
-                </PrivateRoute>
-              </ProtectedRoute>
-            } />
-            <Route path="/dashboard/customer" element={
-              <ProtectedRoute>
-                <PrivateRoute>
-                  <CustomerDashboard />
-                </PrivateRoute>
-              </ProtectedRoute>
-            } />
-            <Route path="/dashboard/guest" element={
-              <ProtectedRoute>
-                <PrivateRoute>
-                  <GuestDashboard />
-                </PrivateRoute>
-              </ProtectedRoute>
-            } />
+          {/* Dashboards */}
+          <Route path="/dashboard/admin" element={
+            <ProtectedRoute>
+              <PrivateRoute>
+                <AdminDashboard />
+              </PrivateRoute>
+            </ProtectedRoute>
+          } />
+          <Route path="/dashboard/customer" element={
+            <ProtectedRoute>
+              <PrivateRoute>
+                <CustomerDashboard />
+              </PrivateRoute>
+            </ProtectedRoute>
+          } />
+          <Route path="/dashboard/guest" element={
+            <ProtectedRoute>
+              <PrivateRoute>
+                <GuestDashboard />
+              </PrivateRoute>
+            </ProtectedRoute>
+          } />
 
-            {/* ✅ Error Routes (ErrorLayout is used inside these, no need to route ErrorLayout directly) */}
-            <Route path="/401" element={<Unauthorized401 />} />
-            <Route path="/403" element={<Forbidden403 />} />
-            <Route path="/500" element={<ServerError500 />} />
-            <Route path="/error" element={<GenericErrorPage />} />
+          {/* ✅ Error Routes */}
+          <Route path="/401" element={<Unauthorized401 />} />
+          <Route path="/403" element={<Forbidden403 />} />
+          <Route path="/500" element={<ServerError500 />} />
+          <Route path="/error" element={<GenericErrorPage />} />
 
-            {/* ✅ Catch-all fallback */}
-            <Route path="*" element={<NotFound404 />} />
-          </Routes>
-        </main>
+          {/* ✅ Catch-all fallback */}
+          <Route path="*" element={<NotFound404 />} />
+        </Routes>
+      </main>
 
-        <ChatBotWidget />
-      </div>
-    </Router>
+      <ChatBotWidget />
+    </div>
   );
 }
 
-export default App;
+export default function WrappedApp() {
+  return (
+    <Router>
+      <App />
+    </Router>
+  );
+}
