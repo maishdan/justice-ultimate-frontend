@@ -2,6 +2,8 @@ import { useEffect, useRef, useState } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { Sun, Moon } from "lucide-react";
 import { Button } from "./button";
+import logo from "../../assets/logo.png";
+// Make sure this path points to your logo image
 
 export default function Header({
   darkMode,
@@ -63,13 +65,11 @@ export default function Header({
   };
 
   return (
-    <header className={`w-full shadow-md z-50 sticky top-0 ${darkMode ? "bg-blue-950 text-white" : "bg-white text-black border-b border-gray-200"}`}>
+    <header className={`w-full z-50 fixed top-0 left-0 transition-colors duration-1000 animate-gradientShift ${darkMode ? "bg-blue-950 text-white" : "bg-white text-black border-b border-gray-200"}`}>
       <div className="max-w-7xl mx-auto px-4 py-2 flex items-center justify-between text-sm">
         <div className="flex items-center gap-2">
-          <div className="rounded-full bg-green-600 text-white w-8 h-8 flex items-center justify-center font-bold text-sm">
-            J
-          </div>
-          <span className="text-lg font-bold text-green-400">
+          <img src={logo} alt="Logo" className="w-8 h-8 rounded-full" />
+          <span className="text-lg font-bold text-green-400 whitespace-nowrap">
             Justice Ultimate Automobiles
           </span>
         </div>
