@@ -25,6 +25,16 @@ import AdminDashboard from './pages/Dashboard/AdminDashboard';
 import CustomerDashboard from './pages/CustomerDashboard';
 import GuestDashboard from './pages/Dashboard/GuestDashboard';
 
+// ✅ Import the dynamic CarDetails page
+import CarDetails from "./pages/app/CarDetails";
+
+// ✅ Import Error Pages (which use ErrorLayout internally)
+import NotFound404 from "./pages/errors/NotFound404";
+import ServerError500 from "./pages/errors/ServerError500";
+import Forbidden403 from "./pages/errors/Forbidden403";
+import Unauthorized401 from "./pages/errors/Unauthorized401";
+import GenericErrorPage from "./pages/errors/GenericErrorPage";
+
 function App() {
   const [darkMode, setDarkMode] = useState(false);
 
@@ -66,6 +76,10 @@ function App() {
             <Route path="/book-test-drive" element={<BookTestDrive />} />
             <Route path="/vehicle-catalogue" element={<VehicleCatalogue />} />
 
+            {/* ✅ Dynamic Car Details Route */}
+            <Route path="/cars/:slug" element={<CarDetails />} />
+
+            {/* Dashboards */}
             <Route path="/dashboard/admin" element={
               <ProtectedRoute>
                 <PrivateRoute>
@@ -87,6 +101,15 @@ function App() {
                 </PrivateRoute>
               </ProtectedRoute>
             } />
+
+            {/* ✅ Error Routes (ErrorLayout is used inside these, no need to route ErrorLayout directly) */}
+            <Route path="/401" element={<Unauthorized401 />} />
+            <Route path="/403" element={<Forbidden403 />} />
+            <Route path="/500" element={<ServerError500 />} />
+            <Route path="/error" element={<GenericErrorPage />} />
+
+            {/* ✅ Catch-all fallback */}
+            <Route path="*" element={<NotFound404 />} />
           </Routes>
         </main>
 
