@@ -141,17 +141,23 @@ export default function Header({
       {menuOpen && (
         <div className={`md:hidden px-4 pb-4 space-y-2 ${darkMode ? "bg-blue-900 text-white" : "bg-white text-black"}`}>
           {navLinks.map((link) =>
-            link.subMenu ? (
-              <div className="space-y-1">
-                <span className="font-semibold cursor-pointer animate-pulse shadow-md rounded-md px-2 py-1 bg-gradient-to-r from-green-500 to-blue-500">
-                  {link.label}
-                </span>
-                {link.subMenu.map((sub) => (
-                  <Link key={sub.path} to={sub.path} className="block ml-4" onClick={() => setMenuOpen(false)}>
-                    {sub.label}
-                  </Link>
-                ))}
-              </div>
+  link.subMenu ? (
+    <div className="space-y-1" key={link.label}> {/* ✅ key added here */}
+      <span className="font-semibold cursor-pointer animate-pulse shadow-md rounded-md px-2 py-1 bg-gradient-to-r from-green-500 to-blue-500">
+        {link.label}
+      </span>
+      {link.subMenu.map((sub) => (
+        <Link
+          key={sub.path} // ✅ key already correct here
+          to={sub.path}
+          className="block ml-4"
+          onClick={() => setMenuOpen(false)}
+        >
+          {sub.label}
+        </Link>
+      ))}
+    </div>
+
             ) : (
               <Link key={link.path} to={link.path} className="block" onClick={() => setMenuOpen(false)}>
                 {link.label}

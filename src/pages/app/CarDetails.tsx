@@ -1,5 +1,5 @@
-// src/pages/app/CarDetails.tsx
-import { useParams } from "react-router-dom";
+// src/pages/CarDetails.tsx
+import { useParams, useNavigate } from "react-router-dom";
 import CarImageGallery from "../../components/car/CarImageGallery";
 import CarSpecsCard from "../../components/car/CarSpecsCard";
 import PurchaseOptions from "../../components/car/PurchaseOptions";
@@ -7,10 +7,12 @@ import BookingModal from "../../components/car/BookingModal";
 import { Button } from "../../components/ui/button";
 import { motion } from "framer-motion";
 import { useEffect, useState } from "react";
-import { carsDetailed as cars } from "../VehicleCatalogue";
+import { cars } from "../../data/carData"; // ✅ Correct path
 
 export default function CarDetails() {
-  const { id } = useParams();
+  const { slug, id } = useParams<{ slug: string; id?: string }>();
+  const navigate = useNavigate();
+
   const [car, setCar] = useState<any>(null);
   const [statusMessage, setStatusMessage] = useState<{
     type: "success" | "error";
@@ -18,24 +20,16 @@ export default function CarDetails() {
   } | null>(null);
 
   useEffect(() => {
-    const foundCar = cars.find((c: any) => c.id === id);
+    const foundCar = cars.find((c: any) => c.slug === slug);
     setCar(foundCar);
 
     if (!foundCar) {
-      setStatusMessage({
-        type: "error",
-        message: "Car not found. Please check the URL or try again.",
-      });
+      console.warn("Car not found, redirecting to 404");
+      navigate("/404");
     }
-  }, [id]);
+  }, [slug, navigate]);
 
-  if (!car) {
-    return (
-      <div className="text-red-500 text-center p-10">
-        <p className="text-lg">Car not found or failed to load.</p>
-      </div>
-    );
-  }
+  if (!car) return null;
 
   const [bookingOpen, setBookingOpen] = useState(false);
   const [imageError, setImageError] = useState(false);
@@ -49,7 +43,6 @@ export default function CarDetails() {
   };
 
   useEffect(() => {
-    // Delay success message to allow image load attempt
     const timeout = setTimeout(() => {
       if (!imageError) {
         setStatusMessage({
@@ -82,7 +75,10 @@ export default function CarDetails() {
         <p className="text-sm text-gray-400 mt-1">Stock ID: {car.stockId}</p>
         <div className="flex flex-wrap justify-center gap-2 mt-3">
           {car.tags.map((tag: string) => (
-            <span key={tag} className="text-xs bg-blue-100 text-blue-600 px-2 py-1 rounded-full">
+            <span
+              key={tag}
+              className="text-xs bg-blue-100 text-blue-600 px-2 py-1 rounded-full"
+            >
               {tag}
             </span>
           ))}
@@ -91,7 +87,11 @@ export default function CarDetails() {
 
       {/* Image Gallery */}
       <section className="mb-8">
-        <CarImageGallery images={car.image} name={car.name} onError={handleImageError} />
+        <CarImageGallery
+          images={car.image}
+          name={car.name}
+          onError={handleImageError}
+        />
       </section>
 
       {/* Specifications + Description */}
@@ -106,21 +106,31 @@ export default function CarDetails() {
 
       {/* Action Buttons */}
       <section className="flex flex-wrap gap-4 justify-center mb-10">
-        <ActionButton label="WhatsApp" href={`https://wa.me/254700000000?text=I'm%20interested%20in%20${car.name}`} />
+        <ActionButton
+          label="WhatsApp"
+          href={`https://wa.me/254700000000?text=I'm%20interested%20in%20${car.name}`}
+        />
         <ActionButton label="SMS" href="sms:+254700000000" />
         <ActionButton label="Call" href="tel:+254700000000" />
-        <ActionButton label="Visit" href="https://maps.google.com?q=Justice+Ultimate+Automobiles" />
+        <ActionButton
+          label="Visit"
+          href="https://maps.google.com?q=Justice+Ultimate+Automobiles"
+        />
         <ActionButton label="Rent This Car" onClick={() => setBookingOpen(true)} />
         <ActionButton label="Book This Car" onClick={() => setBookingOpen(true)} />
       </section>
 
       {/* Booking Modal */}
-      <BookingModal open={bookingOpen} onClose={() => setBookingOpen(false)} carName={car.name} />
+      <BookingModal
+        open={bookingOpen}
+        onClose={() => setBookingOpen(false)}
+        carName={car.name}
+      />
     </main>
   );
 }
 
-// ActionButton Component
+// ✅ ActionButton Subcomponent
 function ActionButton({
   label,
   href,
