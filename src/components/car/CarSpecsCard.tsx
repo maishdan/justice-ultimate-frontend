@@ -1,8 +1,6 @@
-// ✅ src/components/car/CarSpecsCard.tsx
-interface Car {
-  name: string;
-  category: string;
-  description: string;
+// src/components/car/CarSpecsCard.tsx
+
+interface CarSpecs {
   engine?: string;
   transmission?: string;
   fuel?: string;
@@ -17,15 +15,13 @@ interface Car {
 }
 
 interface Props {
-  car: Car;
+  car: CarSpecs;
 }
 
 export default function CarSpecsCard({ car }: Props) {
   return (
     <div className="bg-blue-900/60 rounded-xl p-4 mb-6">
       <h2 className="text-xl font-semibold text-yellow-300 mb-2">Specs & Description</h2>
-      <p className="text-sm text-gray-200 mb-1">Category: {car.category}</p>
-      <p className="text-sm text-gray-300 mb-2">{car.description}</p>
       <ul className="text-sm text-gray-400 grid grid-cols-2 gap-2">
         {car.engine && <li>Engine: {car.engine}</li>}
         {car.transmission && <li>Transmission: {car.transmission}</li>}

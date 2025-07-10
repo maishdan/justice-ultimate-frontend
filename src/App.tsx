@@ -91,7 +91,7 @@ function App() {
           <Route path="/vehicle-catalogue" element={<VehicleCatalogue />} />
 
           {/* ✅ Dynamic Car Details Route */}
-          <Route path="/cars/:slug/:id" element={<CarDetails />} />
+          <Route path="/cars/:slug" element={<CarDetails />} />
 
           {/* Dashboards */}
           <Route path="/dashboard/admin" element={

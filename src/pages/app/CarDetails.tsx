@@ -1,4 +1,5 @@
-// src/pages/CarDetails.tsx
+// src/pages/app/CarDetails.tsx
+
 import { useParams, useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
@@ -7,18 +8,29 @@ import CarSpecsCard from "../../components/car/CarSpecsCard";
 import PurchaseOptions from "../../components/car/PurchaseOptions";
 import BookingModal from "../../components/car/BookingModal";
 import { Button } from "../../components/ui/button";
-import { cars } from "../../data/carData";
+import { carsDetailed as cars } from "../../pages/VehicleCatalogue";
 
-type CarType = {
+export interface CarType {
   slug: string;
+  id: string;
+  category: string;
   name: string;
+  description: string;
+  image: string[];
   tagline: string;
   stockId: string;
   tags: string[];
-  image: string[];
-  description: string;
-  [key: string]: any; // To allow specs like year, mileage, etc.
-};
+  specs: {
+    engine: string;
+    fuel: string;
+    year: number;
+    mileage: string;
+    color: string;
+    transmission: string;
+    drive: string;
+  };
+}
+
 
 export default function CarDetails() {
   const { slug } = useParams<{ slug: string }>();
@@ -32,15 +44,12 @@ export default function CarDetails() {
     message: string;
   } | null>(null);
 
-  // Fetch car data once on mount
   useEffect(() => {
     if (!slug) return;
-
     const foundCar = cars.find((c) => c.slug === slug);
     if (foundCar) {
       setCar(foundCar);
     } else {
-      // Delay redirect to allow cleanup
       setTimeout(() => {
         console.warn("Car not found, redirecting to 404");
         navigate("/404", { replace: true });
@@ -48,7 +57,6 @@ export default function CarDetails() {
     }
   }, [slug, navigate]);
 
-  // Handle image load errors
   const handleImageError = () => {
     setImageError(true);
     setStatusMessage({
@@ -57,7 +65,6 @@ export default function CarDetails() {
     });
   };
 
-  // Status message when car successfully loads
   useEffect(() => {
     if (car && !imageError) {
       const timeout = setTimeout(() => {
@@ -74,7 +81,6 @@ export default function CarDetails() {
 
   return (
     <main className="min-h-screen bg-gradient-to-br from-black to-blue-950 text-white p-6 md:p-16">
-      {/* ✅ Status Message */}
       {statusMessage && (
         <div
           className={`text-center mb-6 text-sm font-medium ${
@@ -85,7 +91,6 @@ export default function CarDetails() {
         </div>
       )}
 
-      {/* Car Header */}
       <section className="mb-8 text-center">
         <h1 className="text-4xl font-bold text-yellow-400 mb-2">{car.name}</h1>
         <p className="text-gray-300 italic">{car.tagline}</p>
@@ -102,7 +107,6 @@ export default function CarDetails() {
         </div>
       </section>
 
-      {/* Image Gallery */}
       <section className="mb-8">
         <CarImageGallery
           images={car.image}
@@ -111,9 +115,8 @@ export default function CarDetails() {
         />
       </section>
 
-      {/* Specifications + Description */}
       <section className="grid md:grid-cols-2 gap-6 mb-8">
-        <CarSpecsCard car={car} />
+        <CarSpecsCard car={car.specs} />
         <div className="text-gray-300 space-y-4">
           <h2 className="text-xl font-semibold text-white">About This Car</h2>
           <p>{car.description}</p>
@@ -121,7 +124,6 @@ export default function CarDetails() {
         </div>
       </section>
 
-      {/* Action Buttons */}
       <section className="flex flex-wrap gap-4 justify-center mb-10">
         <ActionButton
           label="WhatsApp"
@@ -131,15 +133,11 @@ export default function CarDetails() {
         />
         <ActionButton label="SMS" href="sms:+254700000000" />
         <ActionButton label="Call" href="tel:+254700000000" />
-        <ActionButton
-          label="Visit"
-          href="https://maps.google.com?q=Justice+Ultimate+Automobiles"
-        />
+        <ActionButton label="Email" href="mailto:justice@automobiles.co.ke" />
         <ActionButton label="Rent This Car" onClick={() => setBookingOpen(true)} />
         <ActionButton label="Book This Car" onClick={() => setBookingOpen(true)} />
       </section>
 
-      {/* Booking Modal */}
       <BookingModal
         open={bookingOpen}
         onClose={() => setBookingOpen(false)}
@@ -149,7 +147,6 @@ export default function CarDetails() {
   );
 }
 
-// ✅ ActionButton Subcomponent
 function ActionButton({
   label,
   href,
