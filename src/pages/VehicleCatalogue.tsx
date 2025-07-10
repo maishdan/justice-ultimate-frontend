@@ -9,7 +9,7 @@ export const cars = [
     category: "Luxury",
     name: "Mercedes-Benz S-Class",
     description: "Elegant design with unmatched comfort. Ideal for executive travel.",
-    image: "/images/mercedes-benz-s-class.png",
+    image: "/cars/mercedes-s-class/1.jpg",
   },
   {
     id: "toyota-land-cruiser-v8",

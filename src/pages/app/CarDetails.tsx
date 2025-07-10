@@ -1,39 +1,54 @@
 // src/pages/CarDetails.tsx
 import { useParams, useNavigate } from "react-router-dom";
+import { useEffect, useState } from "react";
+import { motion } from "framer-motion";
 import CarImageGallery from "../../components/car/CarImageGallery";
 import CarSpecsCard from "../../components/car/CarSpecsCard";
 import PurchaseOptions from "../../components/car/PurchaseOptions";
 import BookingModal from "../../components/car/BookingModal";
 import { Button } from "../../components/ui/button";
-import { motion } from "framer-motion";
-import { useEffect, useState } from "react";
-import { cars } from "../../data/carData"; // ✅ Correct path
+import { cars } from "../../data/carData";
+
+type CarType = {
+  slug: string;
+  name: string;
+  tagline: string;
+  stockId: string;
+  tags: string[];
+  image: string[];
+  description: string;
+  [key: string]: any; // To allow specs like year, mileage, etc.
+};
 
 export default function CarDetails() {
-  const { slug, id } = useParams<{ slug: string; id?: string }>();
+  const { slug } = useParams<{ slug: string }>();
   const navigate = useNavigate();
 
-  const [car, setCar] = useState<any>(null);
+  const [car, setCar] = useState<CarType | null>(null);
+  const [bookingOpen, setBookingOpen] = useState(false);
+  const [imageError, setImageError] = useState(false);
   const [statusMessage, setStatusMessage] = useState<{
     type: "success" | "error";
     message: string;
   } | null>(null);
 
+  // Fetch car data once on mount
   useEffect(() => {
-    const foundCar = cars.find((c: any) => c.slug === slug);
-    setCar(foundCar);
+    if (!slug) return;
 
-    if (!foundCar) {
-      console.warn("Car not found, redirecting to 404");
-      navigate("/404");
+    const foundCar = cars.find((c) => c.slug === slug);
+    if (foundCar) {
+      setCar(foundCar);
+    } else {
+      // Delay redirect to allow cleanup
+      setTimeout(() => {
+        console.warn("Car not found, redirecting to 404");
+        navigate("/404", { replace: true });
+      }, 0);
     }
   }, [slug, navigate]);
 
-  if (!car) return null;
-
-  const [bookingOpen, setBookingOpen] = useState(false);
-  const [imageError, setImageError] = useState(false);
-
+  // Handle image load errors
   const handleImageError = () => {
     setImageError(true);
     setStatusMessage({
@@ -42,18 +57,20 @@ export default function CarDetails() {
     });
   };
 
+  // Status message when car successfully loads
   useEffect(() => {
-    const timeout = setTimeout(() => {
-      if (!imageError) {
+    if (car && !imageError) {
+      const timeout = setTimeout(() => {
         setStatusMessage({
           type: "success",
           message: "Car details loaded successfully.",
         });
-      }
-    }, 500);
-
-    return () => clearTimeout(timeout);
+      }, 500);
+      return () => clearTimeout(timeout);
+    }
   }, [car, imageError]);
+
+  if (!car) return null;
 
   return (
     <main className="min-h-screen bg-gradient-to-br from-black to-blue-950 text-white p-6 md:p-16">
@@ -74,7 +91,7 @@ export default function CarDetails() {
         <p className="text-gray-300 italic">{car.tagline}</p>
         <p className="text-sm text-gray-400 mt-1">Stock ID: {car.stockId}</p>
         <div className="flex flex-wrap justify-center gap-2 mt-3">
-          {car.tags.map((tag: string) => (
+          {car.tags.map((tag) => (
             <span
               key={tag}
               className="text-xs bg-blue-100 text-blue-600 px-2 py-1 rounded-full"
@@ -108,7 +125,9 @@ export default function CarDetails() {
       <section className="flex flex-wrap gap-4 justify-center mb-10">
         <ActionButton
           label="WhatsApp"
-          href={`https://wa.me/254700000000?text=I'm%20interested%20in%20${car.name}`}
+          href={`https://wa.me/254700000000?text=I'm%20interested%20in%20${encodeURIComponent(
+            car.name
+          )}`}
         />
         <ActionButton label="SMS" href="sms:+254700000000" />
         <ActionButton label="Call" href="tel:+254700000000" />
