@@ -1,3 +1,4 @@
+// 📁 File: src/components/ui/Header.tsx
 import { useEffect, useRef, useState } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { Sun, Moon } from "lucide-react";
@@ -138,57 +139,59 @@ export default function Header({
         </Button>
       </div>
 
+      {/* 🚀 Mobile Menu Fixed to Half Width */}
       {menuOpen && (
-        <div className={`md:hidden px-4 pb-4 space-y-2 ${darkMode ? "bg-blue-900 text-white" : "bg-white text-black"}`}>
-          {navLinks.map((link) =>
-  link.subMenu ? (
-    <div className="space-y-1" key={link.label}> {/* ✅ key added here */}
-      <span className="font-semibold cursor-pointer animate-pulse shadow-md rounded-md px-2 py-1 bg-gradient-to-r from-green-500 to-blue-500">
-        {link.label}
-      </span>
-      {link.subMenu.map((sub) => (
-        <Link
-          key={sub.path} // ✅ key already correct here
-          to={sub.path}
-          className="block ml-4"
-          onClick={() => setMenuOpen(false)}
-        >
-          {sub.label}
-        </Link>
-      ))}
-    </div>
+        <div className={`md:hidden fixed top-0 left-0 h-full w-1/2 z-50 rounded-tr-2xl rounded-br-2xl ${darkMode ? "bg-[#0A1A3E] text-white" : "bg-white text-black"} shadow-lg transition-all`}> 
+          <div className="p-4 space-y-3">
+            {navLinks.map((link) =>
+              link.subMenu ? (
+                <div className="space-y-1" key={link.label}>
+                  <span className="font-semibold cursor-pointer animate-pulse shadow-md rounded-md px-2 py-1 bg-gradient-to-r from-green-500 to-blue-500">
+                    {link.label}
+                  </span>
+                  {link.subMenu.map((sub) => (
+                    <Link
+                      key={sub.path}
+                      to={sub.path}
+                      className="block ml-4"
+                      onClick={() => setMenuOpen(false)}
+                    >
+                      {sub.label}
+                    </Link>
+                  ))}
+                </div>
+              ) : (
+                <Link key={link.path} to={link.path} className="block" onClick={() => setMenuOpen(false)}>
+                  {link.label}
+                </Link>
+              )
+            )}
 
-            ) : (
-              <Link key={link.path} to={link.path} className="block" onClick={() => setMenuOpen(false)}>
-                {link.label}
-              </Link>
-            )
-          )}
+            <Link to="/register" className="block" onClick={() => setMenuOpen(false)}>
+              📝 Register
+            </Link>
+            <Link to="/login" className="block" onClick={() => setMenuOpen(false)}>
+              🔐 Login
+            </Link>
 
-          <Link to="/register" className="block" onClick={() => setMenuOpen(false)}>
-            📝 Register
-          </Link>
-          <Link to="/login" className="block" onClick={() => setMenuOpen(false)}>
-            🔐 Login
-          </Link>
+            <button onClick={handleLogout} className="text-sm bg-red-600 px-3 py-2 rounded">
+              Logout
+            </button>
 
-          <button onClick={handleLogout} className="text-sm bg-red-600 px-3 py-2 rounded">
-            Logout
-          </button>
+            <button
+              onClick={() => {
+                setDarkMode(!darkMode);
+                setMenuOpen(false);
+              }}
+              className="mt-2 flex items-center gap-2"
+            >
+              {darkMode ? <Sun size={18} /> : <Moon size={18} />} Toggle Theme
+            </button>
 
-          <button
-            onClick={() => {
-              setDarkMode(!darkMode);
-              setMenuOpen(false);
-            }}
-            className="mt-2 flex items-center gap-2"
-          >
-            {darkMode ? <Sun size={18} /> : <Moon size={18} />} Toggle Theme
-          </button>
-
-          <button onClick={handleLanguageToggle} className="block mt-2 border px-2 py-1 rounded text-sm">
-            🌍 {language}
-          </button>
+            <button onClick={handleLanguageToggle} className="block mt-2 border px-2 py-1 rounded text-sm">
+              🌍 {language}
+            </button>
+          </div>
         </div>
       )}
     </header>
