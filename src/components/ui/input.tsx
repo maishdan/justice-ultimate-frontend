@@ -1,4 +1,5 @@
 import React from 'react';
+import { cn } from "../../lib/utils";
 
 export function Input({ placeholder, className = '', ...props }: React.InputHTMLAttributes<HTMLInputElement>) {
   return <input className={`border px-4 py-2 rounded-lg w-full dark:bg-gray-800 dark:text-white ${className}`} placeholder={placeholder} {...props} />;
@@ -27,3 +28,8 @@ export function SearchInput({ placeholder, className = '', ...props }: React.Inp
     </div>
   );
 }
+// src/components/ui/input.tsx
+import { forwardRef } from "react";
+
+
+  

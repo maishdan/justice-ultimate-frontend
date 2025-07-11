@@ -20,6 +20,11 @@ module.exports = {
       backgroundSize: {
         '400': '400% 400%', // Needed for smooth animated gradients
       },
+      colors: {
+        primary: "#1e3a8a",     // blue-800
+        secondary: "#10b981",   // green-500
+        danger: "#dc2626",      // red-600
+      },
     },
   },
   plugins: [],

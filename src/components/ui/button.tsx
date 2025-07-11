@@ -1,6 +1,22 @@
 // src/components/ui/button.tsx
 import React from "react";
 
+// Utility to combine class names (replace with your own if needed)
+function cn(...classes: string[]) {
+  return classes.filter(Boolean).join(" ");
+}
+
+// Type for main Button
+export type ButtonProps = {
+  variant?: "default" | "primary" | "secondary" | "danger" | "outline";
+  size?: "sm" | "md" | "lg";
+  className?: string;
+  children: React.ReactNode;
+  onClick?: () => void;
+  type?: "button" | "submit";
+  disabled?: boolean;
+};
+
 export function Button({
   children,
   className = "",
@@ -9,15 +25,7 @@ export function Button({
   variant = "default",
   type = "button",
   disabled = false,
-}: {
-  children: React.ReactNode;
-  className?: string;
-  onClick?: () => void;
-  size?: "sm" | "md" | "lg";
-  variant?: "default" | "outline";
-  type?: "button" | "submit";
-  disabled?: boolean;
-}) {
+}: ButtonProps) {
   const sizeClass = {
     sm: "px-3 py-1 text-sm",
     md: "px-4 py-2",
@@ -26,14 +34,17 @@ export function Button({
 
   const variantClass = {
     default: "bg-blue-600 text-white hover:bg-blue-700",
-    outline: "border border-white text-white hover:bg-white hover:text-black",
+    primary: "bg-blue-600 text-white hover:bg-blue-700",
+    secondary: "bg-green-500 text-white hover:bg-green-600",
+    danger: "bg-red-600 text-white hover:bg-red-700",
+    outline: "border border-blue-600 text-blue-600 hover:bg-blue-100",
   }[variant];
 
   return (
     <button
       type={type}
       onClick={onClick}
-      className={`rounded ${sizeClass} ${variantClass} ${className}`}
+      className={cn("rounded font-semibold transition duration-300 focus:outline-none", sizeClass, variantClass, className)}
       disabled={disabled}
     >
       {children}
@@ -110,6 +121,7 @@ export function SubmitButton({
       onClick={onClick}
       className={`bg-green-600 hover:bg-green-700 text-white ${className}`}
       size={size}
+      variant="secondary"
     >
       {children}
     </Button>
@@ -132,6 +144,7 @@ export function CancelButton({
       onClick={onClick}
       className={`bg-gray-300 hover:bg-gray-400 text-black ${className}`}
       size={size}
+      variant="outline"
     >
       {children}
     </Button>
@@ -154,6 +167,7 @@ export function DangerButton({
       onClick={onClick}
       className={`bg-red-600 hover:bg-red-700 text-white ${className}`}
       size={size}
+      variant="danger"
     >
       {children}
     </Button>
@@ -176,11 +190,13 @@ export function PrimaryButton({
       onClick={onClick}
       className={`bg-blue-600 hover:bg-blue-700 text-white ${className}`}
       size={size}
+      variant="primary"
     >
       {children}
     </Button>
   );
 }
+
 export function SecondaryButton({
   children,
   className = "",
@@ -197,6 +213,7 @@ export function SecondaryButton({
       onClick={onClick}
       className={`bg-gray-500 hover:bg-gray-600 text-white ${className}`}
       size={size}
+      variant="secondary"
     >
       {children}
     </Button>

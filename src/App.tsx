@@ -4,6 +4,7 @@ import React from 'react';
 
 import ProtectedRoute from "./routes/ProtectedRoute";
 import PrivateRoute from "./routes/PrivateRoute";
+import AllCarsShowcase from "./pages/AllCarsShowcase";
 
 import Header from "./components/ui/Header";
 import LandingPage from "./pages/LandingPage";
@@ -26,7 +27,7 @@ import CustomerDashboard from './pages/CustomerDashboard';
 import GuestDashboard from './pages/Dashboard/GuestDashboard';
 
 // ✅ Import the dynamic CarDetails page
-import CarDetails from "./pages/app/CarDetails";
+
 
 // ✅ Import Error Pages (which use ErrorLayout internally)
 import NotFound404 from "./pages/errors/NotFound404";
@@ -91,7 +92,9 @@ function App() {
           <Route path="/vehicle-catalogue" element={<VehicleCatalogue />} />
 
           {/* ✅ Dynamic Car Details Route */}
-          <Route path="/cars/:slug" element={<CarDetails />} />
+         <Route path="/all-cars-showcase" element={<AllCarsShowcase />} />
+          
+
 
           {/* Dashboards */}
           <Route path="/dashboard/admin" element={
