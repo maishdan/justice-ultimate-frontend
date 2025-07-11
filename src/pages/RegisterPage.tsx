@@ -1,9 +1,10 @@
+// src/pages/RegisterPage.tsx
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
-import allCountries from '../data/allCountries';
+import allCountries from "../data/allCountries";
 
 const countries = [
   { code: "KE", name: "Kenya", dial: "+254" },
@@ -20,13 +21,13 @@ export default function RegisterPage() {
   const [middleName, setMiddleName] = useState("");
   const [lastName, setLastName] = useState("");
   const [email, setEmail] = useState("");
-  const [idNumber, setIdNumber] = useState(""); // Unused, but preserved if backend requires
+  const [idNumber, setIdNumber] = useState(""); // Unused, but preserved
   const [kraPin, setKraPin] = useState("");     // Unused, but preserved
   const [ntsaPhone, setNtsaPhone] = useState(""); // Unused, but preserved
   const [phoneNumber, setPhoneNumber] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
-  const [address, setAddress] = useState(""); // ✅ FIXED: Added missing state
+  const [address, setAddress] = useState("");
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
@@ -55,7 +56,7 @@ export default function RegisterPage() {
         ntsaPhone,
         phoneNumber: finalPhoneNumber,
         password,
-        address, // ✅ Added to request payload if backend expects it
+        address,
       });
 
       toast.success("Registration successful. Redirecting to login...");
@@ -71,127 +72,139 @@ export default function RegisterPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-900 text-white p-6">
-      <h2 className="text-3xl font-bold text-center mb-6">Create Account</h2>
-      <form className="max-w-xl mx-auto space-y-4" onSubmit={handleRegister}>
-        <div className="grid grid-cols-2 gap-4">
-          <input
-            type="text"
-            value={firstName}
-            onChange={(e) => setFirstName(e.target.value)}
-            placeholder="First Name"
-            className="p-3 bg-gray-800 rounded"
-            required
-          />
-          <input
-            type="text"
-            value={middleName}
-            onChange={(e) => setMiddleName(e.target.value)}
-            placeholder="Middle Name"
-            className="p-3 bg-gray-800 rounded"
-          />
-          <input
-            type="text"
-            value={lastName}
-            onChange={(e) => setLastName(e.target.value)}
-            placeholder="Last Name"
-            className="p-3 bg-gray-800 rounded"
-            required
-          />
-          <input
-            type="email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            placeholder="Email"
-            className="p-3 bg-gray-800 rounded"
-            required
-          />
-        </div>
+    <div className="min-h-screen bg-gray-900 text-white p-6 flex items-center justify-center">
+      <div className="relative w-full max-w-2xl">
+        {/* Disco Glow Border */}
+        <div className="absolute inset-0 animate-pulse-glow rounded-xl z-0 blur-md" />
 
-        <div className="grid grid-cols-2 gap-4">
-          <input
-            type="text"
-            value={address}
-            onChange={(e) => setAddress(e.target.value)}
-            placeholder="123 ...city"
-            className="p-3 bg-gray-800 text-white rounded"
-            required
-          />
-        </div>
+        {/* Floating Glass Form */}
+        <div className="relative z-10 bg-gray-800 bg-opacity-90 backdrop-blur-md border border-yellow-500/40 rounded-xl p-6 shadow-2xl transition-all duration-300 hover:drop-shadow-[0_0_25px_#fff]">
+          <h2 className="text-3xl font-bold text-center mb-6 text-yellow-300">
+            Create Account
+          </h2>
+          <form className="space-y-4" onSubmit={handleRegister}>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <input
+                type="text"
+                value={firstName}
+                onChange={(e) => setFirstName(e.target.value)}
+                placeholder="First Name"
+                className="p-3 bg-gray-700 rounded"
+                required
+              />
+              <input
+                type="text"
+                value={middleName}
+                onChange={(e) => setMiddleName(e.target.value)}
+                placeholder="Middle Name"
+                className="p-3 bg-gray-700 rounded"
+              />
+              <input
+                type="text"
+                value={lastName}
+                onChange={(e) => setLastName(e.target.value)}
+                placeholder="Last Name"
+                className="p-3 bg-gray-700 rounded"
+                required
+              />
+              <input
+                type="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                placeholder="Email"
+                className="p-3 bg-gray-700 rounded"
+                required
+              />
+            </div>
 
-        <div className="grid grid-cols-3 gap-2 items-center">
-  <select
-    className="bg-gray-800 text-white p-2 rounded col-span-1"
-    value={selectedCountry.code}
-    onChange={(e) => {
-      const country = allCountries.find(c => c.code === e.target.value);
-      if (country) setSelectedCountry(country);
-    }}
-  >
-    {allCountries.map((country) => (
-      <option key={country.code} value={country.code}>
-        {country.name} ({country.dial})
-      </option>
-    ))}
-  </select>
+            <div className="grid grid-cols-1">
+              <input
+                type="text"
+                value={address}
+                onChange={(e) => setAddress(e.target.value)}
+                placeholder="123 ...city"
+                className="p-3 bg-gray-700 text-white rounded"
+                required
+              />
+            </div>
 
-  <input
-    type="tel"
-    value={phoneNumber}
-    onChange={(e) => setPhoneNumber(e.target.value)}
-    placeholder={`${selectedCountry.dial}790293895`}
-    className="p-3 bg-gray-800 text-white rounded col-span-2"
-    required
-  />
-</div>
-        <input
-          type="password"
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-          placeholder="Password"
-          className="p-3 bg-gray-800 rounded w-full"
-          required
-        />
+            <div className="grid grid-cols-3 gap-2 items-center">
+              <select
+                className="bg-gray-700 text-white p-2 rounded col-span-1"
+                value={selectedCountry.code}
+                onChange={(e) => {
+                  const country = allCountries.find(
+                    (c) => c.code === e.target.value
+                  );
+                  if (country) setSelectedCountry(country);
+                }}
+              >
+                {allCountries.map((country) => (
+                  <option key={country.code} value={country.code}>
+                    {country.name} ({country.dial})
+                  </option>
+                ))}
+              </select>
 
-        <input
-          type="password"
-          value={confirmPassword}
-          onChange={(e) => setConfirmPassword(e.target.value)}
-          placeholder="Confirm Password"
-          className="p-3 bg-gray-800 rounded w-full"
-          required
-        />
+              <input
+                type="tel"
+                value={phoneNumber}
+                onChange={(e) => setPhoneNumber(e.target.value)}
+                placeholder={`${selectedCountry.dial}790293895`}
+                className="p-3 bg-gray-700 text-white rounded col-span-2"
+                required
+              />
+            </div>
 
-        <button
-          type="submit"
-          className="w-full bg-blue-600 hover:bg-blue-700 p-3 rounded font-bold flex justify-center items-center"
-        >
-          {loading && (
-            <svg
-              className="animate-spin h-5 w-5 mr-2 text-white"
-              xmlns="http://www.w3.org/2000/svg"
-              fill="none"
-              viewBox="0 0 24 24"
+            <input
+              type="password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              placeholder="Password"
+              className="p-3 bg-gray-700 rounded w-full"
+              required
+            />
+
+            <input
+              type="password"
+              value={confirmPassword}
+              onChange={(e) => setConfirmPassword(e.target.value)}
+              placeholder="Confirm Password"
+              className="p-3 bg-gray-700 rounded w-full"
+              required
+            />
+
+            <button
+              type="submit"
+              className="w-full bg-blue-600 hover:bg-blue-700 p-3 rounded font-bold flex justify-center items-center transition-all hover:drop-shadow-[0_0_12px_#60a5fa]"
             >
-              <circle
-                className="opacity-25"
-                cx="12"
-                cy="12"
-                r="10"
-                stroke="currentColor"
-                strokeWidth="4"
-              ></circle>
-              <path
-                className="opacity-75"
-                fill="currentColor"
-                d="M4 12a8 8 0 018-8v8H4z"
-              ></path>
-            </svg>
-          )}
-          {loading ? "Registering..." : "Register"}
-        </button>
-      </form>
-
+              {loading && (
+                <svg
+                  className="animate-spin h-5 w-5 mr-2 text-white"
+                  xmlns="http://www.w3.org/2000/svg"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                >
+                  <circle
+                    className="opacity-25"
+                    cx="12"
+                    cy="12"
+                    r="10"
+                    stroke="currentColor"
+                    strokeWidth="4"
+                  ></circle>
+                  <path
+                    className="opacity-75"
+                    fill="currentColor"
+                    d="M4 12a8 8 0 018-8v8H4z"
+                  ></path>
+                </svg>
+              )}
+              {loading ? "Registering..." : "Register"}
+            </button>
+          </form>
+        </div>
+      </div>
       <ToastContainer position="top-center" autoClose={3000} hideProgressBar />
     </div>
   );

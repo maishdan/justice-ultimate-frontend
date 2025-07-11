@@ -1,6 +1,13 @@
 // src/pages/SuccessStories.tsx
 import { useState } from "react";
-import { FaMapMarkerAlt, FaStar, FaGlobeAfrica, FaCar, FaUserCheck, FaPlus, FaPlay, FaUpload } from "react-icons/fa";
+import {
+  FaMapMarkerAlt,
+  FaStar,
+  FaGlobeAfrica,
+  FaUpload,
+  FaPlus,
+} from "react-icons/fa";
+import { motion, AnimatePresence } from "framer-motion";
 
 const stories = [
   {
@@ -21,25 +28,34 @@ const stories = [
       result: "Zero issues for 7 months, drives weekly 300km.",
     },
   },
-  // Add more stories...
+  // You can add more story objects here...
 ];
 
 export default function SuccessStories() {
   const [filter, setFilter] = useState("All");
+  const [showModal, setShowModal] = useState(false);
+  const [currentPage, setCurrentPage] = useState(1);
+  const storiesPerPage = 2;
 
   const filtered = stories.filter(
     (s) => filter === "All" || s.useCase === filter || s.car.includes(filter)
   );
 
+  const totalPages = Math.ceil(filtered.length / storiesPerPage);
+  const currentStories = filtered.slice(
+    (currentPage - 1) * storiesPerPage,
+    currentPage * storiesPerPage
+  );
+
   return (
-    <div className="min-h-screen px-6 py-10 bg-gradient-to-br from-blue-950 to-black text-white">
+    <div className="min-h-screen px-4 md:px-6 py-10 bg-gradient-to-br from-blue-950 to-black text-white">
       <div className="max-w-7xl mx-auto space-y-10">
-        <h1 className="text-4xl font-bold text-yellow-400 border-b border-yellow-400 pb-2">
+        <h1 className="text-3xl md:text-4xl font-bold text-yellow-400 border-b border-yellow-400 pb-2">
           🏆 Success Stories
         </h1>
 
-        {/* Filters */}
-        <div className="flex flex-wrap gap-4 items-center">
+        {/* Filter Bar */}
+        <div className="flex flex-wrap gap-4 items-center justify-between">
           <select
             onChange={(e) => setFilter(e.target.value)}
             className="p-2 bg-blue-100 text-black rounded"
@@ -51,14 +67,20 @@ export default function SuccessStories() {
             <option value="Toyota Prado">Toyota Prado</option>
             <option value="2023">2023 Models</option>
           </select>
+          <button
+            onClick={() => setShowModal(true)}
+            className="flex items-center gap-2 bg-yellow-400 text-black py-2 px-4 rounded hover:bg-yellow-500 shadow hover:drop-shadow-[0_0_10px_#facc15]"
+          >
+            <FaPlus /> Share Story
+          </button>
         </div>
 
-        {/* Carousel (simplified with scroll) */}
+        {/* Scrollable Cards */}
         <div className="flex overflow-x-auto gap-6 pb-4">
-          {filtered.map((story) => (
+          {currentStories.map((story) => (
             <div
               key={story.id}
-              className="min-w-[300px] bg-blue-900 border border-yellow-400 rounded-xl p-4 shadow hover:shadow-yellow-400 transition-all duration-300 hover:scale-105"
+              className="min-w-[300px] bg-blue-900 border border-yellow-400 rounded-xl p-4 shadow transition-all duration-300 hover:scale-105 hover:shadow-yellow-400 hover:drop-shadow-[0_0_15px_#facc15]"
             >
               <img src={story.image} className="w-full h-48 object-cover rounded" />
               <h2 className="text-xl font-bold mt-2 text-yellow-300">{story.name}</h2>
@@ -80,10 +102,30 @@ export default function SuccessStories() {
           ))}
         </div>
 
+        {/* Pagination Controls */}
+        <div className="flex justify-center gap-3">
+          {Array.from({ length: totalPages }, (_, i) => (
+            <button
+              key={i}
+              onClick={() => setCurrentPage(i + 1)}
+              className={`px-4 py-1 rounded ${
+                currentPage === i + 1
+                  ? "bg-yellow-400 text-black"
+                  : "bg-blue-800 text-yellow-300"
+              } hover:scale-105 transition`}
+            >
+              {i + 1}
+            </button>
+          ))}
+        </div>
+
         {/* Story Details */}
-        {filtered.map((story) => (
-          <div key={story.id} className="bg-blue-900 border border-yellow-400 rounded-xl p-6 shadow-lg space-y-4">
-            <div className="grid md:grid-cols-2 gap-6">
+        {currentStories.map((story) => (
+          <div
+            key={story.id}
+            className="bg-blue-900 border border-yellow-400 rounded-xl p-6 shadow-lg space-y-4 transition-all duration-300 hover:drop-shadow-[0_0_15px_#facc15]"
+          >
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <img src={story.before} className="rounded shadow" alt="Before" />
               <img src={story.after} className="rounded shadow" alt="After" />
             </div>
@@ -98,7 +140,6 @@ export default function SuccessStories() {
               <p>✅ <strong>Result:</strong> {story.story.result}</p>
             </div>
 
-            {/* Video Testimonial */}
             {story.video && (
               <iframe
                 width="100%"
@@ -111,34 +152,68 @@ export default function SuccessStories() {
           </div>
         ))}
 
-        {/* Submit Your Story Form */}
-        <div className="bg-blue-800 border border-yellow-400 p-6 rounded-xl shadow-lg mt-10">
-          <h3 className="text-2xl font-bold text-yellow-300 mb-4">✍️ Share Your Success Story</h3>
-          <form className="grid gap-4 md:grid-cols-2">
-            <input type="text" placeholder="Full Name" className="p-2 rounded bg-blue-100 text-black" required />
-            <input type="text" placeholder="Location (City, Country)" className="p-2 rounded bg-blue-100 text-black" required />
-            <input type="text" placeholder="Car Model Purchased" className="p-2 rounded bg-blue-100 text-black" required />
-            <input type="file" className="p-2 rounded bg-blue-100 text-black" />
-            <textarea placeholder="Your Story" rows={4} className="p-2 rounded bg-blue-100 text-black col-span-2" required></textarea>
-            <button className="bg-yellow-400 text-black py-2 px-4 rounded hover:bg-yellow-500 transition col-span-2">
-              <FaUpload className="inline mr-2" /> Submit Story
-            </button>
-          </form>
-        </div>
-
-        {/* Gamified Trust Section */}
+        {/* Trust Section */}
         <div className="text-center pt-10">
           <h2 className="text-2xl text-yellow-400 font-bold">🧩 Trusted Globally</h2>
-          <p className="text-gray-300">10,742 Cars Delivered • Active in 43 Countries • Avg. Rating: 4.9/5</p>
+          <p className="text-gray-300">
+            10,742 Cars Delivered • Active in 43 Countries • Avg. Rating: 4.9/5
+          </p>
         </div>
 
-        {/* Interactive Map Placeholder */}
-        <div className="mt-10 text-center text-yellow-300">
-          <FaGlobeAfrica className="inline text-3xl mb-2" />
-          <h3 className="text-xl font-semibold">🌍 Global Stories Map</h3>
-          <p className="text-gray-400">Map showing where our happy customers are located — coming soon!</p>
+        {/* Live Map Embed */}
+        <div className="mt-10">
+          <h3 className="text-xl text-yellow-300 font-semibold mb-2 text-center">
+            🌍 Where Our Clients Are
+          </h3>
+          <iframe
+            src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3988.8455589247724!2d36.803848773973975!3d-1.2652404356014013!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x182f17cf83d20673%3A0xe0e7e1768510ea56!2sJUSTICE%20ULTIMATE%20AUTOMOBILES!5e0!3m2!1sen!2ske!4v1752239190599!5m2!1sen!2ske"
+            width="100%"
+            height="450"
+            allowFullScreen
+            loading="lazy"
+            referrerPolicy="no-referrer-when-downgrade"
+            className="rounded shadow-md"
+          />
         </div>
       </div>
+
+      {/* Genie-Style Modal */}
+      <AnimatePresence>
+        {showModal && (
+          <motion.div
+            className="fixed inset-0 z-50 bg-black/70 flex items-center justify-center p-6"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+          >
+            <motion.div
+              initial={{ scale: 0.7, y: 100 }}
+              animate={{ scale: 1, y: 0 }}
+              exit={{ scale: 0.7, y: 100 }}
+              transition={{ duration: 0.4 }}
+              className="bg-blue-800 border border-yellow-400 p-6 rounded-xl shadow-xl w-full max-w-xl space-y-4"
+            >
+              <h3 className="text-2xl font-bold text-yellow-300">📢 Share Your Story</h3>
+              <form className="grid gap-4 md:grid-cols-2">
+                <input type="text" placeholder="Full Name" className="p-2 rounded bg-blue-100 text-black" required />
+                <input type="text" placeholder="Location" className="p-2 rounded bg-blue-100 text-black" required />
+                <input type="text" placeholder="Car Model" className="p-2 rounded bg-blue-100 text-black" required />
+                <input type="file" className="p-2 rounded bg-blue-100 text-black" />
+                <textarea placeholder="Your Journey" rows={4} className="p-2 rounded bg-blue-100 text-black col-span-2" required></textarea>
+                <button className="bg-yellow-400 text-black py-2 px-4 rounded hover:bg-yellow-500 col-span-2">
+                  <FaUpload className="inline mr-2" /> Submit Story
+                </button>
+              </form>
+              <button
+                onClick={() => setShowModal(false)}
+                className="text-sm text-yellow-300 underline hover:text-yellow-200"
+              >
+                Close
+              </button>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }
