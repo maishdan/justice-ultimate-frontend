@@ -16,7 +16,7 @@ const articles = [
   {
     id: 1,
     title: "Justice Ultimate Launches New 2025 Electric SUV",
-    image: "/assets/news/ev-launch.jpg",
+    image: "/images/MERCEDES S CLASS/1.jpg",
     author: "Daniel M. Wangui",
     date: "June 15, 2025",
     tags: ["Electric", "SUV", "Launch"],
@@ -24,7 +24,8 @@ const articles = [
     region: "Kenya",
     brand: "Toyota",
     summary: "Our latest electric SUV is here, blending power with eco-friendly technology...",
-    video: "https://www.youtube.com/embed/oHg5SJYRHA0",
+    video: "https://www.youtube.com/embed/-4zsY28t76k",
+
   },
 ];
 
