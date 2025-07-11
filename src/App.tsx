@@ -25,6 +25,7 @@ import ApplyForFinancing from "./pages/ApplyForFinancing";
 import AdminDashboard from './pages/Dashboard/AdminDashboard';
 import CustomerDashboard from './pages/CustomerDashboard';
 import GuestDashboard from './pages/Dashboard/GuestDashboard';
+import ScrollToTop from "./components/ScrollToTop";
 
 // ✅ Import the dynamic CarDetails page
 
