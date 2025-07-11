@@ -139,10 +139,13 @@ export default function Header({
         </Button>
       </div>
 
-      {/* 🚀 Mobile Menu Fixed to Half Width */}
+      {/* 🚀 Updated Mobile Menu with Half Width + Transparency */}
       {menuOpen && (
-        <div className={`md:hidden fixed top-0 left-0 h-full w-1/2 z-50 rounded-tr-2xl rounded-br-2xl ${darkMode ? "bg-[#0A1A3E] text-white" : "bg-white text-black"} shadow-lg transition-all`}> 
-          <div className="p-4 space-y-3">
+        <div
+          className={`md:hidden fixed top-0 left-0 h-full w-1/2 z-50 rounded-tr-2xl rounded-br-2xl backdrop-blur-lg bg-[rgba(11,31,58,0.92)] text-white shadow-2xl transition-all`}
+          style={{ fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto' }}
+        >
+          <div className="p-6 space-y-4 text-base">
             {navLinks.map((link) =>
               link.subMenu ? (
                 <div className="space-y-1" key={link.label}>
