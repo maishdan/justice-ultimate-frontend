@@ -28,7 +28,6 @@ const stories = [
       result: "Zero issues for 7 months, drives weekly 300km.",
     },
   },
-  // You can add more story objects here...
 ];
 
 export default function SuccessStories() {
@@ -165,48 +164,50 @@ export default function SuccessStories() {
           <h3 className="text-xl text-yellow-300 font-semibold mb-2 text-center">
             🌍 Where Our Clients Are
           </h3>
-          <iframe
-            src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3988.8455589247724!2d36.803848773973975!3d-1.2652404356014013!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x182f17cf83d20673%3A0xe0e7e1768510ea56!2sJUSTICE%20ULTIMATE%20AUTOMOBILES!5e0!3m2!1sen!2ske!4v1752239190599!5m2!1sen!2ske"
-            width="100%"
-            height="450"
-            allowFullScreen
-            loading="lazy"
-            referrerPolicy="no-referrer-when-downgrade"
-            className="rounded shadow-md"
-          />
+         <iframe
+  src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3988.8455589247724!2d36.803848773973975!3d-1.2652404356014013!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x182f17cf83d20673%3A0xe0e7e1768510ea56!2sJUSTICE%20ULTIMATE%20AUTOMOBILES!5e0!3m2!1sen!2ske!4v1752242628966!5m2!1sen!2ske"
+  width="100%"
+  height="450"
+  style={{ border: 0 }}
+  allowFullScreen
+  loading="lazy"
+  referrerPolicy="no-referrer-when-downgrade"
+  className="rounded shadow-md"
+/>
+
         </div>
       </div>
 
-      {/* Genie-Style Modal */}
+      {/* ✅ Genie-Style Modal (100% Responsive) */}
       <AnimatePresence>
         {showModal && (
           <motion.div
-            className="fixed inset-0 z-50 bg-black/70 flex items-center justify-center p-6"
+            className="fixed inset-0 z-50 bg-black/70 flex items-center justify-center p-4"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
           >
             <motion.div
-              initial={{ scale: 0.7, y: 100 }}
+              initial={{ scale: 0.8, y: 100 }}
               animate={{ scale: 1, y: 0 }}
-              exit={{ scale: 0.7, y: 100 }}
-              transition={{ duration: 0.4 }}
-              className="bg-blue-800 border border-yellow-400 p-6 rounded-xl shadow-xl w-full max-w-xl space-y-4"
+              exit={{ scale: 0.8, y: 100 }}
+              transition={{ duration: 0.3 }}
+              className="bg-blue-800 border border-yellow-400 p-6 rounded-xl shadow-xl w-full max-w-md sm:max-w-lg max-h-[90vh] overflow-y-auto"
             >
-              <h3 className="text-2xl font-bold text-yellow-300">📢 Share Your Story</h3>
-              <form className="grid gap-4 md:grid-cols-2">
+              <h3 className="text-2xl font-bold text-yellow-300 mb-4">📢 Share Your Story</h3>
+              <form className="grid gap-4 sm:grid-cols-2">
                 <input type="text" placeholder="Full Name" className="p-2 rounded bg-blue-100 text-black" required />
                 <input type="text" placeholder="Location" className="p-2 rounded bg-blue-100 text-black" required />
-                <input type="text" placeholder="Car Model" className="p-2 rounded bg-blue-100 text-black" required />
-                <input type="file" className="p-2 rounded bg-blue-100 text-black" />
-                <textarea placeholder="Your Journey" rows={4} className="p-2 rounded bg-blue-100 text-black col-span-2" required></textarea>
-                <button className="bg-yellow-400 text-black py-2 px-4 rounded hover:bg-yellow-500 col-span-2">
+                <input type="text" placeholder="Car Model" className="p-2 rounded bg-blue-100 text-black sm:col-span-2" required />
+                <input type="file" className="p-2 rounded bg-blue-100 text-black sm:col-span-2" />
+                <textarea placeholder="Your Journey" rows={4} className="p-2 rounded bg-blue-100 text-black sm:col-span-2" required></textarea>
+                <button className="bg-yellow-400 text-black py-2 px-4 rounded hover:bg-yellow-500 sm:col-span-2">
                   <FaUpload className="inline mr-2" /> Submit Story
                 </button>
               </form>
               <button
                 onClick={() => setShowModal(false)}
-                className="text-sm text-yellow-300 underline hover:text-yellow-200"
+                className="text-sm text-yellow-300 underline hover:text-yellow-200 mt-4"
               >
                 Close
               </button>
