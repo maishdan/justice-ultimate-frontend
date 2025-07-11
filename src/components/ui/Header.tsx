@@ -1,8 +1,12 @@
+// ✅ Install Required Package (if not already installed):
+// npm install framer-motion
+
 // 📁 File: src/components/ui/Header.tsx
 import { useEffect, useRef, useState } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { Sun, Moon } from "lucide-react";
 import { Button } from "./button";
+import { AnimatePresence, motion } from "framer-motion";
 import logo from "../../assets/logo.png";
 
 export default function Header({
@@ -15,6 +19,7 @@ export default function Header({
   const [menuOpen, setMenuOpen] = useState(false);
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const dropdownTimeout = useRef<NodeJS.Timeout | null>(null);
+  const [genieOpen, setGenieOpen] = useState(false);
 
   const location = useLocation();
   const navigate = useNavigate();
@@ -139,13 +144,17 @@ export default function Header({
         </Button>
       </div>
 
-      {/* 🚀 Updated Mobile Menu with Half Width + Transparency */}
-      {menuOpen && (
-        <div
-          className={`md:hidden fixed top-0 left-0 h-full w-1/2 z-50 rounded-tr-2xl rounded-br-2xl backdrop-blur-lg bg-[rgba(11,31,58,0.92)] text-white shadow-2xl transition-all`}
-          style={{ fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto' }}
-        >
-          <div className="p-6 space-y-4 text-base">
+      {/* Mobile Off-Canvas Menu (with fixed height like screenshot) */}
+      <AnimatePresence>
+        {menuOpen && (
+          <motion.div
+            initial={{ opacity: 0, scale: 0.1, rotate: 720, y: 300, clipPath: "circle(0% at 90% 95%)" }}
+            animate={{ opacity: 1, scale: 1, rotate: 0, y: 0, clipPath: "circle(150% at 50% 50%)" }}
+            exit={{ opacity: 0, scale: 0.1, rotate: -720, y: 300, clipPath: "circle(0% at 90% 95%)" }}
+            transition={{ duration: 0.8, ease: "easeInOut" }}
+            className="md:hidden fixed top-0 left-0 h-[85%] w-1/2 z-50 rounded-tr-2xl rounded-br-2xl backdrop-blur-lg bg-[rgba(11,31,58,0.92)] text-white shadow-2xl p-6 space-y-4 text-base"
+            style={{ fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto' }}
+          >
             {navLinks.map((link) =>
               link.subMenu ? (
                 <div className="space-y-1" key={link.label}>
@@ -194,9 +203,9 @@ export default function Header({
             <button onClick={handleLanguageToggle} className="block mt-2 border px-2 py-1 rounded text-sm">
               🌍 {language}
             </button>
-          </div>
-        </div>
-      )}
+          </motion.div>
+        )}
+      </AnimatePresence>
     </header>
   );
 }
