@@ -4,6 +4,7 @@ import { supabase } from '../lib/supabaseClient';
 import { Eye, EyeOff } from 'lucide-react';
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
+import { FaGoogle, FaGithub } from 'react-icons/fa';
 
 const Login = () => {
   const navigate = useNavigate();
@@ -15,36 +16,79 @@ const Login = () => {
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
+    console.log('Login form submitted');
+    console.log('Email:', email);
+    console.log('Password length:', password.length);
+    
     setLoading(true);
     setError('');
     try {
+      console.log('Attempting to sign in with Supabase...');
       const { data, error } = await supabase.auth.signInWithPassword({
         email,
         password,
       });
+      console.log('Supabase response:', { data, error });
+      
       if (error) {
+        console.error('Login error:', error);
         setError(error.message);
         toast.error(error.message);
       } else if (data.session) {
+        console.log('Login successful, session:', data.session);
         // Fetch user role from Supabase user metadata
-        const { data: { user } } = await supabase.auth.getUser();
-        let role = user?.user_metadata?.role || 'customer';
+        const { data: { user }, error: userError } = await supabase.auth.getUser();
+        console.log('User data:', user);
+        console.log('User error:', userError);
+        
+        if (userError || !user) {
+          console.error('Could not fetch user info:', userError);
+          setError('Could not fetch user info.');
+          toast.error('Could not fetch user info.');
+          setLoading(false);
+          return;
+        }
+        let role = user.user_metadata?.role || 'customer';
         let dashboardPath = '/dashboard/customer';
         if (role === 'admin') dashboardPath = '/dashboard/admin';
         else if (role === 'staff') dashboardPath = '/dashboard/staff';
         else if (role === 'mechanic') dashboardPath = '/dashboard/mechanic';
         else if (role === 'guest') dashboardPath = '/dashboard/guest';
+        else if (role === 'customer') dashboardPath = '/dashboard/customer';
+        else dashboardPath = '/dashboard/customer'; // fallback
+        
+        console.log('User role:', role);
+        console.log('Redirecting to:', dashboardPath);
+        
         toast.success('Login successful. Redirecting to dashboard...');
         setTimeout(() => {
-          navigate(dashboardPath);
-        }, 2000);
+          console.log('Navigating to:', dashboardPath);
+          navigate(dashboardPath, { replace: true });
+        }, 1000);
       }
     } catch (err: any) {
+      console.error('Login catch error:', err);
       setError('Login failed');
       toast.error('Login failed. Please check your credentials.');
     } finally {
       setLoading(false);
     }
+  };
+
+  const loginWithProvider = async (provider: 'google' | 'github') => {
+    setLoading(true);
+    const { error } = await supabase.auth.signInWithOAuth({
+      provider,
+      options: {
+        redirectTo: window.location.origin + '/dashboard/customer'
+      }
+    });
+    if (error) {
+      console.error(`${provider} login failed:`, error.message);
+      setError(`Login with ${provider} failed. Please try again.`);
+      toast.error(`Login with ${provider} failed. Please try again.`);
+    }
+    setLoading(false);
   };
 
   return (
@@ -118,6 +162,27 @@ const Login = () => {
           )}
           {loading ? 'Logging in...' : 'Login'}
         </button>
+        
+        {/* OAuth Buttons */}
+        <div className="mt-4 space-y-2">
+          <button
+            type="button"
+            onClick={() => loginWithProvider('google')}
+            disabled={loading}
+            className="w-full py-2 bg-white border border-gray-300 rounded-lg font-semibold transition-all duration-300 shadow-md flex justify-center items-center text-gray-700 hover:bg-gray-50"
+          >
+            <FaGoogle className="mr-2" /> Sign in with Google
+          </button>
+          <button
+            type="button"
+            onClick={() => loginWithProvider('github')}
+            disabled={loading}
+            className="w-full py-2 bg-black text-white rounded-lg font-semibold transition-all duration-300 shadow-md flex justify-center items-center hover:bg-gray-800"
+          >
+            <FaGithub className="mr-2" /> Sign in with GitHub
+          </button>
+        </div>
+        
         <div className="flex justify-between text-sm text-gray-500 mt-4">
           <a href="/reset-password" className="hover:underline">Forgot password?</a>
           <a href="/register" className="hover:underline">Register</a>

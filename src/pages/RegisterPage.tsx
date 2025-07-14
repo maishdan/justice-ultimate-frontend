@@ -5,6 +5,8 @@ import { supabase } from '../lib/supabaseClient';
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import allCountries from "../data/allCountries";
+import zxcvbn from 'zxcvbn';
+import { FaGoogle, FaGithub } from 'react-icons/fa';
 
 const countries = [
   { code: "KE", name: "Kenya", dial: "+254" },
@@ -21,15 +23,35 @@ export default function RegisterPage() {
   const [password, setPassword] = useState("");
   const [fullName, setFullName] = useState("");
   const [country, setCountry] = useState("KE");
+  const [phoneNumber, setPhoneNumber] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [success, setSuccess] = useState(false);
+  const [confirmPassword, setConfirmPassword] = useState("");
+  const [passwordStrength, setPasswordStrength] = useState(0);
 
   const handleRegister = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
     setError("");
     setSuccess(false);
+    // Password strength check
+    const strong =
+      password.length >= 8 &&
+      /[A-Z]/.test(password) &&
+      /[a-z]/.test(password) &&
+      /[0-9]/.test(password) &&
+      /[^A-Za-z0-9]/.test(password);
+    if (!strong) {
+      setError("Password must be at least 8 characters and include upper, lower, number, and special character.");
+      setLoading(false);
+      return;
+    }
+    if (password !== confirmPassword) {
+      setError("Passwords do not match.");
+      setLoading(false);
+      return;
+    }
     try {
       const { data, error } = await supabase.auth.signUp({
         email,
@@ -38,6 +60,7 @@ export default function RegisterPage() {
           data: {
             full_name: fullName,
             country,
+            phone_number: phoneNumber,
           },
           emailRedirectTo: window.location.origin + "/login",
         },
@@ -57,6 +80,24 @@ export default function RegisterPage() {
     }
   };
 
+  const registerWithProvider = async (provider: 'google' | 'github') => {
+    setLoading(true);
+    const { error } = await supabase.auth.signInWithOAuth({
+      provider,
+      options: {
+        redirectTo: window.location.origin + '/dashboard/customer'
+      }
+    });
+    if (error) {
+      console.error(`${provider} registration failed:`, error.message);
+      setError(`Registration with ${provider} failed. Please try again.`);
+      toast.error(`Registration with ${provider} failed. Please try again.`);
+    }
+    setLoading(false);
+  };
+
+  const selectedCountry = countries.find(c => c.code === country);
+
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-900 to-black">
       <ToastContainer />
@@ -65,7 +106,7 @@ export default function RegisterPage() {
         {success ? (
           <div className="text-center">
             <h3 className="text-lg font-semibold text-green-600 mb-2">Check your email to confirm your account!</h3>
-            <p className="text-gray-700 mb-4">We’ve sent a confirmation link to <span className="font-bold">{email}</span>. Please confirm your email to activate your account and then log in.</p>
+            <p className="text-gray-700 mb-4">We've sent a confirmation link to <span className="font-bold">{email}</span>. Please confirm your email to activate your account and then log in.</p>
             <button
               className="mt-4 px-6 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition"
               onClick={() => navigate("/login")}
@@ -96,18 +137,6 @@ export default function RegisterPage() {
               />
             </div>
             <div>
-              <label className="block text-gray-700 font-medium mb-1">Password</label>
-              <input
-                type="password"
-                value={password}
-                onChange={e => setPassword(e.target.value)}
-                required
-                minLength={6}
-                className="w-full px-4 py-2 border rounded focus:outline-none focus:ring-2 focus:ring-blue-400"
-                placeholder="Create a password"
-              />
-            </div>
-            <div>
               <label className="block text-gray-700 font-medium mb-1">Country</label>
               <select
                 value={country}
@@ -119,6 +148,52 @@ export default function RegisterPage() {
                 ))}
               </select>
             </div>
+            <div>
+              <label className="block text-gray-700 font-medium mb-1">Phone Number</label>
+              <div className="flex">
+                <span className="px-3 py-2 bg-gray-100 border border-r-0 rounded-l text-gray-600">
+                  {selectedCountry?.dial}
+                </span>
+                <input
+                  type="tel"
+                  value={phoneNumber}
+                  onChange={e => setPhoneNumber(e.target.value)}
+                  required
+                  className="flex-1 px-4 py-2 border rounded-r focus:outline-none focus:ring-2 focus:ring-blue-400"
+                  placeholder="Phone number"
+                />
+              </div>
+            </div>
+            <div>
+              <label className="block text-gray-700 font-medium mb-1">Password</label>
+              <input
+                type="password"
+                value={password}
+                onChange={e => {
+                  setPassword(e.target.value);
+                  setPasswordStrength(zxcvbn(e.target.value).score);
+                }}
+                required
+                minLength={8}
+                className="w-full px-4 py-2 border rounded focus:outline-none focus:ring-2 focus:ring-blue-400"
+                placeholder="Create a password"
+              />
+              <div className="text-xs mt-1">
+                Password strength: {["Weak","Fair","Good","Strong","Very strong"][passwordStrength]}
+              </div>
+            </div>
+            <div>
+              <label className="block text-gray-700 font-medium mb-1">Confirm Password</label>
+              <input
+                type="password"
+                value={confirmPassword}
+                onChange={e => setConfirmPassword(e.target.value)}
+                required
+                minLength={8}
+                className="w-full px-4 py-2 border rounded focus:outline-none focus:ring-2 focus:ring-blue-400"
+                placeholder="Confirm your password"
+              />
+            </div>
             {error && <div className="text-red-600 text-sm">{error}</div>}
             <button
               type="submit"
@@ -127,6 +202,27 @@ export default function RegisterPage() {
             >
               {loading ? "Registering..." : "Register"}
             </button>
+            
+            {/* OAuth Buttons */}
+            <div className="space-y-2">
+              <button
+                type="button"
+                onClick={() => registerWithProvider('google')}
+                disabled={loading}
+                className="w-full py-2 bg-white border border-gray-300 rounded font-semibold transition-all duration-300 shadow-md flex justify-center items-center text-gray-700 hover:bg-gray-50"
+              >
+                <FaGoogle className="mr-2" /> Sign up with Google
+              </button>
+              <button
+                type="button"
+                onClick={() => registerWithProvider('github')}
+                disabled={loading}
+                className="w-full py-2 bg-black text-white rounded font-semibold transition-all duration-300 shadow-md flex justify-center items-center hover:bg-gray-800"
+              >
+                <FaGithub className="mr-2" /> Sign up with GitHub
+              </button>
+            </div>
+            
             <div className="text-center text-sm mt-2">
               Already have an account?{' '}
               <span

@@ -31,11 +31,13 @@
     "recharts": "^3.0.2",
     "rollup": "^4.44.1",
     "sonner": "^2.0.6",
-    "vaul": "^1.1.2"
+    "vaul": "^1.1.2",
+    "zxcvbn": "^4.4.2"
   },
   "devDependencies": {
     "@types/react": "^19.1.8",
     "@types/react-dom": "^19.1.6",
+    "@types/zxcvbn": "^4.4.5",
     "@vitejs/plugin-react": "^4.2.1",
     "autoprefixer": "^10.4.21",
     "postcss": "^8.4.38",

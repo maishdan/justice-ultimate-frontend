@@ -80,9 +80,10 @@ export default function Header({
         </div>
 
         <nav className="hidden md:flex items-center gap-4">
-          {navLinks.map((link) =>
+          {navLinks.map((link, index) =>
             link.subMenu ? (
               <div
+                key={`nav-${index}`}
                 className="relative"
                 onMouseEnter={handleDropdownOpen}
                 onMouseLeave={handleDropdownClose}
