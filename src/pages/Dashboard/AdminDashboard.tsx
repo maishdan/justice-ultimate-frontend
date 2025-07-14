@@ -2,7 +2,7 @@
 import React, { useEffect, useState } from 'react';
 import useAuth from '../../hooks/useAuth'; // ✅ Protect route
 import { useNavigate } from 'react-router-dom';
-import axios from 'axios';
+import { supabase } from '../../lib/supabaseClient';
 import { Card, CardContent } from '../../components/ui/card';
 import { Button } from '../../components/ui/button';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '../../components/ui/tabs';
@@ -48,9 +48,38 @@ export default function AdminDashboard() {
   const [selectedTab, setSelectedTab] = React.useState("users");
 
   useEffect(() => {
-    axios.get('/api/admin/overview').then((res) => {
-      setStats(res.data);
-    });
+    async function fetchStats() {
+      // Fetch total users
+      const { count: totalUsers } = await supabase.from('users').select('*', { count: 'exact', head: true });
+      // Fetch active users (example: users with last_sign_in within 7 days)
+      const { count: activeUsers } = await supabase.from('users').select('*', { count: 'exact', head: true }).gte('last_sign_in_at', new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString());
+      // Fetch total vehicles
+      const { count: totalVehicles } = await supabase.from('cars').select('*', { count: 'exact', head: true });
+      // Fetch pending approvals (example: users with status 'pending')
+      const { count: pendingApprovals } = await supabase.from('users').select('*', { count: 'exact', head: true }).eq('status', 'pending');
+      // Fetch sales (example: from 'sales' table)
+      const { data: sales } = await supabase.from('sales').select('amount,created_at');
+      let dailySales = 0, weeklySales = 0, monthlySales = 0;
+      if (sales) {
+        const now = new Date();
+        sales.forEach(sale => {
+          const saleDate = new Date(sale.created_at);
+          if (saleDate > new Date(now.getTime() - 1 * 24 * 60 * 60 * 1000)) dailySales += sale.amount;
+          if (saleDate > new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000)) weeklySales += sale.amount;
+          if (saleDate > new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000)) monthlySales += sale.amount;
+        });
+      }
+      setStats({
+        activeUsers: activeUsers || 0,
+        totalUsers: totalUsers || 0,
+        totalVehicles: totalVehicles || 0,
+        pendingApprovals: pendingApprovals || 0,
+        dailySales,
+        weeklySales,
+        monthlySales,
+      });
+    }
+    fetchStats();
   }, []);
 
   const tabOptions = [

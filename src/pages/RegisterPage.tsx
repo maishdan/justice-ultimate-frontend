@@ -1,7 +1,7 @@
 // src/pages/RegisterPage.tsx
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import axios from "axios";
+import { supabase } from '../lib/supabaseClient';
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import allCountries from "../data/allCountries";
@@ -16,196 +16,127 @@ const countries = [
 ];
 
 export default function RegisterPage() {
-  const [selectedCountry, setSelectedCountry] = useState(countries[0]);
-  const [firstName, setFirstName] = useState("");
-  const [middleName, setMiddleName] = useState("");
-  const [lastName, setLastName] = useState("");
-  const [email, setEmail] = useState("");
-  const [idNumber, setIdNumber] = useState(""); // Unused, but preserved
-  const [kraPin, setKraPin] = useState("");     // Unused, but preserved
-  const [ntsaPhone, setNtsaPhone] = useState(""); // Unused, but preserved
-  const [phoneNumber, setPhoneNumber] = useState("");
-  const [password, setPassword] = useState("");
-  const [confirmPassword, setConfirmPassword] = useState("");
-  const [address, setAddress] = useState("");
-  const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [fullName, setFullName] = useState("");
+  const [country, setCountry] = useState("KE");
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
+  const [success, setSuccess] = useState(false);
 
   const handleRegister = async (e: React.FormEvent) => {
     e.preventDefault();
-
-    if (password !== confirmPassword) {
-      toast.error("Passwords do not match!");
-      return;
-    }
-
-    const finalPhoneNumber = phoneNumber.startsWith("0")
-      ? phoneNumber
-      : "0" + phoneNumber;
-
     setLoading(true);
-
+    setError("");
+    setSuccess(false);
     try {
-      await axios.post("http://localhost:5000/api/auth/register", {
-        firstName,
-        middleName,
-        lastName,
+      const { data, error } = await supabase.auth.signUp({
         email,
-        idNumber,
-        kraPin,
-        ntsaPhone,
-        phoneNumber: finalPhoneNumber,
         password,
-        address,
+        options: {
+          data: {
+            full_name: fullName,
+            country,
+          },
+          emailRedirectTo: window.location.origin + "/login",
+        },
       });
-
-      toast.success("Registration successful. Redirecting to login...");
-      setTimeout(() => {
-        navigate("/login");
-      }, 2000);
+      if (error) {
+        setError(error.message);
+        toast.error(error.message);
+      } else {
+        setSuccess(true);
+        toast.success("Registration successful! Please check your email to confirm your account.");
+      }
     } catch (err: any) {
-      console.error("Registration error:", err.response?.data || err.message);
-      toast.error(err.response?.data?.message || "Registration failed");
+      setError(err.message || "Registration failed");
+      toast.error(err.message || "Registration failed");
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <div className="min-h-screen bg-gray-900 text-white p-6 flex items-center justify-center">
-      <div className="relative w-full max-w-2xl">
-        {/* Disco Glow Border */}
-        <div className="absolute inset-0 animate-pulse-glow rounded-xl z-0 blur-md" />
-
-        {/* Floating Glass Form */}
-        <div className="relative z-10 bg-gray-800 bg-opacity-90 backdrop-blur-md border border-yellow-500/40 rounded-xl p-6 shadow-2xl transition-all duration-300 hover:drop-shadow-[0_0_25px_#fff]">
-          <h2 className="text-3xl font-bold text-center mb-6 text-yellow-300">
-            Create Account
-          </h2>
-          <form className="space-y-4" onSubmit={handleRegister}>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-900 to-black">
+      <ToastContainer />
+      <div className="bg-white rounded-xl shadow-lg p-8 w-full max-w-md">
+        <h2 className="text-2xl font-bold mb-6 text-center text-blue-900">Create Your Account</h2>
+        {success ? (
+          <div className="text-center">
+            <h3 className="text-lg font-semibold text-green-600 mb-2">Check your email to confirm your account!</h3>
+            <p className="text-gray-700 mb-4">We’ve sent a confirmation link to <span className="font-bold">{email}</span>. Please confirm your email to activate your account and then log in.</p>
+            <button
+              className="mt-4 px-6 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition"
+              onClick={() => navigate("/login")}
+            >Go to Login</button>
+          </div>
+        ) : (
+          <form onSubmit={handleRegister} className="space-y-4">
+            <div>
+              <label className="block text-gray-700 font-medium mb-1">Full Name</label>
               <input
                 type="text"
-                value={firstName}
-                onChange={(e) => setFirstName(e.target.value)}
-                placeholder="First Name"
-                className="p-3 bg-gray-700 rounded"
+                value={fullName}
+                onChange={e => setFullName(e.target.value)}
                 required
+                className="w-full px-4 py-2 border rounded focus:outline-none focus:ring-2 focus:ring-blue-400"
+                placeholder="Your full name"
               />
-              <input
-                type="text"
-                value={middleName}
-                onChange={(e) => setMiddleName(e.target.value)}
-                placeholder="Middle Name"
-                className="p-3 bg-gray-700 rounded"
-              />
-              <input
-                type="text"
-                value={lastName}
-                onChange={(e) => setLastName(e.target.value)}
-                placeholder="Last Name"
-                className="p-3 bg-gray-700 rounded"
-                required
-              />
+            </div>
+            <div>
+              <label className="block text-gray-700 font-medium mb-1">Email</label>
               <input
                 type="email"
                 value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                placeholder="Email"
-                className="p-3 bg-gray-700 rounded"
+                onChange={e => setEmail(e.target.value)}
                 required
+                className="w-full px-4 py-2 border rounded focus:outline-none focus:ring-2 focus:ring-blue-400"
+                placeholder="you@email.com"
               />
             </div>
-
-            <div className="grid grid-cols-1">
+            <div>
+              <label className="block text-gray-700 font-medium mb-1">Password</label>
               <input
-                type="text"
-                value={address}
-                onChange={(e) => setAddress(e.target.value)}
-                placeholder="123 ...city"
-                className="p-3 bg-gray-700 text-white rounded"
+                type="password"
+                value={password}
+                onChange={e => setPassword(e.target.value)}
                 required
+                minLength={6}
+                className="w-full px-4 py-2 border rounded focus:outline-none focus:ring-2 focus:ring-blue-400"
+                placeholder="Create a password"
               />
             </div>
-
-            <div className="grid grid-cols-3 gap-2 items-center">
+            <div>
+              <label className="block text-gray-700 font-medium mb-1">Country</label>
               <select
-                className="bg-gray-700 text-white p-2 rounded col-span-1"
-                value={selectedCountry.code}
-                onChange={(e) => {
-                  const country = allCountries.find(
-                    (c) => c.code === e.target.value
-                  );
-                  if (country) setSelectedCountry(country);
-                }}
+                value={country}
+                onChange={e => setCountry(e.target.value)}
+                className="w-full px-4 py-2 border rounded focus:outline-none focus:ring-2 focus:ring-blue-400"
               >
-                {allCountries.map((country) => (
-                  <option key={country.code} value={country.code}>
-                    {country.name} ({country.dial})
-                  </option>
+                {countries.map(c => (
+                  <option key={c.code} value={c.code}>{c.name} ({c.dial})</option>
                 ))}
               </select>
-
-              <input
-                type="tel"
-                value={phoneNumber}
-                onChange={(e) => setPhoneNumber(e.target.value)}
-                placeholder={`${selectedCountry.dial}790293895`}
-                className="p-3 bg-gray-700 text-white rounded col-span-2"
-                required
-              />
             </div>
-
-            <input
-              type="password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              placeholder="Password"
-              className="p-3 bg-gray-700 rounded w-full"
-              required
-            />
-
-            <input
-              type="password"
-              value={confirmPassword}
-              onChange={(e) => setConfirmPassword(e.target.value)}
-              placeholder="Confirm Password"
-              className="p-3 bg-gray-700 rounded w-full"
-              required
-            />
-
+            {error && <div className="text-red-600 text-sm">{error}</div>}
             <button
               type="submit"
-              className="w-full bg-blue-600 hover:bg-blue-700 p-3 rounded font-bold flex justify-center items-center transition-all hover:drop-shadow-[0_0_12px_#60a5fa]"
+              disabled={loading}
+              className="w-full py-2 px-4 bg-blue-600 text-white rounded hover:bg-blue-700 transition font-semibold"
             >
-              {loading && (
-                <svg
-                  className="animate-spin h-5 w-5 mr-2 text-white"
-                  xmlns="http://www.w3.org/2000/svg"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                >
-                  <circle
-                    className="opacity-25"
-                    cx="12"
-                    cy="12"
-                    r="10"
-                    stroke="currentColor"
-                    strokeWidth="4"
-                  ></circle>
-                  <path
-                    className="opacity-75"
-                    fill="currentColor"
-                    d="M4 12a8 8 0 018-8v8H4z"
-                  ></path>
-                </svg>
-              )}
               {loading ? "Registering..." : "Register"}
             </button>
+            <div className="text-center text-sm mt-2">
+              Already have an account?{' '}
+              <span
+                className="text-blue-600 hover:underline cursor-pointer"
+                onClick={() => navigate("/login")}
+              >Login</span>
+            </div>
           </form>
-        </div>
+        )}
       </div>
-      <ToastContainer position="top-center" autoClose={3000} hideProgressBar />
     </div>
   );
 }

@@ -1,13 +1,12 @@
-import { useState } from 'react'; 
+import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import axios from 'axios';
-import { Eye, EyeOff } from 'lucide-react'; // Optional: Install lucide-react
+import { supabase } from '../lib/supabaseClient';
+import { Eye, EyeOff } from 'lucide-react';
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 
 const Login = () => {
   const navigate = useNavigate();
-
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPass, setShowPass] = useState(false);
@@ -18,34 +17,31 @@ const Login = () => {
     e.preventDefault();
     setLoading(true);
     setError('');
-
     try {
-      const res = await axios.post('http://localhost:5000/api/auth/login', { email, password });
-      const { token, user } = res.data;
-
-      // ✅ Save both tokens + user
-      localStorage.setItem('token', token);
-      localStorage.setItem('authToken', token); // For PrivateRoute
-      localStorage.setItem('user', JSON.stringify(user));
-
-      toast.success('Login successful. Redirecting to dashboard...');
-
-      setTimeout(() => {
-        const roleRedirectMap: Record<string, string> = {
-          admin: '/dashboard/admin',
-          manager: '/dashboard/admin',
-          sales_staff: '/dashboard/staff',
-          agent: '/dashboard/staff',
-          mechanic: '/dashboard/mechanic',
-          car_owner: '/dashboard/customer',
-          customer: '/dashboard/customer',
-        };
-
-        navigate(roleRedirectMap[user.role] || '/dashboard/customer');
-      }, 2000);
+      const { data, error } = await supabase.auth.signInWithPassword({
+        email,
+        password,
+      });
+      if (error) {
+        setError(error.message);
+        toast.error(error.message);
+      } else if (data.session) {
+        // Fetch user role from Supabase user metadata
+        const { data: { user } } = await supabase.auth.getUser();
+        let role = user?.user_metadata?.role || 'customer';
+        let dashboardPath = '/dashboard/customer';
+        if (role === 'admin') dashboardPath = '/dashboard/admin';
+        else if (role === 'staff') dashboardPath = '/dashboard/staff';
+        else if (role === 'mechanic') dashboardPath = '/dashboard/mechanic';
+        else if (role === 'guest') dashboardPath = '/dashboard/guest';
+        toast.success('Login successful. Redirecting to dashboard...');
+        setTimeout(() => {
+          navigate(dashboardPath);
+        }, 2000);
+      }
     } catch (err: any) {
-      setError(err.response?.data?.error || 'Login failed');
-      toast.error('Login failed. Please check your password.');
+      setError('Login failed');
+      toast.error('Login failed. Please check your credentials.');
     } finally {
       setLoading(false);
     }
@@ -64,22 +60,19 @@ const Login = () => {
         <h2 className="text-3xl font-bold text-center text-blue-800 dark:text-green-300 mb-6 tracking-tight">
           Justice Ultimate Login
         </h2>
-
         {error && (
           <p className="text-sm text-red-500 text-center mb-4">{error}</p>
         )}
-
         <div className="mb-4">
-          <label className="block text-sm font-medium mb-1">Email / Phone</label>
+          <label className="block text-sm font-medium mb-1">Email</label>
           <input
-            type="text"
-            placeholder="justice@.com or +254..."
+            type="email"
+            placeholder="justice@.com"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             className="w-full p-2 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-green-400 dark:bg-gray-800 dark:border-gray-600"
           />
         </div>
-
         <div className="mb-4 relative">
           <label className="block text-sm font-medium mb-1">Password</label>
           <input
@@ -96,7 +89,6 @@ const Login = () => {
             {showPass ? <EyeOff size={18} /> : <Eye size={18} />}
           </span>
         </div>
-
         <button
           type="submit"
           disabled={loading}
@@ -126,19 +118,14 @@ const Login = () => {
           )}
           {loading ? 'Logging in...' : 'Login'}
         </button>
-
         <div className="flex justify-between text-sm text-gray-500 mt-4">
-          <a href="#" className="hover:underline">Forgot password?</a>
+          <a href="/reset-password" className="hover:underline">Forgot password?</a>
           <a href="/register" className="hover:underline">Register</a>
         </div>
-
-        {/* 🌐 Language + Social login (future use) */}
         <div className="mt-6 text-xs text-center text-gray-400 dark:text-gray-500">
           <p>🌐 International login ready | v1.0</p>
         </div>
       </form>
-
-      {/* Toast container */}
       <ToastContainer position="top-center" autoClose={3000} hideProgressBar />
     </div>
   );

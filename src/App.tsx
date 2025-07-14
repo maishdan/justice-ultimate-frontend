@@ -26,6 +26,9 @@ import AdminDashboard from './pages/Dashboard/AdminDashboard';
 import CustomerDashboard from './pages/CustomerDashboard';
 import GuestDashboard from './pages/Dashboard/GuestDashboard';
 import ScrollToTop from "./components/ScrollToTop";
+import ResetPassword from "./pages/ResetPassword";
+import ProfilePage from "./pages/ProfilePage";
+import CarDetailPage from "./pages/CarDetailPage";
 
 // ✅ Import the dynamic CarDetails page
 
@@ -92,6 +95,9 @@ function App() {
           <Route path="/cookies" element={<Cookies />} />
           <Route path="/book-test-drive" element={<BookTestDrive />} />
           <Route path="/vehicle-catalogue" element={<VehicleCatalogue />} />
+          <Route path="/reset-password" element={<ResetPassword />} />
+          <Route path="/profile" element={<ProfilePage />} />
+          <Route path="/car/:id" element={<CarDetailPage />} />
 
           {/* ✅ Dynamic Car Details Route */}
          <Route path="/all-cars-showcase" element={<AllCarsShowcase />} />
