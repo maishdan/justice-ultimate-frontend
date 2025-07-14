@@ -76,6 +76,7 @@ function App() {
       <Header darkMode={darkMode} setDarkMode={setDarkMode} />
 
       <main>
+        
         <Routes>
           <Route path="/" element={<LandingPage />} />
           <Route path="/services" element={<Services />} />
@@ -139,6 +140,7 @@ function App() {
 export default function WrappedApp() {
   return (
     <Router>
+      <ScrollToTop />
       <App />
     </Router>
   );
