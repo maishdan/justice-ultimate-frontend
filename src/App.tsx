@@ -23,12 +23,15 @@ import VehicleCatalogue from "./pages/VehicleCatalogue";
 import ChatBotWidget from "./components/ChatBot/ChatBotWidget";
 import ApplyForFinancing from "./pages/ApplyForFinancing";
 import AdminDashboard from './pages/Dashboard/AdminDashboard';
+import StaffDashboard from './pages/Dashboard/StaffDashboard';
+import MechanicDashboard from './pages/Dashboard/MechanicDashboard';
 import CustomerDashboard from './pages/CustomerDashboard';
 import GuestDashboard from './pages/Dashboard/GuestDashboard';
 import ScrollToTop from "./components/ScrollToTop";
 import ResetPassword from "./pages/ResetPassword";
 import ProfilePage from "./pages/ProfilePage";
 import CarDetailPage from "./pages/CarDetailPage";
+import SetNewPassword from './pages/SetNewPassword';
 
 // ✅ Import the dynamic CarDetails page
 
@@ -98,6 +101,7 @@ function App() {
           <Route path="/reset-password" element={<ResetPassword />} />
           <Route path="/profile" element={<ProfilePage />} />
           <Route path="/car/:id" element={<CarDetailPage />} />
+          <Route path="/set-new-password" element={<SetNewPassword />} />
 
           {/* ✅ Dynamic Car Details Route */}
          <Route path="/all-cars-showcase" element={<AllCarsShowcase />} />
@@ -109,6 +113,20 @@ function App() {
             <ProtectedRoute>
               <PrivateRoute>
                 <AdminDashboard />
+              </PrivateRoute>
+            </ProtectedRoute>
+          } />
+          <Route path="/dashboard/staff" element={
+            <ProtectedRoute>
+              <PrivateRoute>
+                <StaffDashboard />
+              </PrivateRoute>
+            </ProtectedRoute>
+          } />
+          <Route path="/dashboard/mechanic" element={
+            <ProtectedRoute>
+              <PrivateRoute>
+                <MechanicDashboard />
               </PrivateRoute>
             </ProtectedRoute>
           } />

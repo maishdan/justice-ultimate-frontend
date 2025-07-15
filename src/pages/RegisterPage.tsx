@@ -7,6 +7,7 @@ import "react-toastify/dist/ReactToastify.css";
 import allCountries from "../data/allCountries";
 import zxcvbn from 'zxcvbn';
 import { FaGoogle, FaGithub } from 'react-icons/fa';
+import { useRef } from 'react';
 
 const countries = [
   { code: "KE", name: "Kenya", dial: "+254" },
@@ -17,7 +18,32 @@ const countries = [
   { code: "NG", name: "Nigeria", dial: "+234" },
 ];
 
+function ContinueAsGuestButton() {
+  const navigate = useNavigate();
+  return (
+    <button
+      className="w-full mt-4 py-2 px-4 rounded bg-yellow-400 text-black font-bold hover:bg-yellow-300 transition"
+      onClick={() => {
+        localStorage.removeItem("token");
+        localStorage.removeItem("authToken");
+        localStorage.setItem("guestSession", "true");
+        navigate("/dashboard/guest");
+      }}
+      type="button"
+    >
+      Continue as Guest
+    </button>
+  );
+}
+
 export default function RegisterPage() {
+  const audioRef = useRef<HTMLAudioElement | null>(null);
+  const playCling = () => {
+    if (audioRef.current) {
+      audioRef.current.currentTime = 0;
+      audioRef.current.play();
+    }
+  };
   const navigate = useNavigate();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -71,6 +97,7 @@ export default function RegisterPage() {
       } else {
         setSuccess(true);
         toast.success("Registration successful! Please check your email to confirm your account.");
+        localStorage.removeItem("guestSession"); // <-- Ensure guestSession is cleared
       }
     } catch (err: any) {
       setError(err.message || "Registration failed");
@@ -88,10 +115,8 @@ export default function RegisterPage() {
         redirectTo: window.location.origin + '/dashboard/customer'
       }
     });
-    if (error) {
-      console.error(`${provider} registration failed:`, error.message);
-      setError(`Registration with ${provider} failed. Please try again.`);
-      toast.error(`Registration with ${provider} failed. Please try again.`);
+    if (!error) {
+      localStorage.removeItem("guestSession"); // <-- Ensure guestSession is cleared after OAuth
     }
     setLoading(false);
   };
@@ -101,6 +126,7 @@ export default function RegisterPage() {
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-900 to-black">
       <ToastContainer />
+      <audio ref={audioRef} src="/sounds/iphone-notification.mp3" preload="auto" />
       <div className="bg-white rounded-xl shadow-lg p-8 w-full max-w-md">
         <h2 className="text-2xl font-bold mb-6 text-center text-blue-900">Create Your Account</h2>
         {success ? (
@@ -232,6 +258,7 @@ export default function RegisterPage() {
             </div>
           </form>
         )}
+        <ContinueAsGuestButton />
       </div>
     </div>
   );

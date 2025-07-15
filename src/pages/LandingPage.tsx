@@ -4,10 +4,17 @@ import { Button } from "../components/ui/button";
 import { Link } from "react-router-dom";
 import { FaHome, FaTachometerAlt, FaEnvelopeOpenText } from "react-icons/fa";
 import { FaEnvelope, FaPhoneAlt, FaWhatsapp } from "react-icons/fa";
-
+import { useRef } from 'react';
 
 
 export default function LandingPage() {
+  const audioRef = useRef<HTMLAudioElement | null>(null);
+  const playCarStart = () => {
+    if (audioRef.current) {
+      audioRef.current.currentTime = 0;
+      audioRef.current.play();
+    }
+  };
   return (
   <div
  
@@ -37,10 +44,10 @@ className="absolute inset-0 bg-cover bg-center scale-105 animate-slowColorPulse 
           </p>
           <div className="flex flex-col md:flex-row justify-center gap-6">
             <Link to="/register">
-              <Button size="lg" className="bg-yellow-400 text-black hover:bg-yellow-300 shadow-lg transition duration-300">Get Started</Button>
+              <Button size="lg" className="bg-yellow-400 text-black hover:bg-yellow-300 shadow-lg transition duration-300" onClick={playCarStart}>Get Started</Button>
             </Link>
             <Link to="/vehicle-catalogue">
-              <Button variant="outline" size="lg" className="hover:bg-white hover:text-black border-white">Explore Cars</Button>
+              <Button variant="outline" size="lg" className="hover:bg-white hover:text-black border-white" onClick={playCarStart}>Explore Cars</Button>
             </Link>
           </div>
         </motion.section>

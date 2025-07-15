@@ -21,6 +21,11 @@ import SecurityPanel from '../../components/dashboard/widgets/SecurityPanel';
 import ImpersonatorTool from '../../components/dashboard/widgets/ImpersonatorTool';
 import ThemeAccessibilityControls from '../../components/dashboard/widgets/ThemeAccessibilityControls';
 import LanguageCurrencySwitcher from '../../components/dashboard/widgets/LanguageCurrencySwitcher';
+import LeadsWidget from '../../components/dashboard/crm/LeadsWidget';
+import OpportunitiesWidget from '../../components/dashboard/crm/OpportunitiesWidget';
+import ContactsWidget from '../../components/dashboard/crm/ContactsWidget';
+import AccountsWidget from '../../components/dashboard/crm/AccountsWidget';
+import ActivitiesWidget from '../../components/dashboard/crm/ActivitiesWidget';
 
 export default function AdminDashboard() {
   useAuth(); // 👈 Route protection added
@@ -84,6 +89,7 @@ export default function AdminDashboard() {
 
   const tabOptions = [
     { label: "User Management", key: "users" },
+    { label: "CRM", key: "crm" },
     { label: "Vehicle Listings", key: "listings" },
     { label: "Transactions", key: "transactions" },
     { label: "Staff Scheduling", key: "schedules" },
@@ -111,6 +117,14 @@ export default function AdminDashboard() {
         <Card><CardContent>Monthly Sales: {stats.monthlySales}</CardContent></Card>
       </div>
 
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-6">
+        <LeadsWidget />
+        <OpportunitiesWidget />
+        <ContactsWidget />
+        <AccountsWidget />
+        <ActivitiesWidget />
+      </div>
+
       <div className="p-4">
         <WelcomeCard />
 
@@ -129,6 +143,18 @@ export default function AdminDashboard() {
           {selectedTab === "users" && (
             <TabsContent>
               <UserManagementPanel />
+            </TabsContent>
+          )}
+
+          {selectedTab === 'crm' && (
+            <TabsContent>
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                <LeadsWidget />
+                <OpportunitiesWidget />
+                <ContactsWidget />
+                <AccountsWidget />
+                <ActivitiesWidget />
+              </div>
             </TabsContent>
           )}
 

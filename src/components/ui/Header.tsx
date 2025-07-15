@@ -4,7 +4,7 @@
 // 📁 File: src/components/ui/Header.tsx
 import { useEffect, useRef, useState } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
-import { Sun, Moon } from "lucide-react";
+import { Sun, Moon, LogOut } from "lucide-react";
 import { Button } from "./button";
 import { AnimatePresence, motion } from "framer-motion";
 import logo from "../../assets/logo.png";
@@ -69,6 +69,8 @@ export default function Header({
     navigate("/login");
   };
 
+  const isAuthenticated = Boolean(localStorage.getItem("token") || localStorage.getItem("authToken"));
+
   return (
     <header className={`w-full z-50 fixed top-0 left-0 transition-colors duration-1000 animate-gradientShift ${darkMode ? "bg-blue-950 text-white" : "bg-white text-black border-b border-gray-200"}`}>
       <div className="max-w-7xl mx-auto px-4 py-2 flex items-center justify-between text-sm">
@@ -120,16 +122,27 @@ export default function Header({
             )
           )}
 
-          <Link to="/register" className="border border-green-400 px-3 py-1 rounded hover:bg-green-400 hover:text-black">
-            📝 Register
-          </Link>
-          <Link to="/login" className="bg-green-500 px-3 py-1 rounded text-white hover:bg-green-400">
-            🔐 Login
-          </Link>
+          {!isAuthenticated && (
+            <>
+              <Link to="/register" className="border border-green-400 px-3 py-1 rounded hover:bg-green-400 hover:text-black">
+                📝 Register
+              </Link>
+              <Link to="/login" className="bg-green-500 px-3 py-1 rounded text-white hover:bg-green-400">
+                🔐 Login
+              </Link>
+            </>
+          )}
 
-          <button onClick={handleLogout} className="text-sm bg-red-600 px-3 py-2 rounded">
-            Logout
-          </button>
+          {isAuthenticated && (
+            <div className="relative group ml-2">
+              <button onClick={handleLogout} className="flex items-center justify-center p-2 rounded hover:bg-red-100 dark:hover:bg-red-900 transition">
+                <LogOut className="w-6 h-6 text-gray-700 dark:text-gray-200 hover:text-red-600 cursor-pointer" />
+              </button>
+              <div className="absolute -top-8 left-1/2 -translate-x-1/2 bg-black text-white text-xs px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition whitespace-nowrap z-20">
+                Logout
+              </div>
+            </div>
+          )}
 
           <button onClick={() => setDarkMode(!darkMode)} className="ml-2 hover:text-yellow-400" aria-label="Toggle Dark Mode">
             {darkMode ? <Sun size={18} /> : <Moon size={18} />}
@@ -180,16 +193,27 @@ export default function Header({
               )
             )}
 
-            <Link to="/register" className="block" onClick={() => setMenuOpen(false)}>
-              📝 Register
-            </Link>
-            <Link to="/login" className="block" onClick={() => setMenuOpen(false)}>
-              🔐 Login
-            </Link>
+            {!isAuthenticated && (
+              <>
+                <Link to="/register" className="block" onClick={() => setMenuOpen(false)}>
+                  📝 Register
+                </Link>
+                <Link to="/login" className="block" onClick={() => setMenuOpen(false)}>
+                  🔐 Login
+                </Link>
+              </>
+            )}
 
-            <button onClick={handleLogout} className="text-sm bg-red-600 px-3 py-2 rounded">
-              Logout
-            </button>
+            {isAuthenticated && (
+              <div className="relative group ml-2">
+                <button onClick={handleLogout} className="flex items-center justify-center p-2 rounded hover:bg-red-100 dark:hover:bg-red-900 transition">
+                  <LogOut className="w-6 h-6 text-gray-700 dark:text-gray-200 hover:text-red-600 cursor-pointer" />
+                </button>
+                <div className="absolute -top-8 left-1/2 -translate-x-1/2 bg-black text-white text-xs px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition whitespace-nowrap z-20">
+                  Logout
+                </div>
+              </div>
+            )}
 
             <button
               onClick={() => {
