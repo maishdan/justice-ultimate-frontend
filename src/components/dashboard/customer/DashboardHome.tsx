@@ -4,24 +4,22 @@ import { supabase } from '../../../lib/supabaseClient';
 import { Card, CardContent } from '../../ui/card';
 import { Button } from '../../ui/button';
 import { Badge } from '../../ui/badge';
-import { 
-  FiHome, 
-  FiCalendar, 
-  FiDollarSign, 
-  FiBell, 
-  FiSettings,
-  FiTrendingUp,
-  FiTarget,
-  FiAward,
+import {
+  FiCalendar,
+  FiDollarSign,
+  FiBell,
   FiClock,
-  FiMapPin,
-  FiStar
+  FiStar,
+  FiAward,
+  FiTarget,
+  FiUser
 } from 'react-icons/fi';
 import { AiFillCar } from 'react-icons/ai';
+import { useUserProfile } from '../../../context/UserProfileContext';
 
 export default function DashboardHome() {
   const navigate = useNavigate();
-  const [user, setUser] = useState<any>(null);
+  const { profile } = useUserProfile();
   const [stats, setStats] = useState({
     totalBookings: 0,
     activeRentals: 0,
@@ -32,19 +30,10 @@ export default function DashboardHome() {
   });
 
   useEffect(() => {
-    fetchUserData();
     fetchUserStats();
   }, []);
 
-  const fetchUserData = async () => {
-    try {
-      const { data: { user } } = await supabase.auth.getUser();
-      setUser(user);
-    } catch (error) {
-      console.error('Error fetching user data:', error);
-    }
-  };
-
+  // Remove fetchUserData and fetchUserProfile, use context instead
   const fetchUserStats = async () => {
     try {
       // Mock data for now - replace with actual Supabase queries
@@ -60,6 +49,25 @@ export default function DashboardHome() {
       console.error('Error fetching user stats:', error);
     }
   };
+
+  // Dynamic greeting and first name with exact time
+  const now = new Date();
+  const hour = now.getHours();
+  let session = 'evening';
+  if (hour < 12) session = 'morning';
+  else if (hour < 18) session = 'afternoon';
+  const greeting = `Good ${session}`;
+  const firstName = profile?.full_name?.split(' ')[0] || 'there';
+  const timeString = now.toLocaleTimeString(undefined, { hour: 'numeric', minute: '2-digit', hour12: true });
+  const today = now.toLocaleDateString(undefined, { weekday: 'long', month: 'long', day: 'numeric' });
+  const motivationMessages = [
+    "Let’s make today amazing!",
+    "Ready for your next adventure?",
+    "Your world-class automotive experience starts here.",
+    "Drive your dreams!",
+    "Welcome to a new day of possibilities."
+  ];
+  const motivation = motivationMessages[Math.floor(Math.random() * motivationMessages.length)];
 
   const quickActions = [
     {
@@ -119,30 +127,36 @@ export default function DashboardHome() {
       <Card className="bg-gradient-to-r from-blue-600 to-purple-600 text-white">
         <CardContent className="p-6">
           <div className="flex justify-between items-start">
-            <div>
-              <h1 className="text-3xl font-bold mb-2">
-                Welcome back, {user?.user_metadata?.full_name || 'Valued Customer'}! 👋
-              </h1>
-              <p className="text-blue-100 mb-4">
-                Ready for your next adventure? Here's what's happening with your account.
-              </p>
-              <div className="flex gap-4">
-                <Button 
-                  variant="secondary" 
-                  onClick={() => navigate('/vehicle-catalogue')}
-                  className="bg-white text-blue-600 hover:bg-gray-100"
-                >
-                  <AiFillCar className="mr-2" />
-                  Browse Cars
-                </Button>
-                <Button 
-                  variant="outline" 
-                  onClick={() => navigate('/dashboard/notifications')}
-                  className="border-white text-white hover:bg-white hover:text-blue-600"
-                >
-                  <FiBell className="mr-2" />
-                  Notifications
-                </Button>
+            <div className="flex items-center gap-6">
+              {profile?.avatar_url ? (
+                <img src={profile.avatar_url} alt="Profile" className="w-20 h-20 rounded-full object-cover border-4 border-white shadow" />
+              ) : (
+                <div className="w-20 h-20 rounded-full bg-white/20 flex items-center justify-center">
+                  <FiUser className="text-4xl" />
+                </div>
+              )}
+              <div>
+                <h1 className="text-3xl font-bold mb-2">
+                  {greeting}, <span className="text-yellow-400">{firstName}</span>!
+                </h1>
+                <div className="flex gap-4">
+                  <Button 
+                    variant="secondary" 
+                    onClick={() => navigate('/vehicle-catalogue')}
+                    className="bg-white text-blue-600 hover:bg-gray-100"
+                  >
+                    <AiFillCar className="mr-2" />
+                    Browse Cars
+                  </Button>
+                  <Button 
+                    variant="outline" 
+                    onClick={() => navigate('/dashboard/notifications')}
+                    className="border-white text-white hover:bg-white hover:text-blue-600"
+                  >
+                    <FiBell className="mr-2" />
+                    Notifications
+                  </Button>
+                </div>
               </div>
             </div>
             <div className="text-right">

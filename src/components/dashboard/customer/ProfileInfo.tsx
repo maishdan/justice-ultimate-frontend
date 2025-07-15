@@ -19,7 +19,9 @@ import jsPDF from 'jspdf';
 export default function ProfileInfo() {
   const [user, setUser] = useState<any>(null);
   const [profile, setProfile] = useState({
-    full_name: '',
+    first_name: '',
+    last_name: '',
+    full_name: '', // for backward compatibility
     email: '',
     phone: '',
     address: '',
@@ -73,11 +75,13 @@ export default function ProfileInfo() {
           .eq('id', user.id)
           .single();
 
-        if (error && (error.code === 'PGRST116' || error.status === 404)) {
+        if (error && (error.code === 'PGRST116' || error.code === '404')) {
           // Row not found, create it with all required fields
           const emptyProfile = {
             id: user.id,
             email: user.email,
+            first_name: user.user_metadata?.first_name || '',
+            last_name: user.user_metadata?.last_name || '',
             full_name: user.user_metadata?.full_name || '',
             phone: '',
             address: '',
@@ -131,7 +135,7 @@ export default function ProfileInfo() {
       if (user) {
         // Update user metadata
         const { error: updateError } = await supabase.auth.updateUser({
-          data: { full_name: profile.full_name }
+          data: { full_name: `${profile.first_name} ${profile.last_name}`.trim() }
         });
 
         if (updateError) throw updateError;
@@ -140,7 +144,9 @@ export default function ProfileInfo() {
         const upsertProfile = {
           id: user.id,
           email: profile.email || 'N/A',
-          full_name: profile.full_name || 'N/A',
+          first_name: profile.first_name || 'N/A',
+          last_name: profile.last_name || 'N/A',
+          full_name: `${profile.first_name} ${profile.last_name}`.trim() || 'N/A',
           phone: profile.phone || 'N/A',
           address: profile.address || 'N/A',
           city: profile.city || 'N/A',
@@ -169,7 +175,7 @@ export default function ProfileInfo() {
         alert('Profile updated successfully!');
       }
     } catch (error) {
-      if (error && error.code === '42P01') {
+      if (error && typeof error === 'object' && error !== null && 'code' in error && (error as any).code === '42P01') {
         alert('The profiles table does not exist in your Supabase project. Please create it.');
       } else {
         console.error('Error updating profile:', error);
@@ -213,16 +219,20 @@ export default function ProfileInfo() {
     if (!file || !user) return;
     try {
       const fileExt = file.name.split('.').pop();
-      const fileName = `${user.id}-${Date.now()}.${fileExt}`;
-      const filePath = `${fileName}`; // Only filename, not 'avatars/avatars/filename'
-      const { error: uploadError } = await supabase.storage.from('avatars').upload(filePath, file, { upsert: true });
-      if (uploadError) throw uploadError;
-      const { data: { publicUrl } } = supabase.storage.from('avatars').getPublicUrl(filePath);
-      setAvatar(publicUrl);
-      setProfile(prev => ({ ...prev, avatar_url: publicUrl }));
-      // Update profile with new avatar URL
-      await supabase.from('profiles').upsert({ id: user.id, avatar_url: publicUrl });
-      alert('Profile picture uploaded successfully!');
+      const filePath = `${user.id}-${Date.now()}.${fileExt}`;
+      const { data: uploadData, error: uploadError } = await supabase.storage
+        .from('avatars')
+        .upload(filePath, file);
+      if (!uploadError) {
+        const { data: publicUrlData } = supabase.storage.from('avatars').getPublicUrl(filePath);
+        setAvatar(publicUrlData.publicUrl);
+        setProfile(prev => ({ ...prev, avatar_url: publicUrlData.publicUrl }));
+        // Update profile with new avatar URL
+        await supabase.from('profiles').upsert({ id: user.id, avatar_url: publicUrlData.publicUrl });
+        alert('Profile picture uploaded successfully!');
+      } else {
+        throw uploadError;
+      }
     } catch (error) {
       console.error('Error uploading avatar:', error);
       alert('Error uploading avatar. Please try again.');
@@ -313,7 +323,7 @@ export default function ProfileInfo() {
               </label>
             </div>
             <div>
-              <h1 className="text-2xl font-bold">{profile.full_name || 'Your Name'}</h1>
+              <h1 className="text-2xl font-bold">{profile.first_name || 'Your Name'} {profile.last_name}</h1>
               <p className="text-blue-100">{profile.email}</p>
               <div className="flex gap-2 mt-2">
                 <Badge className="bg-white/20 text-white">
@@ -349,12 +359,21 @@ export default function ProfileInfo() {
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div>
-              <label className="block text-sm font-medium mb-2">Full Name</label>
+              <label className="block text-sm font-medium mb-2">First Name</label>
               <Input
-                value={profile.full_name}
-                onChange={(e) => setProfile({...profile, full_name: e.target.value})}
+                value={profile.first_name}
+                onChange={(e) => setProfile({...profile, first_name: e.target.value})}
                 disabled={!isEditing}
-                placeholder="Enter your full name"
+                placeholder="Enter your first name"
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium mb-2">Last Name</label>
+              <Input
+                value={profile.last_name}
+                onChange={(e) => setProfile({...profile, last_name: e.target.value})}
+                disabled={!isEditing}
+                placeholder="Enter your last name"
               />
             </div>
 
@@ -798,11 +817,8 @@ function TwoFAModal({ user, onClose }: ModalProps) {
     if (!user) return;
     setLoading(true);
     try {
-      const { data, error } = await supabase.auth.mfa.generateTotpCode({
-        identityId: user.id,
-        factorType: 'totp',
-        factorId: 'totp', // Assuming 'totp' is the default factor ID
-      });
+      // TODO: Implement TOTP generation with Supabase JS v2 when available
+      const data = null; const error = null;
 
       if (error) throw error;
       if (data) {
@@ -820,11 +836,8 @@ function TwoFAModal({ user, onClose }: ModalProps) {
     if (!user) return;
     setLoading(true);
     try {
-      const { data, error } = await supabase.auth.mfa.verifyTotpCode({
-        identityId: user.id,
-        factorId: 'totp',
-        code: code,
-      });
+      // TODO: Implement TOTP verification with Supabase JS v2 when available
+      const data = null; const error = null;
 
       if (error) throw error;
       if (data) {

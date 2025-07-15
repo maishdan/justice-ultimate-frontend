@@ -1,17 +1,12 @@
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 import { Card, CardContent } from '../../../ui/card';
 import { Badge } from '../../../ui/badge';
 import { Button } from '../../../ui/button';
 import { FiDownload, FiAlertTriangle, FiCheckCircle, FiBell, FiDollarSign, FiCalendar } from 'react-icons/fi';
 import { AiFillCar } from 'react-icons/ai';
+import { useUserProfile } from '../../../../context/UserProfileContext';
 
 // Mock data for demonstration (replace with Supabase integration as needed)
-const mockUser = {
-  full_name: 'Daniel Mwangi',
-  email: 'daniel@example.com',
-  avatar: '/images/avatar-default.png',
-};
-
 const mockVehicles = [
   {
     id: '1',
@@ -48,22 +43,33 @@ const mockSummary = {
 };
 
 export default function Overview() {
-  // In real app, fetch from Supabase and set state
-  const [user] = useState(mockUser);
-  const [vehicles] = useState(mockVehicles);
-  const [pendingActions] = useState(mockPendingActions);
-  const [notifications] = useState(mockNotifications);
-  const [summary] = useState(mockSummary);
+  const { profile } = useUserProfile();
+  const [vehicles] = React.useState(mockVehicles);
+  const [pendingActions] = React.useState(mockPendingActions);
+  const [notifications] = React.useState(mockNotifications);
+  const [summary] = React.useState(mockSummary);
+
+  // Compute greeting and first name
+  const now = new Date();
+  const hour = now.getHours();
+  let session = 'Evening';
+  if (hour < 12) session = 'Morning';
+  else if (hour < 18) session = 'Afternoon';
+  const firstName = profile?.full_name?.split(' ')[0] || 'there';
+  const avatarUrl = profile?.avatar_url || '/images/avatar-default.png';
 
   return (
     <div className="space-y-8 w-full">
       {/* Welcome Header */}
       <div className="flex flex-col md:flex-row items-center md:items-end gap-6 bg-gradient-to-r from-blue-600 to-purple-500 rounded-2xl p-8 shadow-xl relative overflow-hidden">
         <div className="relative">
-          <img src={user.avatar} alt="Profile" className="w-24 h-24 rounded-full object-cover border-4 border-yellow-400 shadow-lg" />
+          <img src={avatarUrl} alt="Profile" className="w-24 h-24 rounded-full object-cover border-4 border-yellow-400 shadow-lg" />
         </div>
         <div>
-          <h1 className="text-3xl md:text-4xl font-extrabold drop-shadow-lg">Welcome back, <span className="text-yellow-400">{user.full_name}</span></h1>
+          <h1 className="text-3xl md:text-4xl font-extrabold drop-shadow-lg">
+            <br />
+            Welcome back, Good {session} <span className="text-yellow-400">{firstName}</span>!
+          </h1>
           <p className="text-blue-100 mt-2">Your world-class automotive experience starts here.</p>
         </div>
       </div>
@@ -126,29 +132,14 @@ export default function Overview() {
               <Card key={action.id} className="flex items-center gap-4 bg-red-100/10 p-4 border-l-4 border-yellow-400">
                 <FiAlertTriangle className="text-red-400 text-2xl" />
                 <div className="text-white font-semibold">{action.message}</div>
-                <Badge className={`ml-auto ${action.priority === 'high' ? 'bg-red-400' : 'bg-yellow-400'} text-blue-900 font-bold`}>{action.type.toUpperCase()}</Badge>
+                <Badge className={`ml-auto ${action.priority === 'high' ? 'bg-red-400' : 'bg-yellow-400'} text-blue-900 font-bold`}>
+                  {action.type.toUpperCase()}
+                </Badge>
               </Card>
             ))}
           </div>
         </div>
       )}
-
-      {/* Recent Notifications */}
-      <div>
-        <h2 className="text-xl font-bold mb-2 text-yellow-400">Recent Notifications</h2>
-        <div className="space-y-2">
-          {notifications.slice(0, 3).map((notif) => (
-            <Card key={notif.id} className="flex items-center gap-4 bg-white/10 p-4">
-              <FiBell className="text-yellow-400 text-2xl" />
-              <div>
-                <div className="font-semibold text-white">{notif.title}</div>
-                <div className="text-xs text-blue-100">{notif.message}</div>
-              </div>
-              <div className="ml-auto text-xs text-blue-200">{notif.timestamp}</div>
-            </Card>
-          ))}
-        </div>
-      </div>
     </div>
   );
-} 
+}

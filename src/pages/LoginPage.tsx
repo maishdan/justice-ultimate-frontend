@@ -108,6 +108,7 @@ const Login = () => {
 
   const loginWithProvider = async (provider: 'google' | 'github') => {
     setLoading(true);
+    console.log('OAuth button clicked:', provider);
     const { error } = await supabase.auth.signInWithOAuth({
       provider,
       options: {

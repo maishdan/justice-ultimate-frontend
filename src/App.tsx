@@ -32,6 +32,7 @@ import ResetPassword from "./pages/ResetPassword";
 import ProfilePage from "./pages/ProfilePage";
 import CarDetailPage from "./pages/CarDetailPage";
 import SetNewPassword from './pages/SetNewPassword';
+import { UserProfileProvider } from './context/UserProfileContext';
 
 // ✅ Import the dynamic CarDetails page
 
@@ -78,86 +79,88 @@ function App() {
   }, [darkMode]);
 
   return (
-    <div className={`min-h-screen transition-colors duration-300 ${darkMode ? "bg-gray-900 text-white" : "bg-white text-black"}`}>
-      <Header darkMode={darkMode} setDarkMode={setDarkMode} />
+    <UserProfileProvider>
+      <div className={`min-h-screen transition-colors duration-300 ${darkMode ? "bg-gray-900 text-white" : "bg-white text-black"}`}>
+        <Header darkMode={darkMode} setDarkMode={setDarkMode} />
 
-      <main>
-        
-        <Routes>
-          <Route path="/" element={<LandingPage />} />
-          <Route path="/services" element={<Services />} />
-          <Route path="/about" element={<About />} />
-          <Route path="/news" element={<News />} />
-          <Route path="/success-stories" element={<SuccessStories />} />
-          <Route path="/contact" element={<Contact />} />
-          <Route path="/login" element={<LoginPage />} />
-          <Route path="/apply-financing" element={<ApplyForFinancing />} />
-          <Route path="/register" element={<RegisterPage />} />
-          <Route path="/terms" element={<Terms />} />
-          <Route path="/privacy" element={<PrivacyPolicy />} />
-          <Route path="/cookies" element={<Cookies />} />
-          <Route path="/book-test-drive" element={<BookTestDrive />} />
-          <Route path="/vehicle-catalogue" element={<VehicleCatalogue />} />
-          <Route path="/reset-password" element={<ResetPassword />} />
-          <Route path="/profile" element={<ProfilePage />} />
-          <Route path="/car/:id" element={<CarDetailPage />} />
-          <Route path="/set-new-password" element={<SetNewPassword />} />
-
-          {/* ✅ Dynamic Car Details Route */}
-         <Route path="/all-cars-showcase" element={<AllCarsShowcase />} />
+        <main>
           
+          <Routes>
+            <Route path="/" element={<LandingPage />} />
+            <Route path="/services" element={<Services />} />
+            <Route path="/about" element={<About />} />
+            <Route path="/news" element={<News />} />
+            <Route path="/success-stories" element={<SuccessStories />} />
+            <Route path="/contact" element={<Contact />} />
+            <Route path="/login" element={<LoginPage />} />
+            <Route path="/apply-financing" element={<ApplyForFinancing />} />
+            <Route path="/register" element={<RegisterPage />} />
+            <Route path="/terms" element={<Terms />} />
+            <Route path="/privacy" element={<PrivacyPolicy />} />
+            <Route path="/cookies" element={<Cookies />} />
+            <Route path="/book-test-drive" element={<BookTestDrive />} />
+            <Route path="/vehicle-catalogue" element={<VehicleCatalogue />} />
+            <Route path="/reset-password" element={<ResetPassword />} />
+            <Route path="/profile" element={<ProfilePage />} />
+            <Route path="/car/:id" element={<CarDetailPage />} />
+            <Route path="/set-new-password" element={<SetNewPassword />} />
+
+            {/* ✅ Dynamic Car Details Route */}
+           <Route path="/all-cars-showcase" element={<AllCarsShowcase />} />
+            
 
 
-          {/* Dashboards */}
-          <Route path="/dashboard/admin" element={
-            <ProtectedRoute>
-              <PrivateRoute>
-                <AdminDashboard />
-              </PrivateRoute>
-            </ProtectedRoute>
-          } />
-          <Route path="/dashboard/staff" element={
-            <ProtectedRoute>
-              <PrivateRoute>
-                <StaffDashboard />
-              </PrivateRoute>
-            </ProtectedRoute>
-          } />
-          <Route path="/dashboard/mechanic" element={
-            <ProtectedRoute>
-              <PrivateRoute>
-                <MechanicDashboard />
-              </PrivateRoute>
-            </ProtectedRoute>
-          } />
-          <Route path="/dashboard/customer" element={
-            <ProtectedRoute>
-              <PrivateRoute>
-                <CustomerDashboard />
-              </PrivateRoute>
-            </ProtectedRoute>
-          } />
-          <Route path="/dashboard/guest" element={
-            <ProtectedRoute>
-              <PrivateRoute>
-                <GuestDashboard />
-              </PrivateRoute>
-            </ProtectedRoute>
-          } />
+            {/* Dashboards */}
+            <Route path="/dashboard/admin" element={
+              <ProtectedRoute>
+                <PrivateRoute>
+                  <AdminDashboard />
+                </PrivateRoute>
+              </ProtectedRoute>
+            } />
+            <Route path="/dashboard/staff" element={
+              <ProtectedRoute>
+                <PrivateRoute>
+                  <StaffDashboard />
+                </PrivateRoute>
+              </ProtectedRoute>
+            } />
+            <Route path="/dashboard/mechanic" element={
+              <ProtectedRoute>
+                <PrivateRoute>
+                  <MechanicDashboard />
+                </PrivateRoute>
+              </ProtectedRoute>
+            } />
+            <Route path="/dashboard/customer" element={
+              <ProtectedRoute>
+                <PrivateRoute>
+                  <CustomerDashboard />
+                </PrivateRoute>
+              </ProtectedRoute>
+            } />
+            <Route path="/dashboard/guest" element={
+              <ProtectedRoute>
+                <PrivateRoute>
+                  <GuestDashboard />
+                </PrivateRoute>
+              </ProtectedRoute>
+            } />
 
-          {/* ✅ Error Routes */}
-          <Route path="/401" element={<Unauthorized401 />} />
-          <Route path="/403" element={<Forbidden403 />} />
-          <Route path="/500" element={<ServerError500 />} />
-          <Route path="/error" element={<GenericErrorPage />} />
+            {/* ✅ Error Routes */}
+            <Route path="/401" element={<Unauthorized401 />} />
+            <Route path="/403" element={<Forbidden403 />} />
+            <Route path="/500" element={<ServerError500 />} />
+            <Route path="/error" element={<GenericErrorPage />} />
 
-          {/* ✅ Catch-all fallback */}
-          <Route path="*" element={<NotFound404 />} />
-        </Routes>
-      </main>
+            {/* ✅ Catch-all fallback */}
+            <Route path="*" element={<NotFound404 />} />
+          </Routes>
+        </main>
 
-      <ChatBotWidget />
-    </div>
+        <ChatBotWidget />
+      </div>
+    </UserProfileProvider>
   );
 }
 
