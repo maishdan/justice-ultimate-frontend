@@ -93,13 +93,7 @@ function App() {
             
 
             {/* Dashboards */}
-            <Route path="/dashboard/admin" element={
-              <ProtectedRoute>
-                <PrivateRoute>
-                  <AdminDashboard />
-                </PrivateRoute>
-              </ProtectedRoute>
-            } />
+            <Route path="/dashboard/admin" element={<AdminDashboard />} />
             <Route path="/dashboard/staff" element={
               <ProtectedRoute>
                 <PrivateRoute>

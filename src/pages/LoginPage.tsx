@@ -29,8 +29,14 @@ const Login = () => {
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const playCling = () => {
     if (audioRef.current) {
-      audioRef.current.currentTime = 0;
-      audioRef.current.play();
+      try {
+        audioRef.current.currentTime = 0;
+        audioRef.current.play().catch((error) => {
+          console.warn('Audio playback failed:', error);
+        });
+      } catch (error) {
+        console.warn('Audio playback error:', error);
+      }
     }
   };
   const navigate = useNavigate();
@@ -88,6 +94,10 @@ const Login = () => {
         else if (role === 'customer') dashboardPath = '/dashboard/customer';
         else dashboardPath = '/dashboard/customer'; // fallback
         
+        // Store user role in localStorage for route protection
+        localStorage.setItem("userRole", role);
+        sessionStorage.setItem("userRole", role);
+        
         console.log('User role:', role);
         console.log('Redirecting to:', dashboardPath);
         
@@ -135,7 +145,7 @@ const Login = () => {
 
   return (
     <>
-      <audio ref={audioRef} src="/sounds/iphone-notification.mp3" preload="auto" />
+      <audio ref={audioRef} src="/car-start.mp3" preload="none" />
       <div className="flex justify-center items-center h-screen bg-gradient-to-br from-blue-50 via-white to-green-50 dark:from-gray-900 dark:to-gray-800 transition-colors duration-500">
         <form
           onSubmit={handleLogin}

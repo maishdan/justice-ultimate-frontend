@@ -153,7 +153,7 @@ export const ReceiptGenerator = ({ name, carName, amount, stockId }: ReceiptProp
 
   return (
     <div>
-      <Button onClick={generatePDF} className="mt-4 w-full">
+    <Button onClick={generatePDF} className="mt-4 w-full">
         Download Official Receipt
       </Button>
       <Button onClick={() => {
@@ -164,7 +164,7 @@ export const ReceiptGenerator = ({ name, carName, amount, stockId }: ReceiptProp
         sendReceiptEmail('customer@example.com');
       }} className="mt-2 w-full bg-green-700 hover:bg-green-800 text-white">
         Send Receipt by Email
-      </Button>
+    </Button>
     </div>
   );
 };

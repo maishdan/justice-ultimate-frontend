@@ -83,12 +83,24 @@ export default function DashboardOverview() {
       {/* Top Section: Welcome, Offers, Notifications */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
         <div className="md:col-span-2 flex flex-col gap-8">
-          <WelcomeCard user={undefined} />
-          <StatsOverview stats={[]} />
+          <WelcomeCard user={{ name: 'Daniwest', role: 'Administrator' }} />
+          <StatsOverview stats={[
+            { label: 'Total Sales', value: 120, icon: '🚗' },
+            { label: 'Total Rentals', value: 45, icon: '🔑' },
+            { label: 'Total Users', value: 320, icon: '👥' },
+            { label: 'Revenue', value: 15000000, icon: '💰' }
+          ]} />
         </div>
         <div className="md:col-span-1 flex flex-col gap-8">
-          <OffersCarousel offers={[]} />
-          <NotificationsFeed notifications={[]} />
+          <OffersCarousel offers={[
+            { title: 'Special Financing', description: '0% APR for 60 months on selected models', image: '/images/BMW X5/1.jpg' },
+            { title: 'Trade-In Bonus', description: 'Get extra $5,000 on your trade-in', image: '/images/mercedes-benz-s-class.png' }
+          ]} />
+          <NotificationsFeed notifications={[
+            { message: 'New user registration: Alice Johnson', time: '2 min ago', type: 'user' },
+            { message: 'Car sold: BMW X5 to Jane Doe', time: '10 min ago', type: 'sale' },
+            { message: 'System maintenance scheduled for tonight', time: '1 hour ago', type: 'system' }
+          ]} />
         </div>
       </div>
 
@@ -101,8 +113,8 @@ export default function DashboardOverview() {
               onClick={action.onClick}
               aria-label={action.label}
             >
-              {action.icon} {action.label}
-            </Button>
+            {action.icon} {action.label}
+          </Button>
             <span className="absolute left-1/2 -translate-x-1/2 mt-2 opacity-0 group-hover:opacity-100 bg-gray-900 text-white text-xs rounded px-2 py-1 pointer-events-none z-10 transition-all whitespace-nowrap">
               {action.tooltip}
             </span>

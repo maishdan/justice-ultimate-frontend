@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { FiUsers, FiUser, FiShield, FiClipboard, FiBarChart2, FiFileText, FiClock, FiCalendar, FiPlus, FiDownload, FiUserPlus, FiUpload, FiDownloadCloud, FiCheckCircle, FiAward, FiActivity, FiEdit2, FiTrash2, FiEye, FiPlusCircle, FiUserCheck } from 'react-icons/fi';
 import StatsOverview from '../widgets/StatsOverview';
 import Charts from '../widgets/Charts';
-import { supabase } from '../../../utils/supabaseClient';
+import { supabase } from '../../../lib/supabaseClient';
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, PieChart, Pie, Cell, LineChart, Line, Legend } from 'recharts';
 
 const TABS = [
