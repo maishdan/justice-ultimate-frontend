@@ -35,6 +35,7 @@ import SetNewPassword from './pages/SetNewPassword';
 import { UserProfileProvider } from './context/UserProfileContext';
 import { ThemeProvider } from './context/ThemeContext';
 import { LanguageProvider } from './context/LanguageContext';
+import { useTranslation } from 'react-i18next';
 
 // ✅ Import the dynamic CarDetails page
 
@@ -47,6 +48,7 @@ import GenericErrorPage from "./pages/errors/GenericErrorPage";
 
 function App() {
   const location = useLocation();
+  const { i18n } = useTranslation();
 
   // ✅ Car Start Sound: Play only on initial homepage load with debug log
   useEffect(() => {
@@ -61,6 +63,15 @@ function App() {
       }
     }
   }, [location.pathname]);
+
+  // RTL/LTR switching
+  useEffect(() => {
+    if (i18n.language === 'ar') {
+      document.documentElement.dir = 'rtl';
+    } else {
+      document.documentElement.dir = 'ltr';
+    }
+  }, [i18n.language]);
 
   return (
     <UserProfileProvider>

@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import useAuth from '../../hooks/useAuth';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '../../lib/supabaseClient';
@@ -26,6 +26,7 @@ import OpportunitiesWidget from '../../components/dashboard/crm/OpportunitiesWid
 import ContactsWidget from '../../components/dashboard/crm/ContactsWidget';
 import AccountsWidget from '../../components/dashboard/crm/AccountsWidget';
 import ActivitiesWidget from '../../components/dashboard/crm/ActivitiesWidget';
+import LoadingScreen from '../../components/ui/LoadingScreen';
 
 export default function StaffDashboard() {
   useAuth();
@@ -44,6 +45,26 @@ export default function StaffDashboard() {
   const [appointments, setAppointments] = useState([]);
   const [vehicles, setVehicles] = useState([]);
   const [selectedTab, setSelectedTab] = useState('overview');
+  const [loading, setLoading] = useState(true);
+  const [progress, setProgress] = useState(0);
+
+  useEffect(() => {
+    let interval = setInterval(() => {
+      setProgress((prev) => {
+        if (prev >= 100) {
+          clearInterval(interval);
+          setLoading(false);
+          return 100;
+        }
+        return prev + 10;
+      });
+    }, 150);
+    return () => clearInterval(interval);
+  }, []);
+
+  if (loading) {
+    return <LoadingScreen text="Loading Staff Dashboard..." progress={progress} />;
+  }
 
   useEffect(() => {
     fetchDashboardData();

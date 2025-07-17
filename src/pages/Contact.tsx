@@ -8,6 +8,8 @@ import {
   FaYoutube,
 } from 'react-icons/fa';
 import { AnimatePresence, motion } from 'framer-motion';
+import { supabase } from '../lib/supabaseClient';
+import { useEffect } from 'react';
 
 export default function Contact() {
   const [form, setForm] = useState({
@@ -20,122 +22,172 @@ export default function Contact() {
   });
   const [submitted, setSubmitted] = useState(false);
   const [open, setOpen] = useState(true);
+  // Admin messages state (for admin panel)
+  const [messages, setMessages] = useState<any[]>([]);
+  const [loadingMessages, setLoadingMessages] = useState(false);
+  const [adminView, setAdminView] = useState(false);
+  // Fetch messages for admin
+  useEffect(() => {
+    if (adminView) {
+      setLoadingMessages(true);
+      supabase.from('contact_messages').select('*').order('created_at', { ascending: false }).then(({ data }) => {
+        setMessages(data || []);
+        setLoadingMessages(false);
+      });
+      // Realtime notification
+      const sub = supabase
+        .channel('contact_messages')
+        .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'contact_messages' }, payload => {
+          setMessages(prev => [payload.new, ...prev]);
+        })
+        .subscribe();
+      return () => { sub.unsubscribe(); };
+    }
+  }, [adminView]);
 
   const handleChange = (
     e: React.ChangeEvent<
       HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement
     >
   ) => {
-    const { name, value } = e.target;
+    const name = e.target.name;
+    const value = e.target.value;
     setForm({ ...form, [name]: value });
   };
 
-  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+  // Handle file upload and Supabase insert
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    console.log(form);
+    let fileUrl = '';
+    const fileInput = (e.currentTarget.elements.namedItem('file') as HTMLInputElement);
+    const file = fileInput?.files?.[0];
+    if (file) {
+      const { data, error } = await supabase.storage.from('contact_uploads').upload(`contact/${Date.now()}_${file.name}`, file);
+      if (data?.path) fileUrl = data.path;
+    }
+    // Insert message into Supabase
+    const { data: inserted, error: insertError } = await supabase.from('contact_messages').insert([
+      { ...form, file_url: fileUrl }
+    ]);
+    // Send email via Supabase function or backend API
+    await fetch('/api/send-contact-email', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        ...form,
+        fileUrl,
+        recipients: [
+          'justiceultimateautomobiles@gmail.com',
+          'daniwesttechnologies@gmail.com',
+        ],
+      }),
+    });
     setSubmitted(true);
+    setForm({ name: '', email: '', subject: '', message: '', phone: '', type: 'General Inquiry' });
+    fileInput.value = '';
   };
 
+  // Genie effect and world-class UI
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-950 to-black text-white px-6 py-10">
+    <div className="min-h-screen bg-gradient-to-br from-blue-950 to-black text-white px-6 py-10" style={{ fontFamily: 'Inter, Segoe UI, Arial, sans-serif', fontWeight: 400, fontSize: '1rem' }}>
       <div className="max-w-6xl mx-auto space-y-12">
-        <h2 className="text-4xl font-bold border-b border-white pb-2">
+        <h2 className="text-3xl md:text-4xl font-semibold border-b-4 border-yellow-400 pb-2 drop-shadow-glow bg-gradient-to-r from-yellow-400/10 to-green-900/10 rounded-xl px-4 py-2 inline-block animate-pulse" style={{ fontWeight: 600 }}>
           Contact Us
         </h2>
-
+        {/* Admin messages panel logic should be moved to the admin dashboard for security. */}
         <AnimatePresence>
           {open && (
             <motion.div
-              initial={{
-                opacity: 0,
-                scale: 0.1,
-                rotate: 720,
-                y: 300,
-                clipPath: 'circle(0% at 90% 95%)',
-              }}
-              animate={{
-                opacity: 1,
-                scale: 1,
-                rotate: 0,
-                y: 0,
-                clipPath: 'circle(150% at 50% 50%)',
-              }}
-              exit={{
-                opacity: 0,
-                scale: 0.1,
-                rotate: -720,
-                y: 300,
-                clipPath: 'circle(0% at 90% 95%)',
-              }}
+              initial={{ opacity: 0, scale: 0.1, rotate: 720, y: 300, clipPath: 'circle(0% at 90% 95%)' }}
+              animate={{ opacity: 1, scale: 1, rotate: 0, y: 0, clipPath: 'circle(150% at 50% 50%)' }}
+              exit={{ opacity: 0, scale: 0.1, rotate: -720, y: 300, clipPath: 'circle(0% at 90% 95%)' }}
               transition={{ duration: 0.8, ease: 'easeInOut' }}
               className="grid md:grid-cols-2 gap-12"
             >
               {/* Contact Form */}
               <form
                 onSubmit={handleSubmit}
-                className="space-y-4 bg-white/10 backdrop-blur-md rounded-3xl shadow-2xl p-6"
+                className="space-y-4 bg-white/10 backdrop-blur-2xl rounded-3xl shadow-2xl p-8 border-2 border-yellow-400"
+                style={{ fontWeight: 400 }}
+                autoComplete="off"
               >
-                <input
-                  name="name"
-                  placeholder="Full Name"
-                  required
-                  className="w-full p-3 rounded-2xl bg-gradient-to-br from-gray-200 to-gray-100 text-black shadow-inner"
-                  onChange={handleChange}
-                />
-                <input
-                  name="email"
-                  placeholder="Email Address"
-                  required
-                  type="email"
-                  className="w-full p-3 rounded-2xl bg-gradient-to-br from-gray-200 to-gray-100 text-black shadow-inner"
-                  onChange={handleChange}
-                />
-                <input
-                  name="phone"
-                  placeholder="Phone Number"
-                  type="tel"
-                  className="w-full p-3 rounded-2xl bg-gradient-to-br from-gray-200 to-gray-100 text-black shadow-inner"
-                  onChange={handleChange}
-                />
-                <select
-                  name="type"
-                  className="w-full p-3 rounded-2xl bg-gradient-to-br from-gray-200 to-gray-100 text-black shadow-inner"
-                  onChange={handleChange}
-                >
-                  <option>General Inquiry</option>
-                  <option>Sales</option>
-                  <option>Support</option>
-                  <option>Partnership</option>
-                </select>
+                <div className="flex gap-4">
+                  <input
+                    name="name"
+                    placeholder="Full Name"
+                    required
+                    className="w-1/2 p-3 rounded-2xl bg-gradient-to-br from-gray-200 to-gray-100 text-black shadow-inner text-base"
+                    onChange={handleChange}
+                    value={form.name}
+                  />
+                  <input
+                    name="email"
+                    placeholder="Email Address"
+                    required
+                    type="email"
+                    className="w-1/2 p-3 rounded-2xl bg-gradient-to-br from-gray-200 to-gray-100 text-black shadow-inner text-base"
+                    onChange={handleChange}
+                    value={form.email}
+                  />
+                </div>
+                <div className="flex gap-4">
+                  <input
+                    name="phone"
+                    placeholder="Phone Number"
+                    type="tel"
+                    className="w-1/2 p-3 rounded-2xl bg-gradient-to-br from-gray-200 to-gray-100 text-black shadow-inner text-base"
+                    onChange={handleChange}
+                    value={form.phone}
+                  />
+                  <select
+                    name="type"
+                    className="w-1/2 p-3 rounded-2xl bg-gradient-to-br from-gray-200 to-gray-100 text-black shadow-inner text-base"
+                    onChange={handleChange}
+                    value={form.type}
+                  >
+                    <option>General Inquiry</option>
+                    <option>Sales</option>
+                    <option>Support</option>
+                    <option>Partnership</option>
+                  </select>
+                </div>
                 <input
                   name="subject"
                   placeholder="Subject"
                   required
-                  className="w-full p-3 rounded-2xl bg-gradient-to-br from-gray-200 to-gray-100 text-black shadow-inner"
+                  className="w-full p-3 rounded-2xl bg-gradient-to-br from-gray-200 to-gray-100 text-black shadow-inner text-base"
                   onChange={handleChange}
+                  value={form.subject}
                 />
                 <textarea
                   name="message"
                   placeholder="Message"
                   required
                   rows={4}
-                  className="w-full p-3 rounded-2xl bg-gradient-to-br from-gray-200 to-gray-100 text-black shadow-inner"
+                  className="w-full p-3 rounded-2xl bg-gradient-to-br from-gray-200 to-gray-100 text-black shadow-inner text-base"
                   onChange={handleChange}
+                  value={form.message}
                 ></textarea>
                 <input
+                  name="file"
                   type="file"
-                  className="w-full p-3 rounded-2xl bg-white text-black shadow-inner"
+                  className="w-full p-3 rounded-2xl bg-white text-black shadow-inner text-base"
                 />
-                <button
+                <motion.button
                   type="submit"
-                  className="bg-yellow-400 hover:bg-yellow-500 text-black font-semibold py-2 px-4 rounded-full shadow-xl hover:drop-shadow-[0_0_10px_#facc15]"
+                  className="bg-yellow-400 hover:bg-yellow-500 text-black font-semibold py-3 px-6 rounded-full shadow-xl hover:drop-shadow-[0_0_10px_#facc15] text-base mt-2"
+                  whileTap={{ scale: 0.95 }}
                 >
                   Send Message
-                </button>
+                </motion.button>
                 {submitted && (
-                  <p className="text-green-300 mt-2">
-                    ✅ Message sent successfully!
-                  </p>
+                  <motion.p
+                    className="text-green-300 mt-2 text-base font-medium animate-pulse"
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                  >
+                    ✅ Message sent successfully! Our team will get back to you soon.
+                  </motion.p>
                 )}
               </form>
 

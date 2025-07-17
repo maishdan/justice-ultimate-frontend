@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { supabase } from '../../../../lib/supabaseClient';
 import { FiPlus, FiDownload, FiMessageCircle, FiBarChart2, FiEdit, FiTrash2, FiEye, FiSearch, FiFilter, FiClock, FiUser, FiAlertTriangle, FiCheckCircle, FiStar, FiCalendar, FiTool, FiShield, FiAward, FiHeadphones, FiMail, FiPhone, FiMapPin } from 'react-icons/fi';
 import { FaHeadset, FaUser, FaWhatsapp, FaEnvelope, FaTools, FaCar, FaClipboardCheck, FaHandshake, FaChartLine } from 'react-icons/fa';
+import { motion, AnimatePresence } from 'framer-motion';
 
 type CustomerService = {
   id: string;
@@ -110,6 +111,15 @@ const CustomerServiceDepartment: React.FC = () => {
   const [satisfactionModalOpen, setSatisfactionModalOpen] = useState(false);
   const [selectedService, setSelectedService] = useState<CustomerService | null>(null);
 
+  // Automation: overdue/escalated detection
+  const now = new Date();
+  const isOverdue = (sla: string | undefined, status: string) => {
+    if (!sla || status === 'Resolved') return false;
+    const deadline = new Date(sla);
+    return deadline < now;
+  };
+  const isEscalated = (level: number | undefined) => level && level > 1;
+
   useEffect(() => {
     fetchCustomerServices();
     fetchAppointments();
@@ -121,20 +131,20 @@ const CustomerServiceDepartment: React.FC = () => {
     setError(null);
     const { data, error } = await supabase.from('customer_services').select('*').order('created_at', { ascending: false });
     if (error) setError(error.message);
-    else setCustomerServices(data || []);
+    else setCustomerServices((data as CustomerService[]) || []);
     setLoading(false);
   };
 
   const fetchAppointments = async () => {
     const { data, error } = await supabase.from('service_appointments').select('*').order('appointment_date', { ascending: true });
     if (error) console.error('Error fetching appointments:', error);
-    else setAppointments(data || []);
+    else setAppointments((data as ServiceAppointment[]) || []);
   };
 
   const fetchWarrantyClaims = async () => {
     const { data, error } = await supabase.from('warranty_claims').select('*').order('claim_date', { ascending: false });
     if (error) console.error('Error fetching warranty claims:', error);
-    else setWarrantyClaims(data || []);
+    else setWarrantyClaims((data as WarrantyClaim[]) || []);
   };
 
   const handleOpenModal = (service?: CustomerService) => {
@@ -323,7 +333,20 @@ const CustomerServiceDepartment: React.FC = () => {
   return (
     <div className="space-y-8">
       {/* Feedback */}
-      {feedback && <div className="fixed top-4 right-4 z-50 bg-green-100 text-green-800 px-4 py-2 rounded shadow-lg">{feedback}</div>}
+      <AnimatePresence>
+        {feedback && (
+          <motion.div
+            initial={{ opacity: 0, y: -20 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -20 }}
+            className="fixed top-4 right-4 z-50 bg-green-100 text-green-800 px-4 py-2 rounded shadow-lg"
+            role="status"
+            aria-live="polite"
+          >
+            {feedback}
+          </motion.div>
+        )}
+      </AnimatePresence>
       
       {/* Header */}
       <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
@@ -334,17 +357,17 @@ const CustomerServiceDepartment: React.FC = () => {
           <p className="text-gray-500">Comprehensive customer service management, after-sales support, and satisfaction tracking.</p>
         </div>
         <div className="flex gap-2">
-          <button className="btn-primary flex items-center gap-2" onClick={() => handleOpenModal()}>
+          <button className="btn btn-primary flex items-center gap-2" onClick={() => handleOpenModal()} aria-label="New Service Request">
             <FiPlus /> New Service Request
           </button>
-          <button className="btn-secondary flex items-center gap-2" onClick={() => handleExport('all')} disabled={exporting}>
+          <button className="btn btn-secondary flex items-center gap-2" onClick={() => handleExport('all')} disabled={exporting} aria-label="Export">
             <FiDownload /> Export
           </button>
         </div>
       </div>
 
       {/* Tabs */}
-      <div className="bg-white dark:bg-gray-900 rounded-xl shadow p-4">
+      <div className="glassmorphic bg-white/80 dark:bg-gray-900/80 rounded-xl shadow-2xl p-4">
         <div className="flex flex-wrap gap-2 mb-6">
           <button
             onClick={() => setActiveTab('services')}
@@ -393,8 +416,9 @@ const CustomerServiceDepartment: React.FC = () => {
         </div>
 
         {/* Service Requests Tab */}
+        <AnimatePresence>
         {activeTab === 'services' && (
-          <>
+          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
             {/* Search & Filter */}
             <div className="flex flex-col md:flex-row gap-4 mb-6">
               <div className="flex-1 relative">
@@ -428,7 +452,7 @@ const CustomerServiceDepartment: React.FC = () => {
             {/* Services Table */}
             <div className="overflow-x-auto">
               <table className="min-w-full table-auto">
-                <thead className="bg-gray-50 dark:bg-gray-800">
+                <thead className="bg-gradient-to-r from-purple-100 to-blue-100 dark:from-purple-900 dark:to-blue-900">
                   <tr>
                     <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Customer</th>
                     <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Service Type</th>
@@ -440,8 +464,15 @@ const CustomerServiceDepartment: React.FC = () => {
                   </tr>
                 </thead>
                 <tbody className="bg-white dark:bg-gray-900 divide-y divide-gray-200 dark:divide-gray-700">
+                  <AnimatePresence>
                   {filteredServices.map((service) => (
-                    <tr key={service.id} className="hover:bg-gray-50 dark:hover:bg-gray-800">
+                    <motion.tr
+                      key={service.id}
+                      initial={{ opacity: 0, y: 10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={{ opacity: 0, y: -10 }}
+                      className="hover:bg-blue-50 dark:hover:bg-blue-900 transition-all"
+                    >
                       <td className="px-4 py-4 whitespace-nowrap">
                         <div>
                           <div className="text-sm font-medium text-gray-900 dark:text-white">{service.customer_name}</div>
@@ -462,11 +493,15 @@ const CustomerServiceDepartment: React.FC = () => {
                         }`}>
                           {service.status}
                         </span>
+                        {isOverdue(service.sla_deadline, service.status) && (
+                          <span className="ml-2 px-2 py-1 bg-red-200 text-red-800 text-xs rounded-full animate-pulse" title="Overdue">Overdue</span>
+                        )}
+                        {isEscalated(service.escalation_level) && (
+                          <span className="ml-2 px-2 py-1 bg-purple-200 text-purple-800 text-xs rounded-full animate-bounce" title="Auto-Escalated">Escalated</span>
+                        )}
                       </td>
                       <td className="px-4 py-4 whitespace-nowrap">
-                        <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${getPriorityBg(service.priority)} ${getPriorityColor(service.priority)}`}>
-                          {service.priority}
-                        </span>
+                        <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${getPriorityBg(service.priority)} ${getPriorityColor(service.priority)}`}>{service.priority}</span>
                       </td>
                       <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-white">
                         {service.assigned_to || 'Unassigned'}
@@ -475,61 +510,80 @@ const CustomerServiceDepartment: React.FC = () => {
                         {service.satisfaction_rating ? (
                           <div className="flex items-center gap-1">
                             {getSatisfactionIcon(service.satisfaction_rating)}
-                            <span className={`text-sm ${getSatisfactionColor(service.satisfaction_rating)}`}>
-                              {service.satisfaction_rating}/5
-                            </span>
+                            <span className={`text-sm ${getSatisfactionColor(service.satisfaction_rating)}`}>{service.satisfaction_rating}/5</span>
                           </div>
                         ) : (
                           <button
                             onClick={() => openSatisfactionModal(service)}
-                            className="text-sm text-gray-500 hover:text-purple-600"
+                            className="text-sm text-gray-500 hover:text-purple-600 focus:ring-2 focus:ring-purple-400 rounded"
+                            aria-label="Rate Satisfaction"
                           >
                             Rate
                           </button>
+                        )}
+                        {/* Satisfaction follow-up badge */}
+                        {!service.satisfaction_rating && service.status === 'Resolved' && (
+                          <span className="ml-2 px-2 py-1 bg-yellow-200 text-yellow-800 text-xs rounded-full animate-pulse" title="Follow-up Needed">Follow-up</span>
                         )}
                       </td>
                       <td className="px-4 py-4 whitespace-nowrap text-sm font-medium">
                         <div className="flex gap-2">
                           <button
                             onClick={() => handleOpenModal(service)}
-                            className="text-blue-600 hover:text-blue-900"
+                            className="btn btn-icon"
+                            aria-label="Edit Service"
+                            tabIndex={0}
                           >
                             <FiEdit size={16} />
                           </button>
                           <button
                             onClick={() => handleDelete(service.id)}
-                            className="text-red-600 hover:text-red-900"
+                            className="btn btn-icon"
+                            aria-label="Delete Service"
+                            tabIndex={0}
                           >
                             <FiTrash2 size={16} />
                           </button>
                           <button
                             onClick={() => openSatisfactionModal(service)}
-                            className="text-purple-600 hover:text-purple-900"
+                            className="btn btn-icon"
+                            aria-label="Rate Satisfaction"
+                            tabIndex={0}
                           >
                             <FiStar size={16} />
                           </button>
                         </div>
                       </td>
-                    </tr>
+                    </motion.tr>
                   ))}
+                  </AnimatePresence>
                 </tbody>
               </table>
             </div>
-          </>
+          </motion.div>
         )}
+        </AnimatePresence>
 
         {/* Service Appointments Tab */}
+        <AnimatePresence>
         {activeTab === 'appointments' && (
+          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
           <div className="space-y-4">
             <div className="flex justify-between items-center">
               <h3 className="text-lg font-semibold">Service Appointments</h3>
-              <button className="btn-primary flex items-center gap-2">
+                <button className="btn btn-primary flex items-center gap-2">
                 <FiPlus /> New Appointment
               </button>
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
               {appointments.map((appointment) => (
-                <div key={appointment.id} className="bg-white dark:bg-gray-800 rounded-lg shadow p-4 border-l-4 border-blue-500">
+                  <motion.div
+                    key={appointment.id}
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: -10 }}
+                    className="bg-white dark:bg-gray-800 rounded-lg shadow p-4 border-l-4 border-blue-500"
+                  >
                   <div className="flex justify-between items-start mb-2">
                     <h4 className="font-semibold text-gray-900 dark:text-white">{appointment.customer_name}</h4>
                     <span className={`px-2 py-1 text-xs rounded-full ${
@@ -546,18 +600,28 @@ const CustomerServiceDepartment: React.FC = () => {
                     <span>{appointment.appointment_date}</span>
                     <span>{appointment.appointment_time}</span>
                   </div>
-                </div>
+                  </motion.div>
               ))}
             </div>
+              {/* Calendar view placeholder */}
+              <div className="mt-6">
+                <div className="bg-gradient-to-r from-blue-100 to-purple-100 dark:from-blue-900 dark:to-purple-900 rounded-xl p-6 text-center text-blue-900 dark:text-blue-100 font-semibold shadow-lg">
+                  <span>📅 Calendar View Coming Soon</span>
           </div>
+              </div>
+            </div>
+          </motion.div>
         )}
+        </AnimatePresence>
 
         {/* Warranty Claims Tab */}
+        <AnimatePresence>
         {activeTab === 'warranty' && (
+          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
           <div className="space-y-4">
             <div className="flex justify-between items-center">
               <h3 className="text-lg font-semibold">Warranty Claims</h3>
-              <button className="btn-primary flex items-center gap-2">
+                <button className="btn btn-primary flex items-center gap-2">
                 <FiPlus /> New Claim
               </button>
             </div>
@@ -575,7 +639,13 @@ const CustomerServiceDepartment: React.FC = () => {
                 </thead>
                 <tbody className="bg-white dark:bg-gray-900 divide-y divide-gray-200 dark:divide-gray-700">
                   {warrantyClaims.map((claim) => (
-                    <tr key={claim.id} className="hover:bg-gray-50 dark:hover:bg-gray-800">
+                      <motion.tr
+                        key={claim.id}
+                        initial={{ opacity: 0, y: 10 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        exit={{ opacity: 0, y: -10 }}
+                        className="hover:bg-gray-50 dark:hover:bg-gray-800 transition-all"
+                      >
                       <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-white">
                         {claim.customer_name}
                       </td>
@@ -599,24 +669,28 @@ const CustomerServiceDepartment: React.FC = () => {
                       </td>
                       <td className="px-4 py-4 whitespace-nowrap text-sm font-medium">
                         <div className="flex gap-2">
-                          <button className="text-blue-600 hover:text-blue-900">
+                            <button className="btn btn-icon" aria-label="View Claim">
                             <FiEye size={16} />
                           </button>
-                          <button className="text-green-600 hover:text-green-900">
+                            <button className="btn btn-icon" aria-label="Approve Claim">
                             <FiCheckCircle size={16} />
                           </button>
                         </div>
                       </td>
-                    </tr>
+                      </motion.tr>
                   ))}
                 </tbody>
               </table>
             </div>
           </div>
+          </motion.div>
         )}
+        </AnimatePresence>
 
         {/* Analytics Tab */}
+        <AnimatePresence>
         {activeTab === 'analytics' && (
+          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
             <div className="bg-gradient-to-r from-blue-500 to-blue-600 text-white rounded-lg p-6">
               <div className="flex items-center justify-between">
@@ -668,13 +742,26 @@ const CustomerServiceDepartment: React.FC = () => {
               </div>
             </div>
           </div>
+          </motion.div>
         )}
+        </AnimatePresence>
       </div>
 
       {/* Add/Edit Service Modal */}
+      <AnimatePresence>
       {modalOpen && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white dark:bg-gray-900 rounded-lg max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4"
+        >
+          <motion.div
+            initial={{ scale: 0.95, opacity: 0 }}
+            animate={{ scale: 1, opacity: 1 }}
+            exit={{ scale: 0.95, opacity: 0 }}
+            className="glassmorphic bg-white/90 dark:bg-gray-900/90 rounded-lg max-w-2xl w-full max-h-[90vh] overflow-y-auto shadow-2xl"
+          >
             <div className="p-6">
               <h3 className="text-lg font-semibold mb-4">
                 {editMode ? 'Edit Service Request' : 'New Service Request'}
@@ -824,13 +911,13 @@ const CustomerServiceDepartment: React.FC = () => {
                   <button
                     type="button"
                     onClick={handleCloseModal}
-                    className="btn-secondary"
+                    className="btn btn-secondary"
                   >
                     Cancel
                   </button>
                   <button
                     type="submit"
-                    className="btn-primary"
+                    className="btn btn-primary"
                     disabled={loading}
                   >
                     {loading ? 'Saving...' : (editMode ? 'Update' : 'Create')}
@@ -838,14 +925,26 @@ const CustomerServiceDepartment: React.FC = () => {
                 </div>
               </form>
             </div>
-          </div>
-        </div>
+          </motion.div>
+        </motion.div>
       )}
+      </AnimatePresence>
 
       {/* Satisfaction Rating Modal */}
+      <AnimatePresence>
       {satisfactionModalOpen && selectedService && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white dark:bg-gray-900 rounded-lg max-w-md w-full">
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4"
+        >
+          <motion.div
+            initial={{ scale: 0.95, opacity: 0 }}
+            animate={{ scale: 1, opacity: 1 }}
+            exit={{ scale: 0.95, opacity: 0 }}
+            className="glassmorphic bg-white/90 dark:bg-gray-900/90 rounded-lg max-w-md w-full shadow-2xl"
+          >
             <div className="p-6">
               <h3 className="text-lg font-semibold mb-4">Rate Customer Satisfaction</h3>
               <p className="text-gray-600 dark:text-gray-300 mb-4">
@@ -865,15 +964,16 @@ const CustomerServiceDepartment: React.FC = () => {
               <div className="flex gap-2 justify-end">
                 <button
                   onClick={() => setSatisfactionModalOpen(false)}
-                  className="btn-secondary"
+                  className="btn btn-secondary"
                 >
                   Cancel
                 </button>
               </div>
             </div>
-          </div>
-        </div>
+          </motion.div>
+        </motion.div>
       )}
+      </AnimatePresence>
     </div>
   );
 };

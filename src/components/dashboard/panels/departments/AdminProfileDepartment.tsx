@@ -17,20 +17,33 @@ type Admin = {
 
 const AdminProfileDepartment: React.FC = () => {
   const [admin, setAdmin] = useState<Admin | null>(null);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     fetchAdmin();
   }, []);
 
   const fetchAdmin = async () => {
-    setLoading(true);
-    setError(null);
     const { data, error } = await supabase.from('admins').select('*').single();
-    if (error) setError(error.message);
-    else setAdmin(data || null);
-    setLoading(false);
+    if (error) {
+      console.error('Error fetching admin:', error.message);
+      return;
+    }
+    if (data) {
+      // Map data to Admin type, casting fields to string
+      const adminObj: Admin = {
+        id: String(data.id),
+        name: String(data.name),
+        email: String(data.email),
+        phone: String(data.phone),
+        role: String(data.role),
+        avatar: String(data.avatar),
+        created_at: String(data.created_at),
+        updated_at: String(data.updated_at)
+      };
+      setAdmin(adminObj);
+    } else {
+      setAdmin(null);
+    }
   };
 
   // Placeholder for advanced features (2FA, logs, preferences, etc.)

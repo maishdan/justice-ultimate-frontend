@@ -1,20 +1,44 @@
 // src/pages/LandingPage.tsx
+import React, { useState, useEffect, useRef } from 'react';
+import LoadingScreen from '../components/ui/LoadingScreen';
 import { motion } from "framer-motion";
 import { Button } from "../components/ui/button";
 import { Link } from "react-router-dom";
 import { FaHome, FaTachometerAlt, FaEnvelopeOpenText } from "react-icons/fa";
 import { FaEnvelope, FaPhoneAlt, FaWhatsapp } from "react-icons/fa";
-import { useRef } from 'react';
 
 
 export default function LandingPage() {
+  // All hooks at the top, always called in the same order
+  const [loading, setLoading] = useState(true);
+  const [progress, setProgress] = useState(0);
   const audioRef = useRef<HTMLAudioElement | null>(null);
+
+  useEffect(() => {
+    let interval = setInterval(() => {
+      setProgress((prev) => {
+        if (prev >= 100) {
+          clearInterval(interval);
+          setLoading(false);
+          return 100;
+        }
+        return prev + 10;
+      });
+    }, 150);
+    return () => clearInterval(interval);
+  }, []);
+
   const playCarStart = () => {
     if (audioRef.current) {
       audioRef.current.currentTime = 0;
       audioRef.current.play();
     }
   };
+
+  if (loading) {
+    return <LoadingScreen text="Loading Justice Ultimate Automobiles..." progress={progress} />;
+  }
+
   return (
   <div
  

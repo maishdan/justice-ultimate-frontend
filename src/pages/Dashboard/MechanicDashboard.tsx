@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import useAuth from '../../hooks/useAuth';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '../../lib/supabaseClient';
@@ -22,11 +22,15 @@ import {
   FiShield
 } from 'react-icons/fi';
 import { AiFillCar, AiOutlineTool } from 'react-icons/ai';
+import LoadingScreen from '../../components/ui/LoadingScreen';
 
 export default function MechanicDashboard() {
   useAuth();
   const navigate = useNavigate();
   
+  const [loading, setLoading] = useState(true);
+  const [progress, setProgress] = useState(0);
+
   const [stats, setStats] = useState({
     activeWorkOrders: 0,
     completedToday: 0,
@@ -40,6 +44,24 @@ export default function MechanicDashboard() {
   const [vehicles, setVehicles] = useState([]);
   const [diagnostics, setDiagnostics] = useState([]);
   const [selectedTab, setSelectedTab] = useState('overview');
+
+  useEffect(() => {
+    let interval = setInterval(() => {
+      setProgress((prev) => {
+        if (prev >= 100) {
+          clearInterval(interval);
+          setLoading(false);
+          return 100;
+        }
+        return prev + 10;
+      });
+    }, 150);
+    return () => clearInterval(interval);
+  }, []);
+
+  if (loading) {
+    return <LoadingScreen text="Loading Mechanic Dashboard..." progress={progress} />;
+  }
 
   useEffect(() => {
     fetchDashboardData();
