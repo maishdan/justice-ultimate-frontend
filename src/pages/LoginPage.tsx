@@ -79,7 +79,7 @@ const Login = () => {
           setLoading(false);
           return;
         }
-        let role = user.user_metadata?.role || 'customer';
+        let role = user.app_metadata?.role || user.user_metadata?.role || 'customer';
         let dashboardPath = '/dashboard/customer';
         if (role === 'admin') dashboardPath = '/dashboard/admin';
         else if (role === 'staff') dashboardPath = '/dashboard/staff';
@@ -207,6 +207,7 @@ const Login = () => {
             {loading ? 'Logging in...' : 'Login'}
           </button>
           
+          <ContinueAsGuestButton />
           {/* OAuth Buttons */}
           <div className="mt-4 space-y-2">
             <button
@@ -226,8 +227,6 @@ const Login = () => {
               <FaGithub className="mr-2" /> Sign in with GitHub
             </button>
           </div>
-          
-          <ContinueAsGuestButton />
           
           <div className="flex justify-between text-sm text-gray-500 mt-4">
             <a href="/reset-password" className="hover:underline">Forgot password?</a>

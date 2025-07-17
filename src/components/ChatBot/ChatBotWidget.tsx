@@ -4,6 +4,7 @@ import { motion } from "framer-motion";
 import { BsFillChatDotsFill } from "react-icons/bs";
 import { IoSend } from "react-icons/io5";
 import { searchKnowledgeBase } from "../../ai/ragEngine";
+import { useLanguage } from '../../context/LanguageContext';
 
 const logAIQuery = (message: string) => {
   const logs = JSON.parse(localStorage.getItem("justiceAI_logs") || "[]");
@@ -11,21 +12,49 @@ const logAIQuery = (message: string) => {
   localStorage.setItem("justiceAI_logs", JSON.stringify(logs));
 };
 
-const defaultBotIntro = `Hi! I'm JusticeAI 🤖, your smart assistant for Justice Ultimate Automobiles.\n\nYou can ask me things like:\n1. What cars do you sell?\n2. How to book a test drive?\n3. Do you ship internationally?\n4. What are your financing options?\n\nJust type your question, or reply with a number!`;
+const getUserRole = () => {
+  return (
+    localStorage.getItem("userRole") ||
+    sessionStorage.getItem("userRole") ||
+    (localStorage.getItem("token") ? "customer" : "guest")
+  );
+};
+
+const getRoleIntro = (role: string, t: (k: string) => string) => {
+  switch (role) {
+    case "admin":
+      return `${t('welcome')}\n\n👋 As an Admin, you can manage users, view analytics, configure system settings, and oversee all departments.\nType 'help' for a full admin guide or ask about any feature.`;
+    case "staff":
+      return `${t('welcome')}\n\n👋 As Staff, you can manage inventory, handle customer support, and view your tasks. Type 'help' for a staff tutorial or ask about your daily tasks.`;
+    case "mechanic":
+      return `${t('welcome')}\n\n🔧 As a Mechanic, you can view assigned vehicles, update service status, and access maintenance logs. Type 'help' for a mechanic guide or ask about your schedule.`;
+    case "customer":
+      return `${t('welcome')}\n\n🚗 As a Customer, you can view your vehicles, book services, track orders, and access support. Type 'help' for a customer tutorial or ask about any feature.`;
+    case "guest":
+    default:
+      return `${t('welcome')}\n\n👋 You can browse our catalogue, view offers, and contact us. Type 'help' for a quick tour or ask any question!`;
+  }
+};
 
 export default function ChatBotWidget() {
+  const { language, t } = useLanguage();
   const [isOpen, setIsOpen] = useState(false);
-  const [messages, setMessages] = useState([{ sender: "bot", text: defaultBotIntro }]);
+  const [messages, setMessages] = useState([{ sender: "bot", text: "" }]);
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement | null>(null);
+  const [role, setRole] = useState(getUserRole());
+
+  useEffect(() => {
+    setRole(getUserRole());
+    setMessages([{ sender: "bot", text: getRoleIntro(getUserRole(), t) }]);
+  }, [isOpen, language]);
 
   const scrollToBottom = () => messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   useEffect(scrollToBottom, [messages]);
 
   const handleSend = async () => {
     if (!input.trim()) return;
-
     const normalizedInput = input.trim().toLowerCase();
     const userMsg = { sender: "user", text: input };
     setMessages((prev) => [...prev, userMsg]);
@@ -34,24 +63,28 @@ export default function ChatBotWidget() {
 
     let reply = "";
 
-    // Beginner support: greeting or numbered menu
-    if (["hi", "hello", "hey", ".", "?", ""].includes(normalizedInput)) {
-      reply = defaultBotIntro;
+    // Onboarding, help, and tutorials
+    if (["hi", "hello", "hey", ".", "?", "", "help", "tutorial", "guide", "onboarding"].includes(normalizedInput)) {
+      reply = getRoleIntro(role, t) +
+        `\n\n${t('systemGuide')}:\n- ${t('roleBasedHelp')}\n- ${t('tutorials')}\n- ${t('documentation')}\n\n${t('customerService')}:\n- ${t('support')}\n- ${t('afterSales')}\n- ${t('warranty')}\n- ${t('maintenance')}`;
     } else if (["1", "2", "3", "4"].includes(normalizedInput)) {
       const answers: { [key: string]: string } = {
-        "1": "🚗 We sell SUVs, sedans, pickups, electric cars & more. Browse all cars in our catalogue.",
-        "2": "🛣️ To book a test drive, visit the 'Book Test Drive' page or call 0722827458.",
-        "3": "🌍 Yes! We ship cars to over 50 countries with full customs assistance.",
-        "4": "💰 We offer flexible financing via banks, SACCOs & 'Lipa Pole Pole'. Apply online!",
+        "1": t('carsManagement'),
+        "2": t('bookTestDrive') || "Book Test Drive",
+        "3": t('shipping') || "Shipping & Delivery",
+        "4": t('financing') || "Financing Options",
       };
       reply = answers[normalizedInput];
+    } else if (normalizedInput.includes("feature") || normalizedInput.includes("how to")) {
+      reply = `${t('systemGuide')}:\n- ${t('roleBasedHelp')}\n- ${t('tutorials')}\n- ${t('documentation')}`;
     } else {
       // 🔍 Search Knowledge Base First
+      // TODO: Extend searchKnowledgeBase to support language and role if needed
       const kbAnswer = searchKnowledgeBase(input);
       if (kbAnswer) {
         reply = kbAnswer;
       } else {
-        // 🌐 Fallback to OpenAI
+        // 🌐 Fallback to OpenAI (multilingual)
         try {
           const response = await fetch("https://api.openai.com/v1/chat/completions", {
             method: "POST",
@@ -61,17 +94,20 @@ export default function ChatBotWidget() {
             },
             body: JSON.stringify({
               model: "gpt-3.5-turbo",
-              messages: [{ role: "user", content: input }],
+              messages: [
+                { role: "system", content: `You are JusticeAI, a multilingual assistant for Justice Ultimate Automobiles. Answer in ${language}. The user role is ${role}.` },
+                { role: "user", content: input },
+              ],
             }),
           });
 
           const data = await response.json();
           reply =
             data.choices?.[0]?.message?.content ||
-            "🤖 Sorry, I didn’t get that. Try asking about car prices, financing, or delivery.";
+            t('support') + ": " + t('help');
         } catch (error) {
           console.error("OpenAI error:", error);
-          reply = "⚠️ Server issue. Please try again later.";
+          reply = t('support') + ": " + t('help');
         }
       }
     }
@@ -83,7 +119,7 @@ export default function ChatBotWidget() {
 
   const handleVoiceInput = () => {
     const recognition = new (window as any).webkitSpeechRecognition();
-    recognition.lang = "en-US";
+    recognition.lang = language === 'CN' ? 'zh-CN' : language === 'FR' ? 'fr-FR' : 'en-US';
     recognition.onresult = (event: any) => {
       const transcript = event.results[0][0].transcript;
       setInput(transcript);
@@ -101,7 +137,7 @@ export default function ChatBotWidget() {
         { sender: "user", text: `📷 Uploaded image: ${file.name}` },
         {
           sender: "bot",
-          text: "📸 Image received! We'll soon support searching for similar cars from photos.",
+          text: t('support') + ": " + t('help'),
         },
       ]);
     };
@@ -117,7 +153,7 @@ export default function ChatBotWidget() {
           animate={{ opacity: 1, y: 0 }}
         >
           <div className="bg-blue-700 text-white p-3 font-bold flex justify-between items-center">
-            Ask JusticeAI
+            JusticeAI
             <button onClick={() => setIsOpen(false)} className="text-white text-sm">✕</button>
           </div>
 
@@ -141,7 +177,7 @@ export default function ChatBotWidget() {
               value={input}
               onChange={(e) => setInput(e.target.value)}
               onKeyDown={(e) => e.key === "Enter" && handleSend()}
-              placeholder="Type your message..."
+              placeholder={t('help') + "..."}
               className="flex-1 p-2 text-sm bg-white dark:bg-gray-800 text-black dark:text-white outline-none"
             />
             <input type="file" accept="image/*" onChange={handleImageUpload} className="hidden" id="imgUpload" />
@@ -155,6 +191,7 @@ export default function ChatBotWidget() {
       <button
         onClick={() => setIsOpen(!isOpen)}
         className="bg-yellow-400 p-3 rounded-full shadow-md hover:bg-blue-700 text-white"
+        aria-label="Open JusticeAI Chat"
       >
         <BsFillChatDotsFill size={20} />
       </button>

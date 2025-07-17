@@ -1,5 +1,5 @@
 import { BrowserRouter as Router, Routes, Route, useLocation } from "react-router-dom";
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import React from 'react';
 
 import ProtectedRoute from "./routes/ProtectedRoute";
@@ -33,9 +33,10 @@ import ProfilePage from "./pages/ProfilePage";
 import CarDetailPage from "./pages/CarDetailPage";
 import SetNewPassword from './pages/SetNewPassword';
 import { UserProfileProvider } from './context/UserProfileContext';
+import { ThemeProvider } from './context/ThemeContext';
+import { LanguageProvider } from './context/LanguageContext';
 
 // ✅ Import the dynamic CarDetails page
-
 
 // ✅ Import Error Pages (which use ErrorLayout internally)
 import NotFound404 from "./pages/errors/NotFound404";
@@ -46,7 +47,6 @@ import GenericErrorPage from "./pages/errors/GenericErrorPage";
 
 function App() {
   const location = useLocation();
-  const [darkMode, setDarkMode] = useState(false);
 
   // ✅ Car Start Sound: Play only on initial homepage load with debug log
   useEffect(() => {
@@ -62,29 +62,12 @@ function App() {
     }
   }, [location.pathname]);
 
-  // Detect preference from localStorage or system
-  useEffect(() => {
-    const localPref = localStorage.getItem("darkMode");
-    const systemPref = window.matchMedia("(prefers-color-scheme: dark)").matches;
-    const shouldUseDark = localPref !== null ? localPref === "true" : systemPref;
-
-    setDarkMode(shouldUseDark);
-    document.documentElement.classList.toggle("dark", shouldUseDark);
-  }, []);
-
-  // Apply class and persist to localStorage
-  useEffect(() => {
-    document.documentElement.classList.toggle("dark", darkMode);
-    localStorage.setItem("darkMode", darkMode.toString());
-  }, [darkMode]);
-
   return (
     <UserProfileProvider>
-      <div className={`min-h-screen transition-colors duration-300 ${darkMode ? "bg-gray-900 text-white" : "bg-white text-black"}`}>
-        <Header darkMode={darkMode} setDarkMode={setDarkMode} />
+      <div className="min-h-screen transition-colors duration-300">
+        <Header />
 
-        <main>
-          
+        <main className="pt-16">
           <Routes>
             <Route path="/" element={<LandingPage />} />
             <Route path="/services" element={<Services />} />
@@ -108,7 +91,6 @@ function App() {
             {/* ✅ Dynamic Car Details Route */}
            <Route path="/all-cars-showcase" element={<AllCarsShowcase />} />
             
-
 
             {/* Dashboards */}
             <Route path="/dashboard/admin" element={
@@ -139,13 +121,7 @@ function App() {
                 </PrivateRoute>
               </ProtectedRoute>
             } />
-            <Route path="/dashboard/guest" element={
-              <ProtectedRoute>
-                <PrivateRoute>
-                  <GuestDashboard />
-                </PrivateRoute>
-              </ProtectedRoute>
-            } />
+            <Route path="/dashboard/guest" element={<GuestDashboard />} />
 
             {/* ✅ Error Routes */}
             <Route path="/401" element={<Unauthorized401 />} />
@@ -168,7 +144,31 @@ export default function WrappedApp() {
   return (
     <Router>
       <ScrollToTop />
-      <App />
+      <ThemeProvider>
+        <LanguageProvider>
+          <div
+            className="min-h-screen relative"
+            style={{
+              backgroundImage: "url('/images/bg-landing.png')",
+              backgroundSize: 'cover',
+              backgroundPosition: 'center',
+              backgroundRepeat: 'no-repeat',
+            }}
+          >
+            {/* Overlay for brand color harmony and readability */}
+            <div
+              className="absolute inset-0 pointer-events-none"
+              style={{
+                background: 'linear-gradient(135deg, rgba(11,31,58,0.7) 0%, rgba(34,197,94,0.5) 100%)',
+                zIndex: 0,
+              }}
+            />
+            <div className="relative z-10">
+              <App />
+            </div>
+          </div>
+        </LanguageProvider>
+      </ThemeProvider>
     </Router>
   );
 }

@@ -230,6 +230,7 @@ export default function RegisterPage() {
               {loading ? "Registering..." : "Register"}
             </button>
             
+            <ContinueAsGuestButton />
             {/* OAuth Buttons */}
             <div className="space-y-2">
               <button
@@ -259,7 +260,6 @@ export default function RegisterPage() {
             </div>
           </form>
         )}
-        <ContinueAsGuestButton />
       </div>
     </div>
   );
