@@ -40,22 +40,14 @@ export default function LandingPage() {
   }
 
   return (
-  <div
- 
-className="absolute inset-0 bg-cover bg-center scale-105 animate-slowColorPulse transition-all duration-1000"
-
-  style={{ backgroundImage: "url('/images/bg-landing.png')" }}
->
-
-
+    <div className="relative min-h-screen w-full bg-cover bg-center scale-105 animate-slowColorPulse transition-all duration-1000">
       {/* Overlay Layer for darkness & contrast */}
       <div className="absolute inset-0 bg-gradient-to-r from-black/80 via-blue-950/80 to-black/70 animate-background" />
-
       {/* Foreground Content */}
-      <div className="relative z-10 min-h-screen text-white">
+      <div className="relative z-10 min-h-screen w-full text-white flex flex-col">
         {/* Hero Section */}
         <motion.section
-          className="text-center py-32 px-6 md:px-20"
+          className="text-center py-20 md:py-32 px-4 md:px-20 w-full"
           initial={{ opacity: 0, y: 60 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8 }}

@@ -125,10 +125,10 @@ export default function RegisterPage() {
   const selectedCountry = countries.find(c => c.code === country);
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-900 to-black">
+    <div className="min-h-screen w-full flex items-center justify-center bg-gradient-to-br from-blue-900 to-black p-4">
       <ToastContainer />
       <audio ref={audioRef} src="/sounds/iphone-notification.mp3" preload="auto" />
-      <div className="bg-white rounded-xl shadow-lg p-8 w-full max-w-md">
+      <div className="bg-white rounded-xl shadow-lg p-4 md:p-8 w-full max-w-md">
         <h2 className="text-2xl font-bold mb-6 text-center text-blue-900">Create Your Account</h2>
         {success ? (
           <div className="text-center">

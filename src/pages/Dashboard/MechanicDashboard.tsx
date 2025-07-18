@@ -102,10 +102,10 @@ export default function MechanicDashboard() {
   ];
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-900 to-gray-800 text-white">
+    <div className="min-h-screen w-full bg-gradient-to-br from-gray-900 to-gray-800 text-white flex flex-col">
       {/* Header */}
-      <div className="bg-gray-800 border-b border-gray-700 p-6">
-        <div className="flex justify-between items-center">
+      <div className="bg-gray-800 border-b border-gray-700 p-4 md:p-6 w-full">
+        <div className="flex flex-col md:flex-row justify-between items-center gap-4">
           <div>
             <h1 className="text-3xl font-bold text-orange-400">Mechanic Dashboard</h1>
             <p className="text-gray-300">Professional vehicle service and maintenance management</p>
@@ -122,9 +122,8 @@ export default function MechanicDashboard() {
           </div>
         </div>
       </div>
-
       {/* Stats Cards */}
-      <div className="p-6">
+      <div className="p-4 md:p-6 w-full">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-4 mb-6">
           <Card className="bg-gray-800 border-gray-700">
             <CardContent className="p-4">

@@ -139,9 +139,9 @@ export default function CustomerDashboard() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-600 to-purple-500 text-white flex">
+    <div className="min-h-screen w-full bg-gradient-to-br from-blue-600 to-purple-500 text-white flex flex-col md:flex-row">
       {/* Sidebar Menu */}
-      <aside className="w-72 bg-gradient-to-r from-blue-600 to-purple-500 text-white min-h-screen p-6 shadow-xl flex flex-col">
+      <aside className="w-full md:w-72 bg-gradient-to-r from-blue-600 to-purple-500 text-white min-h-screen p-6 shadow-xl flex flex-col fixed md:static z-40 md:z-auto top-0 left-0 md:relative transition-transform duration-300 md:translate-x-0 translate-x-[-100%] md:translate-x-0" style={{transform: sidebarOpen ? 'translateX(0)' : ''}}>
         <div className="text-2xl font-extrabold mb-10 text-center tracking-wide drop-shadow-lg">Justice Ultimate Automobiles</div>
         <nav className="flex-1">
           <ul className="space-y-2">
@@ -161,9 +161,9 @@ export default function CustomerDashboard() {
         <div className="mt-10 text-center text-xs text-blue-100">&copy; {new Date().getFullYear()} Justice Ultimate Automobiles</div>
       </aside>
       {/* Main Content */}
-      <div className="flex-1 flex flex-col overflow-hidden">
+      <div className="flex-1 w-full min-w-0 flex flex-col overflow-x-auto">
         <Topbar />
-        <main className="flex-1 overflow-y-auto p-6 space-y-8 animate-fadein">
+        <main className="flex-1 overflow-y-auto p-4 md:p-6 space-y-8 animate-fadein">
           {mainPanel}
         </main>
         <Footer />

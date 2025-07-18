@@ -205,12 +205,11 @@ export default function AdminDashboard() {
   }
 
   return (
-    <div className="dashboard-layout" role="application" aria-label="Justice Ultimate Automobiles Admin Dashboard">
+    <div className="dashboard-layout min-h-screen w-full">
       {/* Skip to main content link for accessibility */}
       <a href="#main-content" className="skip-link">
         Skip to main content
       </a>
-
       {/* Mobile menu button */}
       <button
         className="fixed top-4 left-4 z-50 lg:hidden bg-green-600 text-white p-3 rounded-lg shadow-lg"
@@ -223,7 +222,6 @@ export default function AdminDashboard() {
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
         </svg>
       </button>
-
       {/* Enhanced Sidebar */}
       <aside 
         id="dashboard-sidebar"
@@ -237,11 +235,10 @@ export default function AdminDashboard() {
           admin 
         />
       </aside>
-
       {/* Main Content Area */}
       <main 
         id="main-content"
-        className="dashboard-main"
+        className="dashboard-main w-full min-w-0 flex-1 flex flex-col overflow-x-auto p-4 md:p-8"
         role="main"
         aria-label="Dashboard content"
       >

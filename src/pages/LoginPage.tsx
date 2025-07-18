@@ -137,10 +137,10 @@ const Login = () => {
   return (
     <>
       <audio ref={audioRef} src="/car-start.mp3" preload="none" />
-      <div className="flex justify-center items-center h-screen bg-gradient-to-br from-blue-50 via-white to-green-50 dark:from-gray-900 dark:to-gray-800 transition-colors duration-500">
+      <div className="flex justify-center items-center min-h-screen w-full bg-gradient-to-br from-blue-50 via-white to-green-50 dark:from-gray-900 dark:to-gray-800 transition-colors duration-500">
         <form
           onSubmit={handleLogin}
-          className="bg-white dark:bg-gray-900 text-gray-800 dark:text-white p-8 rounded-xl shadow-2xl w-[95%] max-w-md transition-all duration-300"
+          className="bg-white dark:bg-gray-900 text-gray-800 dark:text-white p-6 md:p-8 rounded-xl shadow-2xl w-[95%] max-w-md transition-all duration-300"
           style={{
             backdropFilter: 'blur(10px)',
             border: '1px solid rgba(0,0,0,0.1)',
