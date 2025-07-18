@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 
 const mockLogs = [
   { type: 'Action', message: 'User JohnDoe updated inventory item #123', time: '2024-05-01 10:23', status: 'success' },
@@ -9,11 +9,35 @@ const mockLogs = [
 ];
 
 export default function ActivityLogsPanel() {
+  const [sessionLogs, setSessionLogs] = useState<any[]>([]);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
+
+  const fetchSessionLogs = async () => {
+    setLoading(true);
+    setError('');
+    try {
+      const token = localStorage.getItem('sb-access-token') || sessionStorage.getItem('sb-access-token');
+      const res = await fetch('/api/admin/session-logs', {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      if (!res.ok) throw new Error('Failed to fetch session logs');
+      const data = await res.json();
+      setSessionLogs(data);
+    } catch (err: any) {
+      setError(err.message || 'Failed to fetch session logs');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => { fetchSessionLogs(); }, []);
+
   return (
     <div className="w-full max-w-4xl mx-auto bg-white dark:bg-gray-900 rounded-2xl shadow-xl p-8 mt-8">
       <h2 className="text-2xl font-bold mb-6 text-blue-800 dark:text-blue-200">Activity Logs</h2>
       <p className="text-gray-500 mb-6">Actions, Errors, and Access logs for system auditing and security.</p>
-      <div className="overflow-x-auto">
+      <div className="overflow-x-auto mb-10">
         <table className="min-w-full text-sm">
           <thead>
             <tr className="bg-blue-50 dark:bg-blue-900/40">
@@ -38,6 +62,32 @@ export default function ActivityLogsPanel() {
                   {log.status === 'error' && <span className="bg-red-100 text-red-700 px-2 py-1 rounded-full text-xs font-bold">Error</span>}
                   {log.status === 'info' && <span className="bg-blue-100 text-blue-700 px-2 py-1 rounded-full text-xs font-bold">Info</span>}
                 </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+      <h3 className="text-xl font-semibold mb-4 text-blue-700 dark:text-blue-200 flex items-center gap-2">Session Logs <button onClick={fetchSessionLogs} className="ml-2 px-2 py-1 bg-blue-100 dark:bg-blue-800 text-blue-700 dark:text-blue-200 rounded hover:bg-blue-200 dark:hover:bg-blue-700 transition">Refresh</button></h3>
+      {error && <div className="text-red-600 mb-2">{error}</div>}
+      <div className="overflow-x-auto">
+        <table className="min-w-full text-sm">
+          <thead>
+            <tr className="bg-blue-50 dark:bg-blue-900/40">
+              <th className="px-4 py-2 text-left font-semibold text-blue-700 dark:text-blue-200">User ID</th>
+              <th className="px-4 py-2 text-left font-semibold text-blue-700 dark:text-blue-200">Session ID</th>
+              <th className="px-4 py-2 text-left font-semibold text-blue-700 dark:text-blue-200">Last Active</th>
+            </tr>
+          </thead>
+          <tbody>
+            {loading ? (
+              <tr><td colSpan={3} className="text-center py-4">Loading...</td></tr>
+            ) : sessionLogs.length === 0 ? (
+              <tr><td colSpan={3} className="text-center py-4">No session logs found.</td></tr>
+            ) : sessionLogs.map((log, idx) => (
+              <tr key={idx} className="border-b border-blue-100 dark:border-blue-800 hover:bg-blue-50/60 dark:hover:bg-blue-900/30 transition">
+                <td className="px-4 py-2 font-mono text-xs">{log.user_id}</td>
+                <td className="px-4 py-2 font-mono text-xs">{log.session_id?.slice(0, 12)}...</td>
+                <td className="px-4 py-2 text-gray-500 dark:text-gray-400">{new Date(log.last_active).toLocaleString()}</td>
               </tr>
             ))}
           </tbody>

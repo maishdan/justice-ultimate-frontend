@@ -27,6 +27,7 @@ import ContactsWidget from '../../components/dashboard/crm/ContactsWidget';
 import AccountsWidget from '../../components/dashboard/crm/AccountsWidget';
 import ActivitiesWidget from '../../components/dashboard/crm/ActivitiesWidget';
 import LoadingScreen from '../../components/ui/LoadingScreen';
+import ProtectedRoute from '../../components/auth/ProtectedRoute';
 
 export default function StaffDashboard() {
   useAuth();

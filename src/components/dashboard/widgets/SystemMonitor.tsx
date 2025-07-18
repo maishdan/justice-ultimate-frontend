@@ -5,6 +5,16 @@ import {
   FiShield, FiAlertCircle, FiCheckCircle, FiClock, FiRefreshCw,
   FiTrendingUp, FiTrendingDown, FiSettings, FiBarChart, FiZap
 } from 'react-icons/fi';
+import SecurityEventsTable from '../../security/SecurityEventsTable';
+import { getRealTimeData, fetchSystemMetrics } from '../../../lib/automation';
+import { supabase } from '../../../lib/supabaseClient';
+
+function getSystemMetricsApiUrl() {
+  if (window.location.hostname === 'localhost') {
+    return 'http://localhost:5001/api/system-metrics';
+  }
+  return 'https://backend-jua.onrender.com/api/system-metrics';
+}
 
 interface SystemMetric {
   name: string;
@@ -43,9 +53,10 @@ export default function SystemMonitor() {
   const [metrics, setMetrics] = useState<SystemMetric[]>([]);
   const [services, setServices] = useState<ServiceStatus[]>([]);
   const [alerts, setAlerts] = useState<Alert[]>([]);
-  const [view, setView] = useState<'overview' | 'metrics' | 'services' | 'alerts'>('overview');
+  const [view, setView] = useState<'overview' | 'metrics' | 'services' | 'alerts' | 'security'>('overview');
   const [loading, setLoading] = useState(false);
   const [lastRefresh, setLastRefresh] = useState(new Date());
+  const [errorMsg, setErrorMsg] = useState<string | null>(null);
 
   useEffect(() => {
     loadSystemData();
@@ -55,158 +66,139 @@ export default function SystemMonitor() {
 
   const loadSystemData = async () => {
     setLoading(true);
+    setErrorMsg(null); // Clear previous errors
     try {
-      // Simulate loading system metrics
-      const mockMetrics: SystemMetric[] = [
+      // Force session refresh to get latest 2FA status
+      await supabase.auth.refreshSession();
+      const session = await supabase.auth.getSession();
+      const token = session?.data?.session?.access_token;
+      const { data: userData, error: userError } = await supabase.auth.getUser();
+      console.log('SystemMonitor: current user', userData, userError);
+      if (!userData?.user) {
+        setErrorMsg('You must be logged in as an admin to view system metrics.');
+        setLoading(false);
+        return;
+      }
+      if (userData.user.app_metadata?.role !== 'admin') {
+        setErrorMsg('Only admins can view system metrics.');
+        setLoading(false);
+        return;
+      }
+      if (!token) {
+        setErrorMsg('No session token. Please log in again.');
+        setLoading(false);
+        return;
+      }
+      // Fetch real system metrics from backend
+      let realData;
+      try {
+        const apiUrl = getSystemMetricsApiUrl();
+        const res = await fetch(apiUrl, {
+          headers: { Authorization: `Bearer ${token}` }
+        });
+        const text = await res.text();
+        try {
+          realData = JSON.parse(text);
+        } catch (err) {
+          if (text.startsWith('<!DOCTYPE')) {
+            throw new Error('System metrics endpoint returned HTML. Backend may not be running or you are not authorized.');
+          }
+          throw new Error('Failed to parse system metrics response: ' + text);
+        }
+        if (!res.ok) {
+          throw new Error(realData.error || 'Failed to fetch system metrics');
+        }
+      } catch (err) {
+        const e = err as Error;
+        throw new Error('Failed to fetch system metrics: ' + (e.message || e));
+      }
+      const metrics: SystemMetric[] = [
         {
           name: 'CPU Usage',
-          value: 45,
+          value: realData.cpuUsage,
           unit: '%',
-          status: 'healthy',
-          trend: 'up',
+          status: realData.cpuUsage > 90 ? 'critical' : realData.cpuUsage > 70 ? 'warning' : 'healthy',
+          trend: 'stable',
           threshold: { warning: 70, critical: 90 },
           lastUpdated: new Date()
         },
         {
           name: 'Memory Usage',
-          value: 68,
+          value: realData.memoryUsage,
           unit: '%',
-          status: 'warning',
-          trend: 'up',
+          status: realData.memoryUsage > 90 ? 'critical' : realData.memoryUsage > 75 ? 'warning' : 'healthy',
+          trend: 'stable',
           threshold: { warning: 75, critical: 90 },
           lastUpdated: new Date()
         },
         {
           name: 'Disk Usage',
-          value: 82,
+          value: realData.diskUsage,
           unit: '%',
-          status: 'warning',
+          status: realData.diskUsage > 95 ? 'critical' : realData.diskUsage > 80 ? 'warning' : 'healthy',
           trend: 'stable',
           threshold: { warning: 80, critical: 95 },
           lastUpdated: new Date()
         },
         {
           name: 'Network Traffic',
-          value: 1250,
+          value: realData.networkTraffic,
           unit: 'Mbps',
-          status: 'healthy',
-          trend: 'down',
+          status: realData.networkTraffic > 3000 ? 'critical' : realData.networkTraffic > 2000 ? 'warning' : 'healthy',
+          trend: 'stable',
           threshold: { warning: 2000, critical: 3000 },
           lastUpdated: new Date()
         },
         {
           name: 'Database Connections',
-          value: 45,
+          value: realData.dbConnections,
           unit: '',
-          status: 'healthy',
+          status: realData.dbConnections > 100 ? 'critical' : realData.dbConnections > 80 ? 'warning' : 'healthy',
           trend: 'stable',
           threshold: { warning: 80, critical: 100 },
           lastUpdated: new Date()
         },
         {
           name: 'Active Users',
-          value: 127,
+          value: realData.activeUsers,
           unit: '',
-          status: 'healthy',
-          trend: 'up',
+          status: realData.activeUsers > 300 ? 'critical' : realData.activeUsers > 200 ? 'warning' : 'healthy',
+          trend: 'stable',
           threshold: { warning: 200, critical: 300 },
           lastUpdated: new Date()
         }
       ];
-
-      const mockServices: ServiceStatus[] = [
-        {
-          name: 'Web Server',
-          status: 'online',
-          responseTime: 45,
-          uptime: 99.98,
-          lastCheck: new Date(),
-          endpoint: 'https://justice.com',
-          description: 'Main web application server'
-        },
-        {
-          name: 'Database',
-          status: 'online',
-          responseTime: 12,
-          uptime: 99.99,
-          lastCheck: new Date(),
-          endpoint: 'postgresql://localhost:5432',
-          description: 'Primary database server'
-        },
-        {
-          name: 'Email Service',
-          status: 'degraded',
-          responseTime: 250,
-          uptime: 98.5,
-          lastCheck: new Date(),
-          endpoint: 'smtp://mail.justice.com',
-          description: 'Email delivery service'
-        },
-        {
-          name: 'Payment Gateway',
-          status: 'online',
-          responseTime: 89,
-          uptime: 99.95,
-          lastCheck: new Date(),
-          endpoint: 'https://api.payments.justice.com',
-          description: 'Payment processing service'
-        },
-        {
-          name: 'File Storage',
-          status: 'online',
-          responseTime: 67,
-          uptime: 99.97,
-          lastCheck: new Date(),
-          endpoint: 'https://storage.justice.com',
-          description: 'File storage and CDN service'
-        },
-        {
-          name: 'Analytics API',
-          status: 'maintenance',
-          responseTime: 0,
-          uptime: 0,
-          lastCheck: new Date(),
-          endpoint: 'https://analytics.justice.com',
-          description: 'Analytics and reporting API'
-        }
-      ];
-
-      const mockAlerts: Alert[] = [
-        {
-          id: '1',
-          type: 'warning',
-          title: 'High Memory Usage',
-          message: 'Memory usage has exceeded 75% threshold',
-          timestamp: new Date(Date.now() - 1000 * 60 * 5),
-          acknowledged: false,
-          service: 'System'
-        },
-        {
-          id: '2',
-          type: 'error',
-          title: 'Email Service Degraded',
-          message: 'Email delivery service experiencing high latency',
-          timestamp: new Date(Date.now() - 1000 * 60 * 15),
-          acknowledged: true,
-          service: 'Email Service'
-        },
-        {
-          id: '3',
-          type: 'info',
-          title: 'Scheduled Maintenance',
-          message: 'Analytics API will be under maintenance for 2 hours',
-          timestamp: new Date(Date.now() - 1000 * 60 * 30),
-          acknowledged: false,
-          service: 'Analytics API'
-        }
-      ];
-
-      setMetrics(mockMetrics);
-      setServices(mockServices);
-      setAlerts(mockAlerts);
+      setMetrics(metrics);
+      // Fetch real alerts from notifications table
+      let alertsData, error;
+      try {
+        const res = await supabase
+          .from('notifications')
+          .select('*')
+          .order('created_at', { ascending: false })
+          .limit(10);
+        alertsData = res.data;
+        error = res.error;
+      } catch (err) {
+        const e = err as Error;
+        throw new Error('Failed to fetch notifications: ' + (e.message || e));
+      }
+      if (error) throw new Error('Error fetching notifications: ' + (error as Error).message);
+      const alerts: Alert[] = (alertsData || []).map((a: any) => ({
+        id: a.id,
+        type: a.type || 'info',
+        title: a.title || a.subject || 'System Alert',
+        message: a.message || a.body || '',
+        timestamp: new Date(a.created_at),
+        acknowledged: !!a.acknowledged,
+        service: a.service || 'System'
+      }));
+      setAlerts(alerts);
       setLastRefresh(new Date());
     } catch (error) {
-      console.error('Failed to load system data:', error);
+      const e = error as Error;
+      console.error('Failed to load system data:', e);
+      alert(e.message || e);
     } finally {
       setLoading(false);
     }
@@ -573,7 +565,8 @@ export default function SystemMonitor() {
             { id: 'overview', label: 'Overview', icon: FiActivity },
             { id: 'metrics', label: 'Metrics', icon: FiBarChart },
             { id: 'services', label: 'Services', icon: FiServer },
-            { id: 'alerts', label: 'Alerts', icon: FiAlertCircle }
+            { id: 'alerts', label: 'Alerts', icon: FiAlertCircle },
+            { id: 'security', label: 'Security Events', icon: FiShield }
           ].map((tab) => (
             <button
               key={tab.id}
@@ -604,6 +597,7 @@ export default function SystemMonitor() {
           {view === 'metrics' && renderMetrics()}
           {view === 'services' && renderServices()}
           {view === 'alerts' && renderAlerts()}
+          {view === 'security' && <SecurityEventsTable />}
         </motion.div>
       </AnimatePresence>
     </div>

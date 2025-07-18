@@ -15,6 +15,8 @@ import {
   FiStar
 } from 'react-icons/fi';
 import jsPDF from 'jspdf';
+import { profileSchema } from '../../../validation/profileSchema';
+import { logFileUpload } from '../../../lib/securityLogger';
 
 export default function ProfileInfo() {
   const [user, setUser] = useState<any>(null);
@@ -111,17 +113,23 @@ export default function ProfileInfo() {
         }
 
         if (profileData) {
+          const safePreferences = (profileData.preferences && typeof profileData.preferences === 'object' && Object.keys(profileData.preferences).length > 0)
+            ? profileData.preferences
+            : {
+                language: 'English',
+                currency: 'KES',
+                notifications: true,
+                marketing_emails: false
+              };
+          const safeNotificationChannels = (profileData.notification_channels && typeof profileData.notification_channels === 'object' && Object.keys(profileData.notification_channels).length > 0)
+            ? profileData.notification_channels
+            : { sms: true, email: true, push: true };
           setProfile({
             ...profileData,
-            preferences: profileData.preferences || {
-              language: 'English',
-              currency: 'KES',
-              notifications: true,
-              marketing_emails: false
-            },
-            notification_channels: profileData.notification_channels || { sms: true, email: true, push: true }
+            preferences: safePreferences,
+            notification_channels: safeNotificationChannels
           });
-          if (profileData.avatar_url) setAvatar(profileData.avatar_url);
+          if (typeof profileData.avatar_url === 'string' && profileData.avatar_url) setAvatar(profileData.avatar_url);
         }
       }
     } catch (error) {
@@ -133,45 +141,47 @@ export default function ProfileInfo() {
     setLoading(true);
     try {
       if (user) {
+        // Validate profile with Zod
+        const validation = profileSchema.safeParse(profile);
+        if (!validation.success) {
+          alert('Profile validation failed: ' + JSON.stringify(validation.error.issues));
+          setLoading(false);
+          return;
+        }
         // Update user metadata
         const { error: updateError } = await supabase.auth.updateUser({
           data: { full_name: `${profile.first_name} ${profile.last_name}`.trim() }
         });
-
         if (updateError) throw updateError;
-
         // Upsert profile in profiles table
         const upsertProfile = {
           id: user.id,
-          email: profile.email || 'N/A',
-          first_name: profile.first_name || 'N/A',
-          last_name: profile.last_name || 'N/A',
-          full_name: `${profile.first_name} ${profile.last_name}`.trim() || 'N/A',
-          phone: profile.phone || 'N/A',
-          address: profile.address || 'N/A',
-          city: profile.city || 'N/A',
-          country: profile.country || 'N/A',
-          date_of_birth: profile.date_of_birth || 'N/A',
-          license_number: profile.license_number || 'N/A',
-          emergency_contact: profile.emergency_contact || 'N/A',
-          kra_pin: profile.kra_pin || 'N/A',
-          id_document_url: profile.id_document_url || 'N/A',
-          passport_url: profile.passport_url || 'N/A',
-          avatar_url: profile.avatar_url || 'N/A',
-          gender: profile.gender || 'N/A',
-          gender_other: profile.genderOther || 'N/A',
-          preferences: profile.preferences,
-          communication_method: profile.communication_method || 'N/A',
-          theme: profile.theme || 'N/A',
-          notification_channels: profile.notification_channels,
+          email: profile.email?.trim() || null,
+          first_name: profile.first_name?.trim() || null,
+          last_name: profile.last_name?.trim() || null,
+          full_name: `${profile.first_name} ${profile.last_name}`.trim() || null,
+          phone: profile.phone?.trim() || null,
+          address: profile.address?.trim() || null,
+          city: profile.city?.trim() || null,
+          country: profile.country?.trim() || null,
+          date_of_birth: profile.date_of_birth?.trim() || null,
+          license_number: profile.license_number?.trim() || null,
+          emergency_contact: profile.emergency_contact?.trim() || null,
+          kra_pin: profile.kra_pin?.trim() || null,
+          id_document_url: profile.id_document_url?.trim() || null,
+          passport_url: profile.passport_url?.trim() || null,
+          avatar_url: profile.avatar_url?.trim() || null,
+          gender: profile.gender?.trim() || null,
+          gender_other: profile.genderOther?.trim() || null,
+          preferences: profile.preferences || { language: 'English', currency: 'KES', notifications: true, marketing_emails: false },
+          communication_method: profile.communication_method?.trim() || null,
+          theme: profile.theme?.trim() || null,
+          notification_channels: profile.notification_channels || { sms: true, email: true, push: true },
           updated_at: new Date().toISOString()
         };
         const { error: profileError } = await supabase.from('profiles').upsert(upsertProfile);
-
         if (profileError) throw profileError;
-
         setIsEditing(false);
-        // Show success message
         alert('Profile updated successfully!');
       }
     } catch (error) {
@@ -222,19 +232,19 @@ export default function ProfileInfo() {
       const filePath = `${user.id}-${Date.now()}.${fileExt}`;
       const { data: uploadData, error: uploadError } = await supabase.storage
         .from('avatars')
-        .upload(filePath, file);
+        .upload(filePath, file, { upsert: true });
       if (!uploadError) {
         const { data: publicUrlData } = supabase.storage.from('avatars').getPublicUrl(filePath);
         setAvatar(publicUrlData.publicUrl);
         setProfile(prev => ({ ...prev, avatar_url: publicUrlData.publicUrl }));
-        // Update profile with new avatar URL
         await supabase.from('profiles').upsert({ id: user.id, avatar_url: publicUrlData.publicUrl });
+        await logFileUpload(user.id, 'avatar', file.name, { size: file.size });
         alert('Profile picture uploaded successfully!');
       } else {
+        alert('Error uploading avatar: ' + (uploadError.message || JSON.stringify(uploadError)));
         throw uploadError;
       }
     } catch (error) {
-      console.error('Error uploading avatar:', error);
       alert('Error uploading avatar. Please try again.');
     }
   };
@@ -250,7 +260,9 @@ export default function ProfileInfo() {
       if (uploadError) throw uploadError;
       const { data: { publicUrl } } = supabase.storage.from('ids').getPublicUrl(filePath);
       setProfile(prev => ({ ...prev, id_document_url: publicUrl }));
-      await supabase.from('profiles').upsert({ id: user.id, id_document_url: publicUrl });
+      const { error: updateError } = await supabase.from('profiles').update({ id_document_url: publicUrl }).eq('id', user.id);
+      if (updateError) throw updateError;
+      await logFileUpload(user.id, 'national_id', file.name, { size: file.size });
       alert('National ID uploaded successfully!');
     } catch (error) {
       console.error('Error uploading National ID:', error);
@@ -269,7 +281,9 @@ export default function ProfileInfo() {
       if (uploadError) throw uploadError;
       const { data: { publicUrl } } = supabase.storage.from('passports').getPublicUrl(filePath);
       setProfile(prev => ({ ...prev, passport_url: publicUrl }));
-      await supabase.from('profiles').upsert({ id: user.id, passport_url: publicUrl });
+      const { error: updateError } = await supabase.from('profiles').update({ passport_url: publicUrl }).eq('id', user.id);
+      if (updateError) throw updateError;
+      await logFileUpload(user.id, 'passport', file.name, { size: file.size });
       alert('Passport uploaded successfully!');
     } catch (error) {
       console.error('Error uploading Passport:', error);
@@ -361,7 +375,7 @@ export default function ProfileInfo() {
             <div>
               <label className="block text-sm font-medium mb-2">First Name</label>
               <Input
-                value={profile.first_name}
+                value={profile.first_name || ''}
                 onChange={(e) => setProfile({...profile, first_name: e.target.value})}
                 disabled={!isEditing}
                 placeholder="Enter your first name"
@@ -370,7 +384,7 @@ export default function ProfileInfo() {
             <div>
               <label className="block text-sm font-medium mb-2">Last Name</label>
               <Input
-                value={profile.last_name}
+                value={profile.last_name || ''}
                 onChange={(e) => setProfile({...profile, last_name: e.target.value})}
                 disabled={!isEditing}
                 placeholder="Enter your last name"
@@ -380,7 +394,7 @@ export default function ProfileInfo() {
             <div>
               <label className="block text-sm font-medium mb-2">Email</label>
               <Input
-                value={profile.email}
+                value={profile.email || ''}
                 disabled
                 placeholder="Email address"
               />
@@ -389,7 +403,7 @@ export default function ProfileInfo() {
             <div>
               <label className="block text-sm font-medium mb-2">Phone Number</label>
               <Input
-                value={profile.phone}
+                value={profile.phone || ''}
                 onChange={(e) => setProfile({...profile, phone: e.target.value})}
                 disabled={!isEditing}
                 placeholder="Enter phone number"
@@ -400,7 +414,7 @@ export default function ProfileInfo() {
               <label className="block text-sm font-medium mb-2">Date of Birth</label>
               <Input
                 type="date"
-                value={profile.date_of_birth}
+                value={profile.date_of_birth || ''}
                 onChange={(e) => setProfile({...profile, date_of_birth: e.target.value})}
                 disabled={!isEditing}
               />
@@ -409,7 +423,7 @@ export default function ProfileInfo() {
             <div>
               <label className="block text-sm font-medium mb-2">License Number</label>
               <Input
-                value={profile.license_number}
+                value={profile.license_number || ''}
                 onChange={(e) => setProfile({...profile, license_number: e.target.value})}
                 disabled={!isEditing}
                 placeholder="Driver's license number"
@@ -419,7 +433,7 @@ export default function ProfileInfo() {
             <div>
               <label className="block text-sm font-medium mb-2">Emergency Contact</label>
               <Input
-                value={profile.emergency_contact}
+                value={profile.emergency_contact || ''}
                 onChange={(e) => setProfile({...profile, emergency_contact: e.target.value})}
                 disabled={!isEditing}
                 placeholder="Emergency contact number"
@@ -429,7 +443,7 @@ export default function ProfileInfo() {
             <div>
               <label className="block text-sm font-medium mb-2">Address</label>
               <Input
-                value={profile.address}
+                value={profile.address || ''}
                 onChange={(e) => setProfile({...profile, address: e.target.value})}
                 disabled={!isEditing}
                 placeholder="Street address"
@@ -439,7 +453,7 @@ export default function ProfileInfo() {
             <div>
               <label className="block text-sm font-medium mb-2">City</label>
               <Input
-                value={profile.city}
+                value={profile.city || ''}
                 onChange={(e) => setProfile({...profile, city: e.target.value})}
                 disabled={!isEditing}
                 placeholder="City"
@@ -449,7 +463,7 @@ export default function ProfileInfo() {
             <div>
               <label className="block text-sm font-medium mb-2">Country</label>
               <Input
-                value={profile.country}
+                value={profile.country || ''}
                 onChange={(e) => setProfile({...profile, country: e.target.value})}
                 disabled={!isEditing}
                 placeholder="Country"
@@ -459,7 +473,7 @@ export default function ProfileInfo() {
             <div>
               <label className="block text-sm font-medium mb-2">KRA PIN</label>
               <Input
-                value={profile.kra_pin}
+                value={profile.kra_pin || ''}
                 onChange={(e) => setProfile({...profile, kra_pin: e.target.value})}
                 disabled={!isEditing}
                 placeholder="Enter your KRA PIN"
@@ -469,7 +483,7 @@ export default function ProfileInfo() {
             <div>
               <label className="block text-sm font-medium mb-2">Gender</label>
               <select
-                value={profile.gender}
+                value={profile.gender || ''}
                 onChange={e => setProfile({ ...profile, gender: e.target.value })}
                 disabled={!isEditing}
                 className="w-full p-2 border border-gray-300 rounded-md"
@@ -549,7 +563,7 @@ export default function ProfileInfo() {
             <div>
               <label className="block text-sm font-medium mb-2">Language</label>
               <select
-                value={profile.preferences.language}
+                value={profile.preferences.language || ''}
                 onChange={(e) => setProfile({
                   ...profile, 
                   preferences: {...profile.preferences, language: e.target.value}
@@ -566,7 +580,7 @@ export default function ProfileInfo() {
             <div>
               <label className="block text-sm font-medium mb-2">Currency</label>
               <select
-                value={profile.preferences.currency}
+                value={profile.preferences.currency || ''}
                 onChange={(e) => setProfile({
                   ...profile, 
                   preferences: {...profile.preferences, currency: e.target.value}
@@ -583,7 +597,7 @@ export default function ProfileInfo() {
             <div>
               <label className="block text-sm font-medium mb-2">Preferred Communication Method</label>
               <select
-                value={profile.communication_method}
+                value={profile.communication_method || ''}
                 onChange={e => setProfile({ ...profile, communication_method: e.target.value as 'SMS' | 'Email' | 'WhatsApp' })}
                 className="w-full p-2 border border-gray-300 rounded-md"
                 disabled={!isEditing}
@@ -597,7 +611,7 @@ export default function ProfileInfo() {
             <div>
               <label className="block text-sm font-medium mb-2">Theme</label>
               <select
-                value={profile.theme}
+                value={profile.theme || ''}
                 onChange={e => setProfile({ ...profile, theme: e.target.value as 'Auto' | 'Light' | 'Dark' })}
                 className="w-full p-2 border border-gray-300 rounded-md"
                 disabled={!isEditing}

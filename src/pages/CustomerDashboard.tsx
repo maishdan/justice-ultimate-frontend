@@ -32,7 +32,7 @@ import Recommendations from '../components/dashboard/customer/features/Recommend
 import Community from '../components/dashboard/customer/features/Community';
 import Refer from '../components/dashboard/customer/features/Refer';
 import Logout from '../components/dashboard/customer/features/Logout';
-
+import ProtectedRoute from '../components/auth/ProtectedRoute';
 const MENU = [
   { key: 'dashboard', label: 'Dashboard Overview', icon: '🏠' },
   { key: 'profile', label: 'Profile & Settings', icon: '👤' },

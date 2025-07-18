@@ -9,6 +9,7 @@ const useAuth = () => {
   useEffect(() => {
     if (!token) {
       navigate('/login');
+    } else {
     }
   }, [token, navigate]);
 };

@@ -759,3 +759,15 @@ export const getRealTimeData = () => {
 // Export getAnomalies for use in analytics panels
 export const getAnomalies = (events: AnalyticsEvent[], metric: 'revenue' | 'page_view' | 'conversions' = 'revenue') =>
   automation.getAnomalies(events, metric); 
+
+export async function fetchSystemMetrics(token: string) {
+  let url = '/api/system-metrics';
+  if (typeof window !== 'undefined' && window.location.hostname !== 'localhost') {
+    url = 'https://backend-jua.onrender.com/api/system-metrics';
+  }
+  const res = await fetch(url, {
+    headers: { Authorization: `Bearer ${token}` }
+  });
+  if (!res.ok) throw new Error('Failed to fetch system metrics');
+  return res.json();
+} 

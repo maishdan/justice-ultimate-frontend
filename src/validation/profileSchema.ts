@@ -1,0 +1,25 @@
+import { z } from 'zod';
+
+export const profileSchema = z.object({
+  first_name: z.string().max(100).optional().nullable(),
+  last_name: z.string().max(100).optional().nullable(),
+  email: z.string().email().optional().nullable().or(z.literal('')),
+  phone: z.string().max(20).optional().nullable(),
+  address: z.string().max(200).optional().nullable(),
+  city: z.string().max(100).optional().nullable(),
+  country: z.string().max(100).optional().nullable(),
+  date_of_birth: z.string().optional().nullable(),
+  license_number: z.string().max(50).optional().nullable(),
+  emergency_contact: z.string().max(50).optional().nullable(),
+  kra_pin: z.string().max(20).optional().nullable(),
+  id_document_url: z.string().url({ message: 'Invalid URL' }).optional().nullable().or(z.literal('')),
+  passport_url: z.string().url({ message: 'Invalid URL' }).optional().nullable().or(z.literal('')),
+  avatar_url: z.string().url().optional().nullable().or(z.literal('')),
+  gender: z.string().max(20).optional().nullable(),
+  genderOther: z.string().max(100).optional().nullable(),
+  preferences: z.any().optional(),
+  communication_method: z.string().optional().nullable(),
+  theme: z.string().optional().nullable(),
+  notification_channels: z.any().optional(),
+  updated_at: z.string().optional().nullable(),
+}); 

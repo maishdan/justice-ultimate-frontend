@@ -26,6 +26,8 @@ import BranchesPanel from '../../components/dashboard/widgets/BranchesPanel';
 import { motion } from 'framer-motion';
 // Add import for InboxPanel (to be implemented)
 import InboxPanel from '../../components/dashboard/widgets/InboxPanel';
+import SecurityEventsTable from '../../components/security/SecurityEventsTable';
+import ProtectedRoute from '../../components/auth/ProtectedRoute';
 
 // Enhanced accessibility and performance hooks
 const useKeyboardNavigation = () => {
@@ -327,6 +329,9 @@ export default function AdminDashboard() {
             aria-live="polite"
           >
           {PANEL_MAP[activePanel]}
+          {activePanel === 'monitor' && (
+  <SecurityEventsTable />
+)}
           </section>
 
           {/* Enhanced Footer */}

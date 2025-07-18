@@ -110,7 +110,11 @@ export const ReceiptGenerator = ({ name, carName, amount, stockId }: ReceiptProp
       const pdfBase64 = btoa(String.fromCharCode(...new Uint8Array(pdfBuffer)));
       const subject = 'Your Official Receipt – Justice Ultimate Automobiles';
       const html = `<div style="font-family:sans-serif;padding:24px;"><h2>Justice Ultimate Automobiles</h2><p>Dear ${name},<br/>Thank you for your business. Please find your official receipt attached.<br/><br/>Best regards,<br/>Justice Ultimate Automobiles Team</p></div>`;
-      await axios.post('http://localhost:5001/send-receipt', {
+      let url = 'http://localhost:5001/send-receipt';
+      if (typeof window !== 'undefined' && window.location.hostname !== 'localhost') {
+        url = 'https://backend-jua.onrender.com/send-receipt';
+      }
+      await axios.post(url, {
         to: recipient,
         subject,
         html,

@@ -48,45 +48,34 @@ const Login = () => {
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
-    console.log('Login form submitted');
-    console.log('Email:', email);
-    console.log('Password length:', password.length);
-    
     setLoading(true);
     setError('');
     try {
-      console.log('Attempting to sign in with Supabase...');
       const { data, error } = await supabase.auth.signInWithPassword({
         email,
         password,
       });
-      console.log('Supabase response:', { data, error });
       
       if (error) {
-        console.error('Login error:', error);
         setError(error.message);
         toast.error(error.message);
       } else if (data.session) {
         playCling();
-        console.log('Login successful, session:', data.session);
         // Set tokens for route protection
         localStorage.setItem("token", data.session.access_token);
         localStorage.setItem("authToken", data.session.access_token);
         localStorage.removeItem("guestSession"); // <-- Ensure guestSession is cleared
         // Fetch user role from Supabase user metadata
         const { data: { user }, error: userError } = await supabase.auth.getUser();
-        console.log('User data:', user);
-        console.log('User error:', userError);
         
         if (userError || !user) {
-          console.error('Could not fetch user info:', userError);
           setError('Could not fetch user info.');
           toast.error('Could not fetch user info.');
           setLoading(false);
           return;
         }
         let role = user.app_metadata?.role || user.user_metadata?.role || 'customer';
-        let dashboardPath = '/dashboard/customer';
+        let dashboardPath = '/dashboard';
         if (role === 'admin') dashboardPath = '/dashboard/admin';
         else if (role === 'staff') dashboardPath = '/dashboard/staff';
         else if (role === 'mechanic') dashboardPath = '/dashboard/mechanic';
@@ -97,18 +86,22 @@ const Login = () => {
         // Store user role in localStorage for route protection
         localStorage.setItem("userRole", role);
         sessionStorage.setItem("userRole", role);
-        
-        console.log('User role:', role);
-        console.log('Redirecting to:', dashboardPath);
+        // Set session values for ProtectedRoute/PrivateRoute compatibility
+        const sessionId = `session_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+        const userId = user.id || `user_${Date.now()}`;
+        localStorage.setItem("sessionId", sessionId);
+        localStorage.setItem("lastSessionId", sessionId);
+        localStorage.setItem("sessionTimestamp", Date.now().toString());
+        localStorage.setItem("userId", userId);
+        sessionStorage.setItem("sessionId", sessionId);
+        sessionStorage.setItem("userId", userId);
         
         toast.success('Login successful. Redirecting to dashboard...');
         setTimeout(() => {
-          console.log('Navigating to:', dashboardPath);
           navigate(dashboardPath, { replace: true });
         }, 1000);
       }
     } catch (err: any) {
-      console.error('Login catch error:', err);
       setError('Login failed');
       toast.error('Login failed. Please check your credentials.');
     } finally {
@@ -118,7 +111,6 @@ const Login = () => {
 
   const loginWithProvider = async (provider: 'google' | 'github') => {
     setLoading(true);
-    console.log('OAuth button clicked:', provider);
     const { error } = await supabase.auth.signInWithOAuth({
       provider,
       options: {
@@ -129,7 +121,6 @@ const Login = () => {
       localStorage.removeItem("guestSession"); // <-- Ensure guestSession is cleared after OAuth
     }
     if (error) {
-      console.error(`${provider} login failed:`, error.message);
       setError(`Login with ${provider} failed. Please try again.`);
       toast.error(`Login with ${provider} failed. Please try again.`);
     }
