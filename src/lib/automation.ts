@@ -109,21 +109,16 @@ export class AutomationEngine {
     if (!this.config.email.enabled) return false;
 
     try {
-      const nodemailer = await import('nodemailer');
-      const transporter = nodemailer.createTransporter(this.config.email.smtp);
-
       const html = this.renderEmailTemplate(template, data);
       const subject = this.getEmailSubject(template, data);
 
-      await transporter.sendMail({
-        from: this.config.email.smtp.auth.user,
-        to,
-        subject,
-        html,
-      });
-
-      this.logAnalyticsEvent('email_sent', { to, template, subject });
-      return true;
+      // This part of the code was removed as per the edit hint.
+      // The original code used nodemailer, which is Node.js-specific.
+      // Since the edit hint requires removing Node.js-only imports,
+      // this function will now return false as a placeholder.
+      // In a real scenario, you would implement a frontend-compatible email sending mechanism.
+      console.warn('Email sending functionality is currently disabled due to Node.js dependencies.');
+      return false;
     } catch (error) {
       console.error('Email sending failed:', error);
       return false;
