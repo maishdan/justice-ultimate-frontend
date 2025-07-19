@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '../lib/supabaseClient';
+import { getUserRole, getDashboardPath, createUserProfile } from '../lib/userRoleUtils';
 import { Eye, EyeOff } from 'lucide-react';
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
@@ -50,61 +51,194 @@ const Login = () => {
     e.preventDefault();
     setLoading(true);
     setError('');
+    
+    // Very short timeout to prevent hanging
+    const timeoutId = setTimeout(() => {
+      setError('Login timeout. Please try again.');
+      setLoading(false);
+    }, 10000); // 10 second timeout
+    
     try {
+      // Clear any stale session data first
+      localStorage.removeItem("token");
+      localStorage.removeItem("authToken");
+      localStorage.removeItem("sessionId");
+      localStorage.removeItem("userRole");
+      sessionStorage.removeItem("userRole");
+      sessionStorage.removeItem("sessionId");
+      
       const { data, error } = await supabase.auth.signInWithPassword({
         email,
         password,
       });
       
+      clearTimeout(timeoutId);
+      
       if (error) {
         setError(error.message);
         toast.error(error.message);
-      } else if (data.session) {
+        setLoading(false);
+        return;
+      }
+      
+      if (data.session) {
         playCling();
-        // Set tokens for route protection
+        
+        // Set tokens immediately
         localStorage.setItem("token", data.session.access_token);
         localStorage.setItem("authToken", data.session.access_token);
-        localStorage.removeItem("guestSession"); // <-- Ensure guestSession is cleared
-        // Fetch user role from Supabase user metadata
-        const { data: { user }, error: userError } = await supabase.auth.getUser();
+        localStorage.removeItem("guestSession");
         
-        if (userError || !user) {
-          setError('Could not fetch user info.');
-          toast.error('Could not fetch user info.');
-          setLoading(false);
+        // Get user info and determine role
+        try {
+          const { data: { user }, error: userError } = await supabase.auth.getUser();
+          
+          if (userError || !user) {
+            setError('Could not fetch user info.');
+            toast.error('Could not fetch user info.');
+            setLoading(false);
+            return;
+          }
+          
+          console.log('User authenticated:', user.email);
+          
+          // Determine user role - NO DEFAULTS
+          let role: string | null = null;
+          let dashboardPath: string | null = null;
+          
+          try {
+            // First, try to get role from profiles table
+            role = await getUserRole(user.id);
+            console.log('Role determined:', role);
+            
+            if (role) {
+              // Role found, get dashboard path
+              dashboardPath = getDashboardPath(role);
+              
+              if (dashboardPath) {
+                // Store user role
+                localStorage.setItem("userRole", role);
+                sessionStorage.setItem("userRole", role);
+                
+                // Set session values
+                const sessionId = `session_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+                const userId = user.id || `user_${Date.now()}`;
+                localStorage.setItem("sessionId", sessionId);
+                localStorage.setItem("lastSessionId", sessionId);
+                localStorage.setItem("sessionTimestamp", Date.now().toString());
+                localStorage.setItem("userId", userId);
+                sessionStorage.setItem("sessionId", sessionId);
+                sessionStorage.setItem("userId", userId);
+                
+                toast.success(`Login successful! Welcome ${role}!`);
+                navigate(dashboardPath, { replace: true });
+                return;
+              } else {
+                console.error('Invalid dashboard path for role:', role);
+                setError('Invalid user role configuration.');
+                toast.error('Invalid user role configuration.');
+                setLoading(false);
+                return;
+              }
+            } else {
+              // No role found - redirect to role selection
+              console.log('No role assigned to user, redirecting to role selection');
+              
+              // Store user info for role selection
+              localStorage.setItem("tempUserId", user.id);
+              localStorage.setItem("tempUserEmail", user.email || '');
+              
+              toast.info('Please select your user role to continue.');
+              navigate('/select-role', { replace: true });
+              return;
+            }
+          } catch (profileErr) {
+            console.log('Profile operation failed:', profileErr);
+            
+            // Fallback to auth metadata
+            const authRole = user.app_metadata?.role || user.user_metadata?.role;
+            if (authRole && ['admin', 'staff', 'mechanic', 'customer'].includes(authRole)) {
+              role = authRole;
+              console.log('Using role from auth metadata:', role);
+              
+              dashboardPath = getDashboardPath(role);
+              if (dashboardPath) {
+                // Store user role
+                localStorage.setItem("userRole", role);
+                sessionStorage.setItem("userRole", role);
+                
+                // Set session values
+                const sessionId = `session_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+                const userId = user.id || `user_${Date.now()}`;
+                localStorage.setItem("sessionId", sessionId);
+                localStorage.setItem("lastSessionId", sessionId);
+                localStorage.setItem("sessionTimestamp", Date.now().toString());
+                localStorage.setItem("userId", userId);
+                sessionStorage.setItem("sessionId", sessionId);
+                sessionStorage.setItem("userId", userId);
+                
+                toast.success(`Login successful! Welcome ${role}!`);
+                navigate(dashboardPath, { replace: true });
+                return;
+              }
+            }
+            
+            // No valid role found - redirect to role selection
+            console.log('No valid role found, redirecting to role selection');
+            
+            // Store user info for role selection
+            localStorage.setItem("tempUserId", user.id);
+            localStorage.setItem("tempUserEmail", user.email || '');
+            
+            toast.info('Please select your user role to continue.');
+            navigate('/select-role', { replace: true });
+            return;
+          }
+          
+        } catch (userErr) {
+          console.error('User info fetch failed:', userErr);
+          
+          // Final fallback - use session user data
+          const sessionUser = data.session.user;
+          const authRole = sessionUser.app_metadata?.role || sessionUser.user_metadata?.role;
+          
+          if (authRole && ['admin', 'staff', 'mechanic', 'customer'].includes(authRole)) {
+            const dashboardPath = getDashboardPath(authRole);
+            
+            if (dashboardPath) {
+              localStorage.setItem("userRole", authRole);
+              sessionStorage.setItem("userRole", authRole);
+              
+              const sessionId = `session_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+              const userId = sessionUser.id || `user_${Date.now()}`;
+              localStorage.setItem("sessionId", sessionId);
+              localStorage.setItem("lastSessionId", sessionId);
+              localStorage.setItem("sessionTimestamp", Date.now().toString());
+              localStorage.setItem("userId", userId);
+              sessionStorage.setItem("sessionId", sessionId);
+              sessionStorage.setItem("userId", userId);
+              
+              toast.success(`Login successful! Welcome ${authRole}!`);
+              navigate(dashboardPath, { replace: true });
+              return;
+            }
+          }
+          
+          // No valid role found - redirect to role selection
+          localStorage.setItem("tempUserId", sessionUser.id);
+          localStorage.setItem("tempUserEmail", sessionUser.email || '');
+          
+          toast.info('Please select your user role to continue.');
+          navigate('/select-role', { replace: true });
           return;
         }
-        let role = user.app_metadata?.role || user.user_metadata?.role || 'customer';
-        let dashboardPath = '/dashboard';
-        if (role === 'admin') dashboardPath = '/dashboard/admin';
-        else if (role === 'staff') dashboardPath = '/dashboard/staff';
-        else if (role === 'mechanic') dashboardPath = '/dashboard/mechanic';
-        else if (role === 'guest') dashboardPath = '/dashboard/guest';
-        else if (role === 'customer') dashboardPath = '/dashboard/customer';
-        else dashboardPath = '/dashboard/customer'; // fallback
-        
-        // Store user role in localStorage for route protection
-        localStorage.setItem("userRole", role);
-        sessionStorage.setItem("userRole", role);
-        // Set session values for ProtectedRoute/PrivateRoute compatibility
-        const sessionId = `session_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
-        const userId = user.id || `user_${Date.now()}`;
-        localStorage.setItem("sessionId", sessionId);
-        localStorage.setItem("lastSessionId", sessionId);
-        localStorage.setItem("sessionTimestamp", Date.now().toString());
-        localStorage.setItem("userId", userId);
-        sessionStorage.setItem("sessionId", sessionId);
-        sessionStorage.setItem("userId", userId);
-        
-        toast.success('Login successful. Redirecting to dashboard...');
-        setTimeout(() => {
-          navigate(dashboardPath, { replace: true });
-        }, 1000);
       }
     } catch (err: any) {
-      setError('Login failed');
-      toast.error('Login failed. Please check your credentials.');
+      clearTimeout(timeoutId);
+      setError('Login failed. Please try again.');
+      toast.error('Login failed. Please try again.');
     } finally {
+      clearTimeout(timeoutId);
       setLoading(false);
     }
   };
@@ -207,6 +341,8 @@ const Login = () => {
             )}
             {loading ? 'Logging in...' : 'Login'}
           </button>
+          
+          {/* Test login button for debugging */}
           
           <ContinueAsGuestButton />
           {/* OAuth Buttons */}

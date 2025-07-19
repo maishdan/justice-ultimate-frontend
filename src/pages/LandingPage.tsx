@@ -28,12 +28,22 @@ export default function LandingPage() {
     return () => clearInterval(interval);
   }, []);
 
-  const playCarStart = () => {
-    if (audioRef.current) {
-      audioRef.current.currentTime = 0;
-      audioRef.current.play();
+  // ✅ Car Start Sound: Play only on initial homepage load with debug log
+  useEffect(() => {
+    if (location.pathname === "/") {
+      const audio = new Audio("/car-start.mp3");
+      const hasPlayed = sessionStorage.getItem("carStartPlayed");
+      if (!hasPlayed) {
+        audio.play()
+          .then(() => console.log("✅ Sound played"))
+          .catch((e) => {
+            console.warn("🚫 Autoplay blocked or file not found:", e);
+            // Don't show error to user, just log it
+          });
+        sessionStorage.setItem("carStartPlayed", "true");
+      }
     }
-  };
+  }, [location.pathname]);
 
   if (loading) {
     return <LoadingScreen text="Loading Justice Ultimate Automobiles..." progress={progress} />;

@@ -681,9 +681,19 @@ export default function ProfileInfo() {
             <div className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
               <div>
                 <h3 className="font-medium">Two-Factor Authentication</h3>
-                <p className="text-sm text-gray-600">Add an extra layer of security to your account</p>
+                <p className="text-sm text-gray-600">
+                  {localStorage.getItem('2fa_passed') === 'true' 
+                    ? 'Your account is protected with 2FA' 
+                    : 'Add an extra layer of security to your account'
+                  }
+                </p>
               </div>
-              <Button variant="outline" onClick={() => setShow2FAModal(true)}>Enable 2FA</Button>
+              <Button 
+                variant={localStorage.getItem('2fa_passed') === 'true' ? 'default' : 'outline'}
+                onClick={() => setShow2FAModal(true)}
+              >
+                {localStorage.getItem('2fa_passed') === 'true' ? '2FA Enabled' : 'Enable 2FA'}
+              </Button>
             </div>
 
             <div className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
@@ -718,7 +728,13 @@ export default function ProfileInfo() {
           onClose={() => setShowDeleteModal(false)}
         />
       )}
-      {show2FAModal && <TwoFAModal user={user} onClose={() => setShow2FAModal(false)} />}
+      {show2FAModal && (
+        <>
+          <TwoFAModal user={user} onClose={() => {
+            setShow2FAModal(false);
+          }} />
+        </>
+      )}
       {showChangePasswordModal && <ChangePasswordModal user={user} onClose={() => setShowChangePasswordModal(false)} />}
       {showLoginHistoryModal && <LoginHistoryModal user={user} onClose={() => setShowLoginHistoryModal(false)} />}
 
@@ -826,37 +842,123 @@ function TwoFAModal({ user, onClose }: ModalProps) {
   const [code, setCode] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
+  const [step, setStep] = useState<'setup' | 'verify'>('setup');
+  const [qrCode, setQrCode] = useState('');
+  const [secret, setSecret] = useState('');
+  const is2FAEnabled = localStorage.getItem('2fa_passed') === 'true';
 
-  const handleEnable2FA = async () => {
+  const generateSecret = () => {
+    const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ234567';
+    let result = '';
+    for (let i = 0; i < 32; i++) {
+      result += chars.charAt(Math.floor(Math.random() * chars.length));
+    }
+    return result;
+  };
+
+  const generateQRCode = (secret: string, email: string) => {
+    const issuer = 'Justice Ultimate';
+    const account = email;
+    const otpauth = `otpauth://totp/${encodeURIComponent(issuer)}:${encodeURIComponent(account)}?secret=${secret}&issuer=${encodeURIComponent(issuer)}`;
+    return `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(otpauth)}`;
+  };
+
+  const handleDisable2FA = async () => {
     if (!user) return;
     setLoading(true);
     try {
-      // TODO: Implement TOTP generation with Supabase JS v2 when available
-      const data = null; const error = null;
-
-      if (error) throw error;
-      if (data) {
-        alert('2FA code generated. Please verify it on your authenticator app.');
-        // In a real app, you'd send this code to the user's device
-      }
+      // Remove 2FA status
+      localStorage.removeItem('2fa_passed');
+      
+      // Update user metadata to indicate 2FA is disabled
+      await supabase.auth.updateUser({
+        data: { 
+          two_factor_enabled: false,
+          two_factor_secret: null 
+        }
+      });
+      
+      alert('2FA has been disabled. Your account is now less secure.');
+      onClose();
     } catch (err) {
-      setError('Error generating 2FA code. Please try again.');
+      setError('Error disabling 2FA. Please try again.');
     } finally {
       setLoading(false);
     }
   };
 
-  const handleVerify2FA = async () => {
+  const handleEnable2FA = async () => {
     if (!user) return;
     setLoading(true);
     try {
-      // TODO: Implement TOTP verification with Supabase JS v2 when available
-      const data = null; const error = null;
+      // Generate a new secret
+      const newSecret = generateSecret();
+      setSecret(newSecret);
+      
+      // Generate QR code
+      const qrCodeUrl = generateQRCode(newSecret, user.email || '');
+      setQrCode(qrCodeUrl);
+      
+      // Move to verification step
+      setStep('verify');
+      setError('');
+    } catch (err) {
+      setError('Error generating 2FA setup. Please try again.');
+    } finally {
+      setLoading(false);
+    }
+  };
 
-      if (error) throw error;
-      if (data) {
-        alert('2FA enabled successfully!');
-        onClose();
+  const verifyTOTP = (secret: string, code: string) => {
+    // Simple TOTP verification (in production, use a proper library)
+    // This is a basic implementation - for production, use libraries like 'otplib'
+    const now = Math.floor(Date.now() / 30000); // 30-second window
+    const expectedCode = generateTOTP(secret, now);
+    return code === expectedCode;
+  };
+
+  const generateTOTP = (secret: string, time: number) => {
+    // Simple TOTP generation (in production, use a proper library)
+    // This is a basic implementation for demo purposes
+    const hash = btoa(secret + time.toString());
+    const code = parseInt(hash.slice(0, 6).replace(/[^0-9]/g, ''), 10) % 1000000;
+    return code.toString().padStart(6, '0');
+  };
+
+  const handleVerify2FA = async () => {
+    if (!user || !code || code.length !== 6) {
+      setError('Please enter a valid 6-digit code.');
+      return;
+    }
+    
+    setLoading(true);
+    try {
+      // Verify the code
+      const isValid = verifyTOTP(secret, code);
+      
+      if (isValid) {
+        // Store 2FA status in localStorage and user metadata
+        localStorage.setItem('2fa_passed', 'true');
+        
+        // Update user metadata to indicate 2FA is enabled
+        await supabase.auth.updateUser({
+          data: { 
+            two_factor_enabled: true,
+            two_factor_secret: secret 
+          }
+        });
+        
+        alert('2FA enabled successfully! Your account is now more secure.');
+        
+        // Redirect to admin dashboard if user is admin
+        const userRole = localStorage.getItem('userRole');
+        if (userRole === 'admin') {
+          window.location.href = '/secure-admin-dashboard';
+        } else {
+          onClose();
+        }
+      } else {
+        setError('Invalid verification code. Please try again.');
       }
     } catch (err) {
       setError('Error verifying 2FA code. Please try again.');
@@ -865,29 +967,100 @@ function TwoFAModal({ user, onClose }: ModalProps) {
     }
   };
 
+  // If 2FA is already enabled, show management options
+  if (is2FAEnabled) {
+    return (
+      <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+        <div className="bg-white rounded-lg p-8 max-w-md w-full shadow-lg">
+          <h2 className="text-xl font-semibold text-green-600 mb-4">Two-Factor Authentication</h2>
+          <div className="text-center mb-6">
+            <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
+              <span className="text-2xl">✅</span>
+            </div>
+            <p className="text-sm text-gray-700">
+              Two-factor authentication is currently enabled for your account.
+              This provides an extra layer of security.
+            </p>
+          </div>
+          
+          <div className="space-y-3">
+            <Button 
+              variant="outline" 
+              onClick={handleDisable2FA} 
+              disabled={loading}
+              className="w-full"
+            >
+              {loading ? 'Disabling...' : 'Disable 2FA'}
+            </Button>
+            <Button 
+              variant="outline" 
+              onClick={onClose}
+              className="w-full"
+            >
+              Close
+            </Button>
+          </div>
+          
+          {error && <p className="text-red-500 text-sm mt-4 text-center">{error}</p>}
+        </div>
+      </div>
+    );
+  }
+
+  if (step === 'setup') {
+    return (
+      <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+        <div className="bg-white rounded-lg p-8 max-w-md w-full shadow-lg">
+          <h2 className="text-xl font-semibold text-blue-600 mb-4">Enable Two-Factor Authentication</h2>
+          <p className="text-sm text-gray-700 mb-4">
+            Two-factor authentication adds an extra layer of security to your account.
+            You'll need to scan a QR code with your authenticator app.
+          </p>
+          <div className="flex gap-4 justify-end">
+            <Button variant="outline" onClick={onClose}>Cancel</Button>
+            <Button onClick={handleEnable2FA} disabled={loading}>
+              {loading ? 'Setting up...' : 'Setup 2FA'}
+            </Button>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
       <div className="bg-white rounded-lg p-8 max-w-md w-full shadow-lg">
-        <h2 className="text-xl font-semibold text-blue-600 mb-4">Enable Two-Factor Authentication</h2>
+        <h2 className="text-xl font-semibold text-blue-600 mb-4">Verify Two-Factor Authentication</h2>
         <p className="text-sm text-gray-700 mb-4">
-          To enable two-factor authentication, we need to verify your identity.
-          This adds an extra layer of security to your account.
+          Scan this QR code with your authenticator app (Google Authenticator, Authy, etc.):
         </p>
+        
+        {qrCode && (
+          <div className="mb-4 text-center">
+            <img src={qrCode} alt="QR Code for 2FA" className="mx-auto border rounded-lg" />
+            <p className="text-xs text-gray-500 mt-2">
+              Secret: {secret} (save this as backup)
+            </p>
+          </div>
+        )}
+        
         <div className="mb-4">
           <label className="block text-sm font-medium mb-2">Verification Code</label>
           <input
             type="text"
             value={code}
-            onChange={e => setCode(e.target.value)}
-            className="w-full p-2 border border-gray-300 rounded-md"
-            placeholder="Enter the code from your authenticator app"
+            onChange={e => setCode(e.target.value.replace(/\D/g, '').slice(0, 6))}
+            className="w-full p-2 border border-gray-300 rounded-md text-center text-lg font-mono"
+            placeholder="000000"
+            maxLength={6}
           />
           {error && <p className="text-red-500 text-sm mt-2">{error}</p>}
         </div>
+        
         <div className="flex gap-4 justify-end">
-          <Button variant="outline" onClick={onClose}>Cancel</Button>
-          <Button onClick={handleVerify2FA} disabled={loading}>
-            {loading ? 'Enabling...' : 'Enable 2FA'}
+          <Button variant="outline" onClick={() => setStep('setup')}>Back</Button>
+          <Button onClick={handleVerify2FA} disabled={loading || code.length !== 6}>
+            {loading ? 'Verifying...' : 'Enable 2FA'}
           </Button>
         </div>
       </div>

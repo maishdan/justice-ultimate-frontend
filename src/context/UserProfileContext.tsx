@@ -22,34 +22,63 @@ export function UserProfileProvider({ children }: { children: React.ReactNode })
   // Fetch profile on mount
   useEffect(() => {
     refreshProfile();
-    // Optionally, listen to auth state changes and refresh
+    
+    // Listen to auth state changes
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(
+      async (event, session) => {
+        if (event === 'SIGNED_IN' && session?.user) {
+          await refreshProfile();
+        } else if (event === 'SIGNED_OUT') {
+          setProfile(null);
+        }
+      }
+    );
+
+    return () => subscription.unsubscribe();
   }, []);
 
   const refreshProfile = async () => {
-    const { data: { user } } = await supabase.auth.getUser();
-    if (user) {
-      try {
-        let { data, error, status } = await supabase
-          .from('profiles')
-          .select('first_name, last_name, full_name, avatar_url')
-          .eq('id', user.id)
-          .single();
-        if (error && error.code === 'PGRST116') {
-          // No profile row exists, so create one
-          const emptyProfile = {
-            id: user.id,
-            first_name: user.user_metadata?.first_name || '',
-            last_name: user.user_metadata?.last_name || '',
-            full_name: user.user_metadata?.full_name || '',
-            avatar_url: '',
-          };
-          await supabase.from('profiles').insert(emptyProfile);
-          data = emptyProfile;
-        }
-        setProfile(data as UserProfile);
-      } catch (err) {
-        console.error('Profile fetch failed:', err);
+    try {
+      const { data: { user }, error: authError } = await supabase.auth.getUser();
+      
+      // Only proceed if user is authenticated and has a valid session
+      if (authError || !user) {
+        setProfile(null);
+        return;
       }
+
+      // Check if we have a valid session token
+      const session = await supabase.auth.getSession();
+      if (!session.data.session) {
+        setProfile(null);
+        return;
+      }
+
+      let { data, error, status } = await supabase
+        .from('profiles')
+        .select('first_name, last_name, full_name, avatar_url')
+        .eq('id', user.id)
+        .single();
+        
+      if (error && error.code === 'PGRST116') {
+        // No profile row exists, so create one
+        const emptyProfile = {
+          id: user.id,
+          first_name: user.user_metadata?.first_name || '',
+          last_name: user.user_metadata?.last_name || '',
+          full_name: user.user_metadata?.full_name || '',
+          avatar_url: '',
+        };
+        await supabase.from('profiles').insert(emptyProfile);
+        data = emptyProfile;
+      }
+      
+      if (data) {
+        setProfile(data as UserProfile);
+      }
+    } catch (err) {
+      console.error('Profile fetch failed:', err);
+      setProfile(null);
     }
   };
 

@@ -3,7 +3,7 @@ import { FiBell, FiGlobe, FiUser } from 'react-icons/fi';
 
 const Topbar = () => {
   return (
-    <header className="flex items-center justify-between bg-gradient-to-r from-blue-600 to-purple-500 px-6 py-4 shadow-md text-white">
+    <header className="flex flex-col sm:flex-row items-center justify-between bg-gradient-to-r from-blue-600 to-purple-500 px-4 md:px-6 py-4 shadow-md text-white w-full min-w-0">
       <div className="text-xl font-semibold drop-shadow">Welcome to Your Dashboard</div>
 
       <div className="flex items-center space-x-6">

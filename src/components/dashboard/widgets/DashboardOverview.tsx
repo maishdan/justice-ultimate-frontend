@@ -8,6 +8,7 @@ import { Button, IconButton } from '../../ui/button';
 import { BarChart, PieChart } from './Charts';
 import { FaPlus, FaFilePdf, FaFileCsv, FaCar, FaUsers, FaMoneyBill, FaChartLine, FaCog, FaUserCircle } from 'react-icons/fa';
 import { useNavigate } from 'react-router-dom';
+import { supabase } from '../../../lib/supabaseClient';
 
 // Type for recent activity
 interface Activity {
@@ -32,6 +33,8 @@ export default function DashboardOverview() {
   useEffect(() => {
     async function fetchData() {
       setLoading(true);
+      
+      // Set data immediately for fast loading
       setKpis({
         totalSales: 120,
         totalRentals: 45,
@@ -39,14 +42,46 @@ export default function DashboardOverview() {
         totalRevenue: 15000000,
         inventory: 87,
       });
+      
       setRecentActivity([
         { id: 1, type: 'sale', message: 'Sold BMW X5 to Jane Doe', time: '2 min ago' },
         { id: 2, type: 'rental', message: 'Rented Toyota Prado to John Smith', time: '10 min ago' },
         { id: 3, type: 'user', message: 'New user registered: Alice', time: '30 min ago' },
         { id: 4, type: 'car', message: 'Added Mercedes S-Class to inventory', time: '1 hr ago' },
       ]);
-      setLoading(false);
+      
+      // Try to fetch real data in background
+      try {
+        const timeoutPromise = new Promise((_, reject) => 
+          setTimeout(() => reject(new Error('Request timeout')), 3000)
+        );
+
+        // Fetch real data with timeout
+        const dataPromise = Promise.all([
+          supabase.from('profiles').select('count').limit(1),
+          supabase.from('cars').select('count').limit(1),
+          supabase.from('bookings').select('count').limit(1)
+        ]);
+
+        const results = await Promise.race([dataPromise, timeoutPromise]) as any;
+        
+        // Update with real data if available
+        if (results && results.length >= 3) {
+          setKpis(prev => ({
+            ...prev,
+            totalUsers: results[0]?.count || prev.totalUsers,
+            inventory: results[1]?.count || prev.inventory,
+            totalRentals: results[2]?.count || prev.totalRentals,
+          }));
+        }
+      } catch (error) {
+        // Keep using mock data if real data fails
+        console.log('Using mock data for dashboard overview');
+      } finally {
+        setLoading(false);
+      }
     }
+    
     fetchData();
   }, []);
 
@@ -63,9 +98,9 @@ export default function DashboardOverview() {
   const adminPhoto = '/logo.png';
 
   return (
-    <div className="space-y-10 max-w-7xl mx-auto px-2 md:px-6 py-8">
+    <div className="space-y-10 max-w-7xl mx-auto px-2 md:px-6 py-8 w-full min-w-0">
       {/* Header: Profile & Settings */}
-      <div className="flex justify-between items-center mb-2">
+      <div className="flex flex-col md:flex-row justify-between items-center mb-2 gap-4 w-full min-w-0">
         <div />
         <div className="flex items-center gap-4">
           <div className="flex items-center gap-2 bg-white dark:bg-green-900 px-3 py-1 rounded-full shadow hover:shadow-blue-400/60 transition-all cursor-pointer group" onClick={() => navigate('/dashboard/admin/profile')}>
@@ -81,7 +116,7 @@ export default function DashboardOverview() {
       </div>
 
       {/* Top Section: Welcome, Offers, Notifications */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-8 w-full min-w-0">
         <div className="md:col-span-2 flex flex-col gap-8">
           <WelcomeCard user={{ name: 'Daniwest', role: 'Administrator' }} />
           <StatsOverview stats={[
@@ -105,7 +140,7 @@ export default function DashboardOverview() {
       </div>
 
       {/* Quick Actions */}
-      <div className="flex flex-wrap gap-4 justify-center md:justify-start">
+      <div className="flex flex-wrap gap-4 justify-center md:justify-start w-full min-w-0">
         {quickActions.map((action, idx) => (
           <div key={idx} className="relative group">
             <Button
@@ -123,7 +158,7 @@ export default function DashboardOverview() {
       </div>
 
       {/* Insights & Mini-Charts */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-8 w-full min-w-0">
         <Card className="shadow-xl hover:shadow-blue-400/40 transition-all">
           <CardContent>
             <h3 className="font-bold text-lg mb-2 text-blue-700 dark:text-blue-200">Sales & Rentals Trend</h3>
@@ -145,7 +180,7 @@ export default function DashboardOverview() {
       {/* Recent Activity */}
       <div>
         <h3 className="font-bold text-lg mb-4 text-blue-700 dark:text-blue-200">Recent Activity</h3>
-        <div className="bg-white dark:bg-gray-800 rounded-xl shadow divide-y divide-gray-200 dark:divide-gray-700">
+        <div className="bg-white dark:bg-gray-800 rounded-xl shadow divide-y divide-gray-200 dark:divide-gray-700 overflow-x-auto w-full min-w-0">
           {recentActivity.map((activity) => (
             <div key={activity.id} className="flex items-center justify-between px-4 py-3">
               <span className="flex items-center gap-2 font-medium text-gray-800 dark:text-gray-100">

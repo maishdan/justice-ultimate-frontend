@@ -1,9 +1,9 @@
-import React, { useState, useEffect } from 'react';
-import { useLanguage } from '../../context/LanguageContext';
-import {
-  FiHome, FiUser, FiSettings, FiLogOut, FiTruck, FiCalendar, FiCreditCard, FiBell, FiMap, FiGift, FiShield, FiDollarSign, FiBarChart2, FiFileText, FiUsers, FiTool, FiBox, FiClock, FiBriefcase, FiLayers, FiGlobe, FiMenu, FiX, FiZap, FiActivity, FiServer, FiLink, FiInbox
-} from 'react-icons/fi';
+import React, { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { supabase } from '../../lib/supabaseClient'; // Added import for supabase
+import LogoutButton from '../auth/LogoutButton';
+import { FiLogOut, FiMenu, FiX, FiMap, FiShield } from 'react-icons/fi';
+import { useTranslation } from 'react-i18next';
 
 interface SidebarProps {
   activePanel: string;
@@ -12,152 +12,164 @@ interface SidebarProps {
 }
 
 const Sidebar: React.FC<SidebarProps> = ({ activePanel, setActivePanel, admin }) => {
-  const { t } = useLanguage();
+  const { t } = useTranslation();
   const [isCollapsed, setIsCollapsed] = useState(false);
   const [focusedIndex, setFocusedIndex] = useState(-1);
 
-  // Enhanced menu items with icons and descriptions
   const menuItems = [
     { 
-      name: t('dashboard'), 
+      name: 'Dashboard', 
       key: 'dashboard', 
-      icon: <FiHome />, 
+      icon: '🏠', 
       description: 'Main dashboard overview',
       shortcut: 'Alt + 1'
     },
     { 
-      name: t('adminProfile'), 
+      name: 'Admin Profile', 
       key: 'profile', 
-      icon: <FiUser />, 
+      icon: '👤', 
       description: 'Admin profile and settings',
       shortcut: 'Alt + 2'
     },
     { 
-      name: t('carsManagement'), 
+      name: 'Cars Management', 
       key: 'cars', 
-      icon: <FiTruck />, 
-      description: 'Manage vehicle inventory',
+      icon: '🚗', 
+      description: 'Vehicle inventory management',
       shortcut: 'Alt + 3'
     },
     { 
-      name: t('businessHub'), 
+      name: 'Business Hub', 
       key: 'business', 
-      icon: <FiBriefcase />, 
-      description: 'Business analytics and reports',
+      icon: '🏢', 
+      description: 'Business operations and analytics',
       shortcut: 'Alt + 4'
     },
     { 
-      name: t('analytics'), 
+      name: 'Analytics', 
       key: 'analytics', 
-      icon: <FiBarChart2 />, 
+      icon: '📊', 
       description: 'Data analytics and insights',
       shortcut: 'Alt + 5'
     },
     { 
       name: 'Advanced Analytics', 
       key: 'advancedAnalytics', 
-      icon: <FiActivity />, 
-      description: 'Advanced analytics and real-time metrics',
+      icon: '📈', 
+      description: 'Advanced data analysis',
       shortcut: 'Alt + A'
     },
     { 
       name: 'Automation', 
       key: 'automation', 
-      icon: <FiZap />, 
-      description: 'Automation rules and integrations',
+      icon: '⚙️', 
+      description: 'System automation tools',
       shortcut: 'Alt + M'
     },
     { 
       name: 'Notifications', 
       key: 'notifications', 
-      icon: <FiBell />, 
-      description: 'Notification center and alerts',
+      icon: '🔔', 
+      description: 'Notification center',
       shortcut: 'Alt + N'
     },
-    // Inbox button for admin
     { 
       name: 'Inbox', 
       key: 'inbox', 
-      icon: <FiInbox />, 
-      description: 'Admin inbox and messages',
+      icon: '📧', 
+      description: 'Message inbox',
       shortcut: 'Alt + Q'
     },
     { 
       name: 'System Monitor', 
       key: 'monitor', 
-      icon: <FiServer />, 
-      description: 'System health and performance',
+      icon: '🖥️', 
+      description: 'System health monitoring',
       shortcut: 'Alt + S'
     },
     { 
       name: 'Integrations', 
       key: 'integrations', 
-      icon: <FiLink />, 
-      description: 'External service integrations',
+      icon: '🔗', 
+      description: 'Third-party integrations',
       shortcut: 'Alt + I'
     },
     { 
-      name: t('receipts'), 
+      name: 'Receipts', 
       key: 'receipts', 
-      icon: <FiFileText />, 
-      description: 'Generate receipts and documents',
+      icon: '🧾', 
+      description: 'Receipt generation and management',
       shortcut: 'Alt + 6'
     },
     { 
-      name: t('userManagement'), 
+      name: 'User Management', 
       key: 'users', 
-      icon: <FiUsers />, 
-      description: 'Manage system users',
+      icon: '👥', 
+      description: 'User account management',
       shortcut: 'Alt + 7'
     },
     { 
-      name: t('transactions'), 
+      name: 'Transactions', 
       key: 'transactions', 
-      icon: <FiDollarSign />, 
-      description: 'View transaction history',
+      icon: '💰', 
+      description: 'Financial transactions',
       shortcut: 'Alt + 8'
     },
     { 
-      name: t('settings'), 
+      name: 'System Settings', 
       key: 'settings', 
-      icon: <FiSettings />, 
+      icon: '⚙️', 
       description: 'System configuration',
       shortcut: 'Alt + 9'
     },
     { 
-      name: t('staffPanel'), 
+      name: 'Staff Panel', 
       key: 'staff', 
-      icon: <FiTool />, 
-      description: 'Staff management panel',
+      icon: '👨‍💼', 
+      description: 'Staff management and HR',
       shortcut: 'Alt + 0'
     },
     { 
-      name: t('departments'), 
+      name: 'Departments', 
       key: 'departments', 
-      icon: <FiLayers />, 
+      icon: '🏢', 
       description: 'Department management',
       shortcut: 'Alt + D'
     },
     { 
-      name: t('inventory'), 
+      name: 'Inventory', 
       key: 'inventory', 
-      icon: <FiBox />, 
-      description: 'Inventory and stock management',
+      icon: '📦', 
+      description: 'Inventory management system',
       shortcut: 'Alt + I'
     },
     { 
-      name: t('activityLogs'), 
+      name: 'Activity Logs', 
       key: 'logs', 
-      icon: <FiClock />, 
-      description: 'System activity logs',
+      icon: '📋', 
+      description: 'System activity and audit logs',
       shortcut: 'Alt + L'
     },
     { 
-      name: t('branches'), 
+      name: 'Sessions', 
+      key: 'sessions', 
+      icon: '🛡️', 
+      description: 'Active session management',
+      shortcut: 'Alt + S'
+    },
+    { 
+      name: 'Branches', 
       key: 'branches', 
-      icon: <FiGlobe />, 
-      description: 'Branch locations management',
+      icon: '🏢', 
+      description: 'Branch management and locations',
       shortcut: 'Alt + B'
+    },
+    { 
+      name: 'Role Test', 
+      key: 'roleTest', 
+      icon: '🧪', 
+      description: 'Test role separation and dashboard access',
+      shortcut: 'Alt + R'
     },
   ];
 
@@ -199,15 +211,6 @@ const Sidebar: React.FC<SidebarProps> = ({ activePanel, setActivePanel, admin })
     return () => document.removeEventListener('keydown', handleKeyDown);
   }, [focusedIndex, menuItems, setActivePanel]);
 
-  // Handle logout with confirmation
-  const handleLogout = () => {
-    if (window.confirm('Are you sure you want to logout? This will end your session.')) {
-      localStorage.clear();
-      sessionStorage.clear();
-      window.location.href = '/login';
-    }
-  };
-
   // Greeting logic
   function getGreeting() {
     const hour = new Date().getHours();
@@ -246,7 +249,7 @@ const Sidebar: React.FC<SidebarProps> = ({ activePanel, setActivePanel, admin })
           clipPath: 'ellipse(60% 10% at 0% 0%)',
         }}
         transition={{ duration: 0.7, type: 'spring', bounce: 0.32 }}
-        className={`dashboard-sidebar fixed top-0 left-0 h-full z-40 bg-gradient-to-br from-blue-900/90 via-green-900/90 to-black/95 backdrop-blur-2xl shadow-2xl border-r-4 border-yellow-400/80 ${isCollapsed ? 'w-20' : 'w-80'} transition-all`}
+        className={`dashboard-sidebar fixed top-0 left-0 h-full z-50 bg-gradient-to-br from-blue-900/90 via-green-900/90 to-black/95 backdrop-blur-2xl shadow-2xl border-r-4 border-yellow-400/80 w-64 md:w-80 transition-all flex flex-col min-w-0 w-full md:static md:relative md:z-auto md:h-auto md:border-none md:shadow-none md:bg-none`}
         role="navigation"
         aria-label="Main navigation menu"
       >
@@ -371,24 +374,32 @@ const Sidebar: React.FC<SidebarProps> = ({ activePanel, setActivePanel, admin })
         >
           {!isCollapsed && (
             <div className="mb-4 p-4 bg-gradient-to-r from-green-800/60 via-blue-900/60 to-green-900/60 rounded-2xl shadow-inner">
-              <div className="flex items-center gap-2 text-base text-yellow-200 font-bold">
-                <div className="w-3 h-3 bg-green-400 rounded-full animate-pulse"></div>
-                <span>Session Active</span>
-              </div>
-              <div className="text-xs text-yellow-300 mt-1 font-mono">
-                {localStorage.getItem('sessionId')?.slice(-8) || 'N/A'}
-              </div>
+              <button
+                onClick={() => setActivePanel('sessions')}
+                className="w-full text-left hover:bg-green-700/40 rounded-lg p-2 transition-colors"
+              >
+                <div className="flex items-center gap-2 text-base text-yellow-200 font-bold">
+                  <div className="w-3 h-3 bg-green-400 rounded-full animate-pulse"></div>
+                  <span>Session Active</span>
+                </div>
+                <div className="text-xs text-yellow-300 mt-1 font-mono">
+                  {localStorage.getItem('sessionId')?.slice(-8) || 'N/A'}
+                </div>
+              </button>
             </div>
           )}
-          <button
-            onClick={handleLogout}
+          <LogoutButton
+            variant="destructive"
+            size="lg"
+            showConfirmation={true}
+            clearAllSessions={false}
+            fastMode={true}
             className="w-full flex items-center justify-center gap-3 px-5 py-3 rounded-2xl bg-gradient-to-r from-red-600 via-red-700 to-red-800 hover:from-red-700 hover:to-red-900 text-white transition-colors font-extrabold text-lg shadow-xl border-2 border-red-400 focus:ring-2 focus:ring-red-300"
-            aria-label="Logout from system"
-            style={{ minHeight: 48 }}
+            data-testid="logout-button"
           >
             <FiLogOut size={26} />
             {!isCollapsed && <span>{t('logout')}</span>}
-        </button>
+          </LogoutButton>
         </motion.div>
 
         {/* Accessibility announcements */}

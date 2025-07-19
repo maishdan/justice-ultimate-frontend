@@ -28,6 +28,8 @@ import { motion } from 'framer-motion';
 import InboxPanel from '../../components/dashboard/widgets/InboxPanel';
 import SecurityEventsTable from '../../components/security/SecurityEventsTable';
 import ProtectedRoute from '../../components/auth/ProtectedRoute';
+import SessionManager from '../../components/dashboard/widgets/SessionManager';
+import RoleTestPanel from '../../components/RoleTestPanel';
 
 // Enhanced accessibility and performance hooks
 const useKeyboardNavigation = () => {
@@ -35,11 +37,50 @@ const useKeyboardNavigation = () => {
   
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.altKey && e.key >= '1' && e.key <= '9') {
-        const panels = ['dashboard', 'profile', 'cars', 'business', 'analytics', 'receipts', 'users', 'transactions', 'settings'];
-        const index = parseInt(e.key) - 1;
-        if (panels[index]) {
-          setFocusedPanel(panels[index]);
+      if (e.altKey) {
+        const key = e.key.toLowerCase();
+        
+        // Number shortcuts (Alt + 1-9)
+        if (key >= '1' && key <= '9') {
+          const panels = ['dashboard', 'profile', 'cars', 'business', 'analytics', 'receipts', 'users', 'transactions', 'settings'];
+          const index = parseInt(key) - 1;
+          if (panels[index]) {
+            setFocusedPanel(panels[index]);
+          }
+        }
+        
+        // Letter shortcuts
+        switch (key) {
+          case 'a':
+            setFocusedPanel('advancedAnalytics');
+            break;
+          case 'm':
+            setFocusedPanel('automation');
+            break;
+          case 'n':
+            setFocusedPanel('notifications');
+            break;
+          case 'q':
+            setFocusedPanel('inbox');
+            break;
+          case 's':
+            setFocusedPanel('sessions');
+            break;
+          case 'i':
+            setFocusedPanel('integrations');
+            break;
+          case 'l':
+            setFocusedPanel('logs');
+            break;
+          case 'b':
+            setFocusedPanel('branches');
+            break;
+          case 'd':
+            setFocusedPanel('departments');
+            break;
+          case '0':
+            setFocusedPanel('staff');
+            break;
         }
       }
     };
@@ -126,6 +167,8 @@ const PANEL_MAP: Record<string, React.ReactNode> = {
   inventory: <InventoryPanelComp />,
   logs: <ActivityLogs />,
   branches: <BranchesPanelComp />,
+  sessions: <SessionManager />,
+  roleTest: <RoleTestPanel />,
 };
 
 export default function AdminDashboard() {

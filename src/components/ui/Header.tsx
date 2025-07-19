@@ -11,6 +11,8 @@ import logo from "../../assets/logo.png";
 import { useTheme } from '../../context/ThemeContext';
 import { useLanguage } from '../../context/LanguageContext';
 import { useTranslation } from 'react-i18next';
+import { supabase } from '../../lib/supabaseClient'; // Added supabase import
+import { secureLogout, fastLogout } from '../../lib/authUtils';
 
 export default function Header() {
   const { darkMode, setDarkMode } = useTheme();
@@ -65,10 +67,20 @@ export default function Header() {
     }, 500);
   };
 
-  const handleLogout = () => {
-    localStorage.clear();
-    sessionStorage.clear();
-    navigate("/login");
+  const handleLogout = async () => {
+    // Show confirmation dialog
+    const confirmed = window.confirm('Are you sure you want to logout? This will end your current session.');
+    if (!confirmed) return;
+
+    // Immediate visual feedback
+    const logoutButton = document.querySelector('[data-testid="header-logout-button"]') as HTMLButtonElement;
+    if (logoutButton) {
+      logoutButton.disabled = true;
+      logoutButton.textContent = 'Logging out...';
+    }
+    
+    // Use fast logout for immediate response
+    fastLogout('/login');
   };
 
   const isAuthenticated = Boolean(localStorage.getItem("token") || localStorage.getItem("authToken"));
@@ -82,21 +94,12 @@ export default function Header() {
 
   const handleDashboardNavigation = () => {
     const userRole = getUserRole();
-    switch (userRole) {
-      case 'admin':
-        navigate('/dashboard/admin');
-        break;
-      case 'staff':
-        navigate('/dashboard/staff');
-        break;
-      case 'mechanic':
-        navigate('/dashboard/mechanic');
-        break;
-      case 'customer':
-        navigate('/dashboard/customer');
-        break;
-      default:
-        navigate('/dashboard/admin');
+    if (userRole === 'admin') {
+      navigate('/dashboard/admin');
+    } else if (userRole === 'customer') {
+      navigate('/dashboard/customer');
+    } else {
+      navigate('/dashboard/guest');
     }
   };
 
@@ -204,7 +207,11 @@ export default function Header() {
 
           {isAuthenticated && (
             <div className="relative group ml-2">
-              <button onClick={handleLogout} className="flex items-center justify-center p-1 sm:p-2 rounded hover:bg-red-100 dark:hover:bg-red-900 transition">
+              <button 
+                onClick={handleLogout} 
+                data-testid="header-logout-button"
+                className="flex items-center justify-center p-1 sm:p-2 rounded hover:bg-red-100 dark:hover:bg-red-900 transition"
+              >
                 <LogOut className="w-4 h-4 sm:w-6 sm:h-6 text-gray-700 dark:text-gray-200 hover:text-red-600 cursor-pointer" />
               </button>
               <div className="absolute -top-8 left-1/2 -translate-x-1/2 bg-black text-white text-xs px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition whitespace-nowrap z-20">

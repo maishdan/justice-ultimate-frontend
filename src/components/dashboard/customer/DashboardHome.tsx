@@ -122,10 +122,10 @@ export default function DashboardHome() {
   ];
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 w-full min-w-0">
       {/* Welcome Section */}
-      <Card className="bg-gradient-to-r from-blue-600 to-purple-600 text-white">
-        <CardContent className="p-6">
+      <Card className="bg-gradient-to-r from-blue-600 to-purple-600 text-white w-full min-w-0">
+        <CardContent className="p-6 w-full min-w-0">
           <div className="flex justify-between items-start">
             <div className="flex items-center gap-6">
               {profile?.avatar_url ? (
@@ -171,9 +171,9 @@ export default function DashboardHome() {
       </Card>
 
       {/* Stats Overview */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-4">
-        <Card className="bg-white hover:shadow-lg transition-shadow">
-          <CardContent className="p-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-6 gap-4 w-full min-w-0">
+        <Card className="bg-white hover:shadow-lg transition-shadow w-full min-w-0">
+          <CardContent className="p-4 w-full min-w-0">
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm text-gray-600">Total Bookings</p>
@@ -184,8 +184,8 @@ export default function DashboardHome() {
           </CardContent>
         </Card>
 
-        <Card className="bg-white hover:shadow-lg transition-shadow">
-          <CardContent className="p-4">
+        <Card className="bg-white hover:shadow-lg transition-shadow w-full min-w-0">
+          <CardContent className="p-4 w-full min-w-0">
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm text-gray-600">Active Rentals</p>
@@ -196,8 +196,8 @@ export default function DashboardHome() {
           </CardContent>
         </Card>
 
-        <Card className="bg-white hover:shadow-lg transition-shadow">
-          <CardContent className="p-4">
+        <Card className="bg-white hover:shadow-lg transition-shadow w-full min-w-0">
+          <CardContent className="p-4 w-full min-w-0">
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm text-gray-600">Total Spent</p>
@@ -208,8 +208,8 @@ export default function DashboardHome() {
           </CardContent>
         </Card>
 
-        <Card className="bg-white hover:shadow-lg transition-shadow">
-          <CardContent className="p-4">
+        <Card className="bg-white hover:shadow-lg transition-shadow w-full min-w-0">
+          <CardContent className="p-4 w-full min-w-0">
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm text-gray-600">Upcoming</p>
@@ -220,8 +220,8 @@ export default function DashboardHome() {
           </CardContent>
         </Card>
 
-        <Card className="bg-white hover:shadow-lg transition-shadow">
-          <CardContent className="p-4">
+        <Card className="bg-white hover:shadow-lg transition-shadow w-full min-w-0">
+          <CardContent className="p-4 w-full min-w-0">
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm text-gray-600">Favorites</p>
@@ -232,8 +232,8 @@ export default function DashboardHome() {
           </CardContent>
         </Card>
 
-        <Card className="bg-white hover:shadow-lg transition-shadow">
-          <CardContent className="p-4">
+        <Card className="bg-white hover:shadow-lg transition-shadow w-full min-w-0">
+          <CardContent className="p-4 w-full min-w-0">
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm text-gray-600">Rating</p>
@@ -246,10 +246,10 @@ export default function DashboardHome() {
       </div>
 
       {/* Quick Actions */}
-      <Card>
-        <CardContent className="p-6">
+      <Card className="w-full min-w-0">
+        <CardContent className="p-6 w-full min-w-0 overflow-x-auto">
           <h2 className="text-xl font-semibold mb-4">Quick Actions</h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 w-full min-w-0">
             {quickActions.map((action, index) => (
               <Button
                 key={index}
@@ -268,10 +268,10 @@ export default function DashboardHome() {
       </Card>
 
       {/* Recent Activity & Upcoming Events */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 w-full min-w-0">
         {/* Recent Activity */}
-        <Card>
-          <CardContent className="p-6">
+        <Card className="w-full min-w-0">
+          <CardContent className="p-6 w-full min-w-0">
             <h2 className="text-xl font-semibold mb-4">Recent Activity</h2>
             <div className="space-y-4">
               {recentActivity.map((activity, index) => (
@@ -301,8 +301,8 @@ export default function DashboardHome() {
         </Card>
 
         {/* Upcoming Events */}
-        <Card>
-          <CardContent className="p-6">
+        <Card className="w-full min-w-0">
+          <CardContent className="p-6 w-full min-w-0">
             <h2 className="text-xl font-semibold mb-4">Upcoming Events</h2>
             <div className="space-y-4">
               <div className="p-4 bg-blue-50 rounded-lg border-l-4 border-blue-500">
@@ -343,10 +343,10 @@ export default function DashboardHome() {
       </div>
 
       {/* Featured Vehicles */}
-      <Card>
-        <CardContent className="p-6">
+      <Card className="w-full min-w-0">
+        <CardContent className="p-6 w-full min-w-0">
           <h2 className="text-xl font-semibold mb-4">Recommended for You</h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 w-full min-w-0">
             {[1, 2, 3].map((i) => (
               <Card key={i} className="overflow-hidden hover:shadow-lg transition-shadow">
                 <div className="h-48 bg-gray-200 relative">

@@ -1,15 +1,17 @@
-import { BrowserRouter as Router, Routes, Route, useLocation } from "react-router-dom";
+import { BrowserRouter as Router, Routes, Route, useLocation, Navigate } from "react-router-dom";
 import { useEffect } from "react";
 import React from 'react';
 
 import ProtectedRoute from "./routes/ProtectedRoute";
 import PrivateRoute from "./routes/PrivateRoute";
 import AllCarsShowcase from "./pages/AllCarsShowcase";
+import ErrorBoundary from "./components/ErrorBoundary";
 
 import Header from "./components/ui/Header";
 import LandingPage from "./pages/LandingPage";
 import LoginPage from "./pages/LoginPage";
 import RegisterPage from "./pages/RegisterPage";
+import SelectRole from "./pages/SelectRole";
 import Services from "./pages/Services";
 import About from "./pages/About";
 import Contact from "./pages/Contact";
@@ -32,6 +34,7 @@ import ResetPassword from "./pages/ResetPassword";
 import ProfilePage from "./pages/ProfilePage";
 import CarDetailPage from "./pages/CarDetailPage";
 import SetNewPassword from './pages/SetNewPassword';
+import Setup2FA from './pages/Setup2FA';
 import { UserProfileProvider } from './context/UserProfileContext';
 import { ThemeProvider } from './context/ThemeContext';
 import { LanguageProvider } from './context/LanguageContext';
@@ -78,66 +81,78 @@ function App() {
       <div className="min-h-screen transition-colors duration-300">
         <Header />
 
-        <main className="pt-16">
-          <Routes>
-            <Route path="/" element={<LandingPage />} />
-            <Route path="/services" element={<Services />} />
-            <Route path="/about" element={<About />} />
-            <Route path="/news" element={<News />} />
-            <Route path="/success-stories" element={<SuccessStories />} />
-            <Route path="/contact" element={<Contact />} />
-            <Route path="/login" element={<LoginPage />} />
-            <Route path="/apply-financing" element={<ApplyForFinancing />} />
-            <Route path="/register" element={<RegisterPage />} />
-            <Route path="/terms" element={<Terms />} />
-            <Route path="/privacy" element={<PrivacyPolicy />} />
-            <Route path="/cookies" element={<Cookies />} />
-            <Route path="/book-test-drive" element={<BookTestDrive />} />
-            <Route path="/vehicle-catalogue" element={<VehicleCatalogue />} />
-            <Route path="/reset-password" element={<ResetPassword />} />
-            <Route path="/profile" element={<ProfilePage />} />
-            <Route path="/car/:id" element={<CarDetailPage />} />
-            <Route path="/set-new-password" element={<SetNewPassword />} />
+        <ErrorBoundary>
+          <main className="pt-16">
+            <Routes>
+              <Route path="/" element={<LandingPage />} />
+              <Route path="/services" element={<Services />} />
+              <Route path="/about" element={<About />} />
+              <Route path="/news" element={<News />} />
+              <Route path="/success-stories" element={<SuccessStories />} />
+              <Route path="/contact" element={<Contact />} />
+              <Route path="/login" element={<LoginPage />} />
+              <Route path="/apply-financing" element={<ApplyForFinancing />} />
+              <Route path="/register" element={<RegisterPage />} />
+              <Route path="/select-role" element={<SelectRole />} />
+              <Route path="/terms" element={<Terms />} />
+              <Route path="/privacy" element={<PrivacyPolicy />} />
+              <Route path="/cookies" element={<Cookies />} />
+              <Route path="/book-test-drive" element={<BookTestDrive />} />
+              <Route path="/vehicle-catalogue" element={<VehicleCatalogue />} />
+              <Route path="/reset-password" element={<ResetPassword />} />
+              <Route path="/profile" element={<ProfilePage />} />
+              <Route path="/car/:id" element={<CarDetailPage />} />
+              <Route path="/set-new-password" element={<SetNewPassword />} />
+              <Route path="/setup-2fa" element={<Setup2FA />} />
 
-            {/* ✅ Dynamic Car Details Route */}
-           <Route path="/all-cars-showcase" element={<AllCarsShowcase />} />
-            
+              {/* ✅ Dynamic Car Details Route */}
+             <Route path="/all-cars-showcase" element={<AllCarsShowcase />} />
+              
 
-            {/* Dashboards */}
-            <Route path="/dashboard/admin" element={<AdminDashboard />} />
-            <Route path="/dashboard/staff" element={
-              <ProtectedRoute>
-                <PrivateRoute>
+              {/* Obfuscated dashboard routes for extra obscurity (security by obscurity is not primary defense) */}
+              <Route path="/secure-admin-dashboard" element={
+                <ProtectedRoute requiredRole="admin">
+                  <AdminDashboard />
+                </ProtectedRoute>
+              } />
+              <Route path="/secure-staff-dashboard" element={
+                <ProtectedRoute requiredRole="staff">
                   <StaffDashboard />
-                </PrivateRoute>
-              </ProtectedRoute>
-            } />
-            <Route path="/dashboard/mechanic" element={
-              <ProtectedRoute>
-                <PrivateRoute>
+                </ProtectedRoute>
+              } />
+              <Route path="/secure-mechanic-dashboard" element={
+                <ProtectedRoute requiredRole="mechanic">
                   <MechanicDashboard />
-                </PrivateRoute>
-              </ProtectedRoute>
-            } />
-            <Route path="/dashboard/customer" element={
-              <ProtectedRoute>
-                <PrivateRoute>
+                </ProtectedRoute>
+              } />
+              <Route path="/secure-customer-dashboard" element={
+                <ProtectedRoute requiredRole="customer">
                   <CustomerDashboard />
-                </PrivateRoute>
-              </ProtectedRoute>
-            } />
-            <Route path="/dashboard/guest" element={<GuestDashboard />} />
+                </ProtectedRoute>
+              } />
+              <Route path="/secure-guest-dashboard" element={<GuestDashboard />} />
 
-            {/* ✅ Error Routes */}
-            <Route path="/401" element={<Unauthorized401 />} />
-            <Route path="/403" element={<Forbidden403 />} />
-            <Route path="/500" element={<ServerError500 />} />
-            <Route path="/error" element={<GenericErrorPage />} />
+              {/* Legacy dashboard routes: redirect to obfuscated paths if authenticated, else to login */}
+              <Route path="/dashboard/admin" element={<Navigate to="/secure-admin-dashboard" replace />} />
+              <Route path="/dashboard/staff" element={<Navigate to="/secure-staff-dashboard" replace />} />
+              <Route path="/dashboard/mechanic" element={<Navigate to="/secure-mechanic-dashboard" replace />} />
+              <Route path="/dashboard/customer" element={<Navigate to="/secure-customer-dashboard" replace />} />
+              <Route path="/dashboard/guest" element={<Navigate to="/secure-guest-dashboard" replace />} />
 
-            {/* ✅ Catch-all fallback */}
-            <Route path="*" element={<NotFound404 />} />
-          </Routes>
-        </main>
+              {/* Catch-all for /dashboard/* to prevent enumeration */}
+              <Route path="/dashboard/*" element={<Navigate to="/login" replace />} />
+
+              {/* ✅ Error Routes */}
+              <Route path="/401" element={<Unauthorized401 />} />
+              <Route path="/403" element={<Forbidden403 />} />
+              <Route path="/500" element={<ServerError500 />} />
+              <Route path="/error" element={<GenericErrorPage />} />
+
+              {/* ✅ Catch-all fallback */}
+              <Route path="*" element={<NotFound404 />} />
+            </Routes>
+          </main>
+        </ErrorBoundary>
 
         <ChatBotWidget />
       </div>
@@ -147,31 +162,33 @@ function App() {
 
 export default function WrappedApp() {
   return (
-    <Router>
+    <Router future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
       <ScrollToTop />
       <ThemeProvider>
         <LanguageProvider>
-          <div
-            className="min-h-screen relative"
-            style={{
-              backgroundImage: "url('/images/bg-landing.png')",
-              backgroundSize: 'cover',
-              backgroundPosition: 'center',
-              backgroundRepeat: 'no-repeat',
-            }}
-          >
-            {/* Overlay for brand color harmony and readability */}
+          <ErrorBoundary>
             <div
-              className="absolute inset-0 pointer-events-none"
+              className="min-h-screen relative"
               style={{
-                background: 'linear-gradient(135deg, rgba(11,31,58,0.7) 0%, rgba(34,197,94,0.5) 100%)',
-                zIndex: 0,
+                backgroundImage: "url('/images/bg-landing.png')",
+                backgroundSize: 'cover',
+                backgroundPosition: 'center',
+                backgroundRepeat: 'no-repeat',
               }}
-            />
-            <div className="relative z-10">
-              <App />
+            >
+              {/* Overlay for brand color harmony and readability */}
+              <div
+                className="absolute inset-0 pointer-events-none"
+                style={{
+                  background: 'linear-gradient(135deg, rgba(11,31,58,0.7) 0%, rgba(34,197,94,0.5) 100%)',
+                  zIndex: 0,
+                }}
+              />
+              <div className="relative z-10">
+                <App />
+              </div>
             </div>
-          </div>
+          </ErrorBoundary>
         </LanguageProvider>
       </ThemeProvider>
     </Router>

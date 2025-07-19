@@ -33,6 +33,9 @@ import Community from '../components/dashboard/customer/features/Community';
 import Refer from '../components/dashboard/customer/features/Refer';
 import Logout from '../components/dashboard/customer/features/Logout';
 import ProtectedRoute from '../components/auth/ProtectedRoute';
+import { secureLogout, fastLogout } from '../lib/authUtils';
+import { FiMenu, FiX } from 'react-icons/fi';
+
 const MENU = [
   { key: 'dashboard', label: 'Dashboard Overview', icon: '🏠' },
   { key: 'profile', label: 'Profile & Settings', icon: '👤' },
@@ -59,6 +62,7 @@ export default function CustomerDashboard() {
   useAuth();
   const [user, setUser] = useState<{ name?: string; email?: string } | undefined>(undefined);
   const [activePanel, setActivePanel] = useState('dashboard');
+  const [sidebarOpen, setSidebarOpen] = useState(false);
 
   useEffect(() => {
     async function fetchUser() {
@@ -132,7 +136,10 @@ export default function CustomerDashboard() {
       break;
     case 'logout':
       mainPanel = <Logout />;
-      setTimeout(() => window.location.href = '/logout', 1200);
+      // Use fast logout for immediate response
+      setTimeout(() => {
+        fastLogout('/login');
+      }, 100); // Very fast logout
       break;
     default:
       mainPanel = <Overview />;
@@ -140,8 +147,16 @@ export default function CustomerDashboard() {
 
   return (
     <div className="min-h-screen w-full bg-gradient-to-br from-blue-600 to-purple-500 text-white flex flex-col md:flex-row">
+      {/* Mobile Menu Toggle */}
+      <button
+        onClick={() => setSidebarOpen(!sidebarOpen)}
+        className="md:hidden fixed top-4 left-4 z-50 p-2 bg-white/20 rounded-lg backdrop-blur-sm"
+      >
+        {sidebarOpen ? <FiX size={24} /> : <FiMenu size={24} />}
+      </button>
+
       {/* Sidebar Menu */}
-      <aside className="w-full md:w-72 bg-gradient-to-r from-blue-600 to-purple-500 text-white min-h-screen p-6 shadow-xl flex flex-col fixed md:static z-40 md:z-auto top-0 left-0 md:relative transition-transform duration-300 md:translate-x-0 translate-x-[-100%] md:translate-x-0" style={{transform: sidebarOpen ? 'translateX(0)' : ''}}>
+      <aside className={`w-full md:w-72 bg-gradient-to-r from-blue-600 to-purple-500 text-white min-h-screen p-6 shadow-xl flex flex-col fixed md:static z-40 md:z-auto top-0 left-0 md:relative transition-transform duration-300 ${sidebarOpen ? 'translate-x-0' : 'translate-x-[-100%] md:translate-x-0'}`}>
         <div className="text-2xl font-extrabold mb-10 text-center tracking-wide drop-shadow-lg">Justice Ultimate Automobiles</div>
         <nav className="flex-1">
           <ul className="space-y-2">
@@ -149,7 +164,10 @@ export default function CustomerDashboard() {
               <li key={item.key}>
                 <button
                   className={`w-full flex items-center gap-3 p-3 rounded-lg transition-all font-semibold text-lg hover:bg-white/10 hover:shadow-lg hover:scale-[1.03] ${activePanel === item.key ? 'bg-white/20 shadow-lg scale-[1.03] text-yellow-400 ring-2 ring-yellow-400' : 'bg-white/5 text-white'}`}
-                  onClick={() => setActivePanel(item.key)}
+                  onClick={() => {
+                    setActivePanel(item.key);
+                    setSidebarOpen(false); // Close mobile menu when item is clicked
+                  }}
                 >
                   <span className="text-xl">{item.icon}</span>
                   <span>{item.label}</span>
@@ -160,6 +178,15 @@ export default function CustomerDashboard() {
         </nav>
         <div className="mt-10 text-center text-xs text-blue-100">&copy; {new Date().getFullYear()} Justice Ultimate Automobiles</div>
       </aside>
+
+      {/* Overlay for mobile */}
+      {sidebarOpen && (
+        <div 
+          className="md:hidden fixed inset-0 bg-black/50 z-30"
+          onClick={() => setSidebarOpen(false)}
+        />
+      )}
+
       {/* Main Content */}
       <div className="flex-1 w-full min-w-0 flex flex-col overflow-x-auto">
         <Topbar />

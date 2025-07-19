@@ -97,7 +97,15 @@ export default function RegisterPage() {
       } else {
         setSuccess(true);
         toast.success("Registration successful! Please check your email to confirm your account.");
-        localStorage.removeItem("guestSession"); // <-- Ensure guestSession is cleared
+        localStorage.removeItem("guestSession");
+        // Optionally, you can redirect to the correct dashboard after registration if auto-login is enabled
+        // let dashboardPath = '/secure-customer-dashboard';
+        // if (role === 'admin') dashboardPath = '/secure-admin-dashboard';
+        // else if (role === 'staff') dashboardPath = '/secure-staff-dashboard';
+        // else if (role === 'mechanic') dashboardPath = '/secure-mechanic-dashboard';
+        // else if (role === 'customer') dashboardPath = '/secure-customer-dashboard';
+        // else dashboardPath = '/secure-guest-dashboard';
+        // navigate(dashboardPath, { replace: true });
       }
     } catch (err: any) {
       setError(err.message || "Registration failed");
