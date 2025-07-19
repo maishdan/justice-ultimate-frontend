@@ -7,7 +7,7 @@ import "react-toastify/dist/ReactToastify.css";
 import allCountries from "../data/allCountries";
 import zxcvbn from 'zxcvbn';
 import { FaGoogle, FaGithub } from 'react-icons/fa';
-import { useRef } from 'react';
+import { useRef, useEffect } from 'react';
 
 const countries = [
   { code: "KE", name: "Kenya", dial: "+254" },
@@ -38,6 +38,23 @@ function ContinueAsGuestButton() {
 
 export default function RegisterPage() {
   const audioRef = useRef<HTMLAudioElement | null>(null);
+  
+  // Initialize reCAPTCHA v3
+  useEffect(() => {
+    // Load reCAPTCHA v3 script
+    const script = document.createElement('script');
+    script.src = `https://www.google.com/recaptcha/api.js?render=6Lf2HYgrAAAAAGLA2Pdh_EgRNFLVNtFr8wChye0T`;
+    script.async = true;
+    script.defer = true;
+    document.head.appendChild(script);
+    
+    return () => {
+      if (document.head.contains(script)) {
+        document.head.removeChild(script);
+      }
+    };
+  }, []);
+  
   const playCling = () => {
     if (audioRef.current) {
       audioRef.current.currentTime = 0;
@@ -55,12 +72,42 @@ export default function RegisterPage() {
   const [success, setSuccess] = useState(false);
   const [confirmPassword, setConfirmPassword] = useState("");
   const [passwordStrength, setPasswordStrength] = useState(0);
+  const [captchaVerified, setCaptchaVerified] = useState(false);
+  const [captchaLoading, setCaptchaLoading] = useState(false);
 
   const handleRegister = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
     setError("");
     setSuccess(false);
+
+    let recaptchaToken: string;
+    
+    try {
+      setCaptchaLoading(true);
+      // Execute reCAPTCHA v3
+      recaptchaToken = await new Promise<string>((resolve, reject) => {
+        if (typeof window !== 'undefined' && (window as any).grecaptcha) {
+          (window as any).grecaptcha.ready(() => {
+            (window as any).grecaptcha.execute('6Lf2HYgrAAAAAGLA2Pdh_EgRNFLVNtFr8wChye0T', { action: 'register' })
+              .then((token: string) => resolve(token))
+              .catch((error: any) => reject(error));
+          });
+        } else {
+          reject(new Error('reCAPTCHA not loaded'));
+        }
+      });
+      
+      setCaptchaVerified(true);
+      setCaptchaLoading(false);
+    } catch (error) {
+      setCaptchaLoading(false);
+      setError('reCAPTCHA verification failed. Please try again.');
+      toast.error('reCAPTCHA verification failed. Please try again.');
+      setLoading(false);
+      return;
+    }
+
     // Password strength check
     const strong =
       password.length >= 8 &&
@@ -78,7 +125,26 @@ export default function RegisterPage() {
       setLoading(false);
       return;
     }
+
     try {
+      // Verify reCAPTCHA with backend
+      const recaptchaResponse = await fetch('http://localhost:5001/api/verify-recaptcha', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          'g-recaptcha-response': recaptchaToken
+        }),
+      });
+
+      if (!recaptchaResponse.ok) {
+        setError('reCAPTCHA verification failed. Please try again.');
+        toast.error('reCAPTCHA verification failed. Please try again.');
+        setLoading(false);
+        return;
+      }
+
       const { data, error } = await supabase.auth.signUp({
         email,
         password,
@@ -98,20 +164,13 @@ export default function RegisterPage() {
         setSuccess(true);
         toast.success("Registration successful! Please check your email to confirm your account.");
         localStorage.removeItem("guestSession");
-        // Optionally, you can redirect to the correct dashboard after registration if auto-login is enabled
-        // let dashboardPath = '/secure-customer-dashboard';
-        // if (role === 'admin') dashboardPath = '/secure-admin-dashboard';
-        // else if (role === 'staff') dashboardPath = '/secure-staff-dashboard';
-        // else if (role === 'mechanic') dashboardPath = '/secure-mechanic-dashboard';
-        // else if (role === 'customer') dashboardPath = '/secure-customer-dashboard';
-        // else dashboardPath = '/secure-guest-dashboard';
-        // navigate(dashboardPath, { replace: true });
       }
     } catch (err: any) {
       setError(err.message || "Registration failed");
       toast.error(err.message || "Registration failed");
     } finally {
       setLoading(false);
+      setCaptchaVerified(false);
     }
   };
 
@@ -230,12 +289,46 @@ export default function RegisterPage() {
               />
             </div>
             {error && <div className="text-red-600 text-sm">{error}</div>}
+            
+            {/* reCAPTCHA v3 Status Indicator */}
+            <div className="mb-4">
+              <div className="flex items-center justify-center space-x-2 p-3 bg-gray-50 rounded-lg border">
+                {captchaLoading ? (
+                  <>
+                    <div className="animate-spin h-4 w-4 border-2 border-blue-500 border-t-transparent rounded-full"></div>
+                    <span className="text-sm text-gray-600">Verifying reCAPTCHA...</span>
+                  </>
+                ) : captchaVerified ? (
+                  <>
+                    <div className="h-4 w-4 bg-green-500 rounded-full flex items-center justify-center">
+                      <svg className="h-3 w-3 text-white" fill="currentColor" viewBox="0 0 20 20">
+                        <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                      </svg>
+                    </div>
+                    <span className="text-sm text-green-600">reCAPTCHA verified ✓</span>
+                  </>
+                ) : (
+                  <>
+                    <div className="h-4 w-4 bg-gray-300 rounded-full"></div>
+                    <span className="text-sm text-gray-500">reCAPTCHA verification required</span>
+                  </>
+                )}
+              </div>
+              <p className="text-xs text-gray-500 text-center mt-2">
+                This site is protected by reCAPTCHA v3
+              </p>
+            </div>
+            
             <button
               type="submit"
-              disabled={loading}
-              className="w-full py-2 px-4 bg-blue-600 text-white rounded hover:bg-blue-700 transition font-semibold"
+              disabled={loading || captchaLoading}
+              className={`w-full py-2 px-4 rounded font-semibold transition ${
+                loading || captchaLoading 
+                  ? 'bg-gray-400 text-gray-600 cursor-not-allowed' 
+                  : 'bg-blue-600 text-white hover:bg-blue-700'
+              }`}
             >
-              {loading ? "Registering..." : "Register"}
+              {loading ? "Registering..." : captchaLoading ? "Verifying..." : "Register"}
             </button>
             
             <ContinueAsGuestButton />

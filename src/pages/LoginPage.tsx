@@ -6,7 +6,7 @@ import { Eye, EyeOff } from 'lucide-react';
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import { FaGoogle, FaGithub } from 'react-icons/fa';
-import { useRef } from 'react';
+import { useRef, useEffect } from 'react';
 
 function ContinueAsGuestButton() {
   const navigate = useNavigate();
@@ -28,6 +28,23 @@ function ContinueAsGuestButton() {
 
 const Login = () => {
   const audioRef = useRef<HTMLAudioElement | null>(null);
+  
+  // Initialize reCAPTCHA v3
+  useEffect(() => {
+    // Load reCAPTCHA v3 script
+    const script = document.createElement('script');
+    script.src = `https://www.google.com/recaptcha/api.js?render=6Lf2HYgrAAAAAGLA2Pdh_EgRNFLVNtFr8wChye0T`;
+    script.async = true;
+    script.defer = true;
+    document.head.appendChild(script);
+    
+    return () => {
+      if (document.head.contains(script)) {
+        document.head.removeChild(script);
+      }
+    };
+  }, []);
+  
   const playCling = () => {
     if (audioRef.current) {
       try {
@@ -46,11 +63,40 @@ const Login = () => {
   const [showPass, setShowPass] = useState(false);
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
+  const [captchaVerified, setCaptchaVerified] = useState(false);
+  const [captchaLoading, setCaptchaLoading] = useState(false);
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
     setError('');
+    
+    let recaptchaToken: string;
+    
+    try {
+      setCaptchaLoading(true);
+      // Execute reCAPTCHA v3
+      recaptchaToken = await new Promise<string>((resolve, reject) => {
+        if (typeof window !== 'undefined' && (window as any).grecaptcha) {
+          (window as any).grecaptcha.ready(() => {
+            (window as any).grecaptcha.execute('6Lf2HYgrAAAAAGLA2Pdh_EgRNFLVNtFr8wChye0T', { action: 'login' })
+              .then((token: string) => resolve(token))
+              .catch((error: any) => reject(error));
+          });
+        } else {
+          reject(new Error('reCAPTCHA not loaded'));
+        }
+      });
+      
+      setCaptchaVerified(true);
+      setCaptchaLoading(false);
+    } catch (error) {
+      setCaptchaLoading(false);
+      setError('reCAPTCHA verification failed. Please try again.');
+      toast.error('reCAPTCHA verification failed. Please try again.');
+      setLoading(false);
+      return;
+    }
     
     // Very short timeout to prevent hanging
     const timeoutId = setTimeout(() => {
@@ -59,6 +105,24 @@ const Login = () => {
     }, 10000); // 10 second timeout
     
     try {
+      // Verify reCAPTCHA with backend
+      const recaptchaResponse = await fetch('http://localhost:5001/api/verify-recaptcha', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          'g-recaptcha-response': recaptchaToken
+        }),
+      });
+
+      if (!recaptchaResponse.ok) {
+        setError('reCAPTCHA verification failed. Please try again.');
+        toast.error('reCAPTCHA verification failed. Please try again.');
+        setLoading(false);
+        return;
+      }
+
       // Clear any stale session data first
       localStorage.removeItem("token");
       localStorage.removeItem("authToken");
@@ -180,19 +244,22 @@ const Login = () => {
                 toast.success(`Login successful! Welcome ${role}!`);
                 navigate(dashboardPath, { replace: true });
                 return;
+              } else {
+                console.error('Invalid dashboard path for role:', role);
+                setError('Invalid user role configuration.');
+                toast.error('Invalid user role configuration.');
+                setLoading(false);
+                return;
               }
+            } else {
+              // No valid role found - redirect to role selection
+              localStorage.setItem("tempUserId", user.id);
+              localStorage.setItem("tempUserEmail", user.email || '');
+              
+              toast.info('Please select your user role to continue.');
+              navigate('/select-role', { replace: true });
+              return;
             }
-            
-            // No valid role found - redirect to role selection
-            console.log('No valid role found, redirecting to role selection');
-            
-            // Store user info for role selection
-            localStorage.setItem("tempUserId", user.id);
-            localStorage.setItem("tempUserEmail", user.email || '');
-            
-            toast.info('Please select your user role to continue.');
-            navigate('/select-role', { replace: true });
-            return;
           }
           
         } catch (userErr) {
@@ -240,6 +307,7 @@ const Login = () => {
     } finally {
       clearTimeout(timeoutId);
       setLoading(false);
+      setCaptchaVerified(false);
     }
   };
 
@@ -312,10 +380,44 @@ const Login = () => {
               {showPass ? <EyeOff size={18} /> : <Eye size={18} />}
             </span>
           </div>
+          
+          {/* reCAPTCHA v3 Status Indicator */}
+          <div className="mb-4">
+            <div className="flex items-center justify-center space-x-2 p-3 bg-gray-50 dark:bg-gray-800 rounded-lg border">
+              {captchaLoading ? (
+                <>
+                  <div className="animate-spin h-4 w-4 border-2 border-blue-500 border-t-transparent rounded-full"></div>
+                  <span className="text-sm text-gray-600 dark:text-gray-300">Verifying reCAPTCHA...</span>
+                </>
+              ) : captchaVerified ? (
+                <>
+                  <div className="h-4 w-4 bg-green-500 rounded-full flex items-center justify-center">
+                    <svg className="h-3 w-3 text-white" fill="currentColor" viewBox="0 0 20 20">
+                      <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                    </svg>
+                  </div>
+                  <span className="text-sm text-green-600 dark:text-green-400">reCAPTCHA verified ✓</span>
+                </>
+              ) : (
+                <>
+                  <div className="h-4 w-4 bg-gray-300 rounded-full"></div>
+                  <span className="text-sm text-gray-500 dark:text-gray-400">reCAPTCHA verification required</span>
+                </>
+              )}
+            </div>
+            <p className="text-xs text-gray-500 text-center mt-2">
+              This site is protected by reCAPTCHA v3
+            </p>
+          </div>
+          
           <button
             type="submit"
-            disabled={loading}
-            className="w-full py-2 mt-2 text-white bg-green-600 hover:bg-green-700 rounded-lg font-semibold transition-all duration-300 shadow-md flex justify-center items-center"
+            disabled={loading || captchaLoading}
+            className={`w-full py-2 mt-2 text-white rounded-lg font-semibold transition-all duration-300 shadow-md flex justify-center items-center ${
+              loading || captchaLoading 
+                ? 'bg-gray-400 cursor-not-allowed' 
+                : 'bg-green-600 hover:bg-green-700'
+            }`}
           >
             {loading && (
               <svg
@@ -339,10 +441,8 @@ const Login = () => {
                 ></path>
               </svg>
             )}
-            {loading ? 'Logging in...' : 'Login'}
+            {loading ? 'Logging in...' : captchaLoading ? 'Verifying...' : 'Login'}
           </button>
-          
-          {/* Test login button for debugging */}
           
           <ContinueAsGuestButton />
           {/* OAuth Buttons */}
