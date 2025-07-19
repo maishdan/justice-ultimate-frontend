@@ -7,6 +7,7 @@ import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import { FaGoogle, FaGithub } from 'react-icons/fa';
 import { useRef, useEffect } from 'react';
+import { API_ENDPOINTS, testBackendConnection } from '../lib/api';
 
 function ContinueAsGuestButton() {
   const navigate = useNavigate();
@@ -43,6 +44,18 @@ const Login = () => {
         document.head.removeChild(script);
       }
     };
+  }, []);
+  
+  // Test backend connection on component mount
+  useEffect(() => {
+    console.log('Current backend URL:', API_ENDPOINTS.verifyRecaptcha);
+    testBackendConnection().then(result => {
+      if (result.success) {
+        console.log('✅ Backend connection successful');
+      } else {
+        console.error('❌ Backend connection failed:', result.error);
+      }
+    });
   }, []);
   
   const playCling = () => {
@@ -106,7 +119,7 @@ const Login = () => {
     
     try {
       // Verify reCAPTCHA with backend
-      const recaptchaResponse = await fetch('http://localhost:5001/api/verify-recaptcha', {
+      const recaptchaResponse = await fetch(API_ENDPOINTS.verifyRecaptcha, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

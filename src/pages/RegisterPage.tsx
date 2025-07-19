@@ -8,6 +8,7 @@ import allCountries from "../data/allCountries";
 import zxcvbn from 'zxcvbn';
 import { FaGoogle, FaGithub } from 'react-icons/fa';
 import { useRef, useEffect } from 'react';
+import { API_ENDPOINTS } from '../lib/api';
 
 const countries = [
   { code: "KE", name: "Kenya", dial: "+254" },
@@ -128,7 +129,7 @@ export default function RegisterPage() {
 
     try {
       // Verify reCAPTCHA with backend
-      const recaptchaResponse = await fetch('http://localhost:5001/api/verify-recaptcha', {
+      const recaptchaResponse = await fetch(API_ENDPOINTS.verifyRecaptcha, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
