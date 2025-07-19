@@ -3,7 +3,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import LoadingScreen from '../components/ui/LoadingScreen';
 import { motion } from "framer-motion";
 import { Button } from "../components/ui/button";
-import { Link } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 import { FaHome, FaTachometerAlt, FaEnvelopeOpenText } from "react-icons/fa";
 import { FaEnvelope, FaPhoneAlt, FaWhatsapp } from "react-icons/fa";
 
@@ -13,6 +13,7 @@ export default function LandingPage() {
   const [loading, setLoading] = useState(true);
   const [progress, setProgress] = useState(0);
   const audioRef = useRef<HTMLAudioElement | null>(null);
+  const location = useLocation();
 
   useEffect(() => {
     let interval = setInterval(() => {
@@ -44,6 +45,18 @@ export default function LandingPage() {
       }
     }
   }, [location.pathname]);
+
+  // Function to play car start sound on button clicks
+  const playCarStart = () => {
+    try {
+      const audio = new Audio("/car-start.mp3");
+      audio.play().catch((e) => {
+        console.warn("🚫 Button sound blocked:", e);
+      });
+    } catch (error) {
+      console.warn("🚫 Sound play failed:", error);
+    }
+  };
 
   if (loading) {
     return <LoadingScreen text="Loading Justice Ultimate Automobiles..." progress={progress} />;
