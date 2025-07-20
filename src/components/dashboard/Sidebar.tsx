@@ -249,7 +249,7 @@ const Sidebar: React.FC<SidebarProps> = ({ activePanel, setActivePanel, admin })
           clipPath: 'ellipse(60% 10% at 0% 0%)',
         }}
         transition={{ duration: 0.7, type: 'spring', bounce: 0.32 }}
-        className={`dashboard-sidebar fixed top-0 left-0 h-full z-50 bg-gradient-to-br from-blue-900/90 via-green-900/90 to-black/95 backdrop-blur-2xl shadow-2xl border-r-4 border-yellow-400/80 w-64 md:w-80 transition-all flex flex-col min-w-0 w-full md:static md:relative md:z-auto md:h-auto md:border-none md:shadow-none md:bg-none`}
+        className={`dashboard-sidebar fixed top-16 left-0 h-full z-40 bg-gradient-to-br from-blue-900/90 via-green-900/90 to-black/95 backdrop-blur-2xl shadow-2xl border-r-4 border-yellow-400/80 w-64 md:w-80 transition-all flex flex-col min-w-0 w-full md:static md:relative md:z-auto md:h-auto md:border-none md:shadow-none md:bg-none`}
         role="navigation"
         aria-label="Main navigation menu"
       >
@@ -296,7 +296,10 @@ const Sidebar: React.FC<SidebarProps> = ({ activePanel, setActivePanel, admin })
         </motion.div>
 
         {/* Navigation Menu with genie effect */}
-        <nav className="flex-1 overflow-y-auto custom-scrollbar" role="menubar">
+        <nav
+          className="glass-panel h-full w-full flex flex-col justify-between p-4 shadow-2xl border border-white/20 rounded-l-3xl overflow-hidden"
+          style={{ background: 'rgba(30,40,60,0.45)', backdropFilter: 'blur(18px) saturate(160%)', WebkitBackdropFilter: 'blur(18px) saturate(160%)' }}
+        >
           <motion.ul
             className="space-y-2 p-4"
             initial="hidden"

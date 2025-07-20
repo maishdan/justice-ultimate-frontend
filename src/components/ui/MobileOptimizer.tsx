@@ -38,10 +38,8 @@ export default function MobileOptimizer({
       document.body.style.userSelect = 'none';
     }
 
-    if (enableScrollOptimization && isMobile) {
-      // Optimize scrolling performance
-      document.body.style.webkitOverflowScrolling = 'touch';
-    }
+    // Remove scroll optimization for instant, native scroll
+    // Remove or comment out any code that sets document.body.style.webkitOverflowScrolling
 
     return () => {
       // Cleanup

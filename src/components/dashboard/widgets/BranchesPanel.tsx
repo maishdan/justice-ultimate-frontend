@@ -19,7 +19,7 @@ function BranchCard({ branch, onDetails, onEdit }: { branch: any; onDetails: (b:
   const rating = typeof branch.rating === 'number' ? branch.rating : 0;
   const currency = branch.currency || 'KES';
   return (
-    <div className="bg-white dark:bg-gray-900 rounded-2xl shadow-xl p-6 flex flex-col gap-2 border border-blue-100 dark:border-blue-800 hover:shadow-2xl transition cursor-pointer group relative min-w-[270px] max-w-xs aspect-square justify-between" onClick={() => onDetails(branch)}>
+    <div className="glass-panel rounded-2xl shadow-xl p-6 flex flex-col gap-2 border border-blue-100 dark:border-blue-800 hover:shadow-2xl transition cursor-pointer group relative min-w-[270px] max-w-xs aspect-square justify-between" onClick={() => onDetails(branch)}>
       <div>
         <div className="flex items-center gap-2 mb-2">
           <span className="text-2xl">{branch.flag || <FiFlag />}</span>

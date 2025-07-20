@@ -1,8 +1,6 @@
 // src/pages/Dashboard/CustomerDashboard.tsx
 import { useEffect, useState } from 'react';
 import useAuth from '../hooks/useAuth';
-import Sidebar from '../components/dashboard/Sidebar';
-import Topbar from '../components/dashboard/Topbar';
 import WelcomeCard from '../components/dashboard/widgets/WelcomeCard';
 import StatsOverview from '../components/dashboard/widgets/StatsOverview';
 import UpcomingAppointments from '../components/dashboard/widgets/UpcomingAppointments';
@@ -146,17 +144,20 @@ export default function CustomerDashboard() {
   }
 
   return (
-    <div className="min-h-screen w-full bg-gradient-to-br from-blue-600 to-purple-500 text-white flex flex-col md:flex-row">
+    <div className="dashboard-background min-h-screen w-full bg-gradient-to-br from-blue-600 to-purple-500 text-white flex flex-col md:flex-row pt-0" style={{ paddingTop: '64px' }}>
       {/* Mobile Menu Toggle */}
       <button
+        className="md:hidden fixed top-20 left-4 z-40 p-2 bg-white/20 rounded-lg backdrop-blur-sm"
         onClick={() => setSidebarOpen(!sidebarOpen)}
-        className="md:hidden fixed top-4 left-4 z-50 p-2 bg-white/20 rounded-lg backdrop-blur-sm"
+        aria-label="Toggle sidebar"
       >
-        {sidebarOpen ? <FiX size={24} /> : <FiMenu size={24} />}
+        <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+        </svg>
       </button>
-
-      {/* Sidebar Menu */}
-      <aside className={`w-full md:w-72 bg-gradient-to-r from-blue-600 to-purple-500 text-white min-h-screen p-6 shadow-xl flex flex-col fixed md:static z-40 md:z-auto top-0 left-0 md:relative transition-transform duration-300 ${sidebarOpen ? 'translate-x-0' : 'translate-x-[-100%] md:translate-x-0'}`}>
+      
+      {/* Sidebar */}
+      <div className={`min-h-screen p-6 shadow-xl flex flex-col fixed md:static z-30 md:z-auto top-0 left-0 md:relative transition-transform duration-300 ${sidebarOpen ? 'translate-x-0' : 'translate-x-[-100%] md:translate-x-0'}`}>
         <div className="text-2xl font-extrabold mb-10 text-center tracking-wide drop-shadow-lg">Justice Ultimate Automobiles</div>
         <nav className="flex-1">
           <ul className="space-y-2">
@@ -177,7 +178,7 @@ export default function CustomerDashboard() {
           </ul>
         </nav>
         <div className="mt-10 text-center text-xs text-blue-100">&copy; {new Date().getFullYear()} Justice Ultimate Automobiles</div>
-      </aside>
+      </div>
 
       {/* Overlay for mobile */}
       {sidebarOpen && (
@@ -189,9 +190,12 @@ export default function CustomerDashboard() {
 
       {/* Main Content */}
       <div className="flex-1 w-full min-w-0 flex flex-col overflow-x-auto">
-        <Topbar />
         <main className="flex-1 overflow-y-auto p-4 md:p-6 space-y-8 animate-fadein">
-          {mainPanel}
+          {mainPanel || (
+            <div className="text-center text-2xl font-bold text-yellow-400 mt-10">
+              Welcome to your Customer Dashboard! Select an option from the sidebar to get started.
+            </div>
+          )}
         </main>
         <Footer />
       </div>

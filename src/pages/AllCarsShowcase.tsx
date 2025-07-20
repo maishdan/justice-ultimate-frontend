@@ -18,9 +18,6 @@ import { ContactBar } from "../components/ContactBar";
 import { carsData } from "../data/carData";
 import type { Car } from "../types/Car";
 
-import Header from "../components/ui/Header"; // ✅ Make sure path is correct
-import { AnimatedHeader } from "../components/AnimatedHeader";
-
 const AllCarsShowcase: React.FC = () => {
   const [selectedCar, setSelectedCar] = useState<Car | null>(null);
   const [searchResults, setSearchResults] = useState<Car[]>(carsData);
@@ -52,13 +49,18 @@ const AllCarsShowcase: React.FC = () => {
   }, [darkMode]);
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-white dark:from-black dark:to-slate-900 transition-colors">
-      {/* ✅ Fixed Header injected */}
-      <Header darkMode={darkMode} setDarkMode={setDarkMode} />
-
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-white dark:from-black dark:to-slate-900 transition-colors" style={{ paddingTop: '64px' }}>
       {/* ✅ Proper spacing below fixed header */}
-      <div className="pt-24">
-        <AnimatedHeader />
+      <div className="pt-16">
+        {/* Page Title Section */}
+        <div className="text-center py-8 bg-gradient-to-r from-black to-blue-900 text-white">
+          <h1 className="text-4xl md:text-5xl font-extrabold mb-4 text-yellow-400">
+            Justice Ultimate Automobiles
+          </h1>
+          <p className="text-lg md:text-xl text-gray-300 max-w-3xl mx-auto">
+            🌍 Premium Cars | ✈️ Global Delivery | 💬 Instant Support | 🚗 Dream Rides
+          </p>
+        </div>
         <ContactBar />
         {showOfferPopup && <OfferPopup onClose={() => setShowOfferPopup(false)} />}
 

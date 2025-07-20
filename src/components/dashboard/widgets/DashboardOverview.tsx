@@ -1,12 +1,8 @@
 import React, { useEffect, useState } from 'react';
-import WelcomeCard from './WelcomeCard';
-import OffersCarousel from './OffersCarousel';
-import StatsOverview from './StatsOverview';
-import NotificationsFeed from './NotificationsFeed';
 import { Card, CardContent } from '../../ui/card';
 import { Button, IconButton } from '../../ui/button';
 import { BarChart, PieChart } from './Charts';
-import { FaPlus, FaFilePdf, FaFileCsv, FaCar, FaUsers, FaMoneyBill, FaChartLine, FaCog, FaUserCircle } from 'react-icons/fa';
+import { FaPlus, FaFilePdf, FaFileCsv, FaCar, FaUsers, FaMoneyBill, FaCog } from 'react-icons/fa';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '../../../lib/supabaseClient';
 
@@ -116,28 +112,7 @@ export default function DashboardOverview() {
       </div>
 
       {/* Top Section: Welcome, Offers, Notifications */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-8 w-full min-w-0">
-        <div className="md:col-span-2 flex flex-col gap-8">
-          <WelcomeCard user={{ name: 'Daniwest', role: 'Administrator' }} />
-          <StatsOverview stats={[
-            { label: 'Total Sales', value: 120, icon: '🚗' },
-            { label: 'Total Rentals', value: 45, icon: '🔑' },
-            { label: 'Total Users', value: 320, icon: '👥' },
-            { label: 'Revenue', value: 15000000, icon: '💰' }
-          ]} />
-        </div>
-        <div className="md:col-span-1 flex flex-col gap-8">
-          <OffersCarousel offers={[
-            { title: 'Special Financing', description: '0% APR for 60 months on selected models', image: '/images/BMW X5/1.jpg' },
-            { title: 'Trade-In Bonus', description: 'Get extra $5,000 on your trade-in', image: '/images/mercedes-benz-s-class.png' }
-          ]} />
-          <NotificationsFeed notifications={[
-            { message: 'New user registration: Alice Johnson', time: '2 min ago', type: 'user' },
-            { message: 'Car sold: BMW X5 to Jane Doe', time: '10 min ago', type: 'sale' },
-            { message: 'System maintenance scheduled for tonight', time: '1 hour ago', type: 'system' }
-          ]} />
-        </div>
-      </div>
+      {/* (Removed duplicated chart tiles here) */}
 
       {/* Quick Actions */}
       <div className="flex flex-wrap gap-4 justify-center md:justify-start w-full min-w-0">
@@ -159,38 +134,34 @@ export default function DashboardOverview() {
 
       {/* Insights & Mini-Charts */}
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-8 w-full min-w-0">
-        <Card className="shadow-xl hover:shadow-blue-400/40 transition-all">
-          <CardContent>
-            <h3 className="font-bold text-lg mb-2 text-blue-700 dark:text-blue-200">Sales & Rentals Trend</h3>
-            <div className="h-56 flex items-center justify-center bg-gradient-to-br from-blue-50 to-blue-100 dark:from-blue-900 dark:to-blue-800 rounded-xl p-2">
-              <BarChart title="" />
-            </div>
-          </CardContent>
-        </Card>
-        <Card className="shadow-xl hover:shadow-blue-400/40 transition-all">
-          <CardContent>
-            <h3 className="font-bold text-lg mb-2 text-blue-700 dark:text-blue-200">Sales Distribution</h3>
-            <div className="h-56 flex items-center justify-center bg-gradient-to-br from-blue-50 to-blue-100 dark:from-blue-900 dark:to-blue-800 rounded-xl p-2">
-              <PieChart />
-            </div>
-          </CardContent>
-        </Card>
+        <div className="glass-panel rounded-xl shadow-xl p-6">
+          <h3 className="font-bold text-lg mb-2 text-white">Sales & Rentals Trend</h3>
+          <div className="h-56 flex items-center justify-center glass-panel rounded-xl p-2">
+            <BarChart title="" />
+          </div>
+        </div>
+        <div className="glass-panel rounded-xl shadow-xl p-6">
+          <h3 className="font-bold text-lg mb-2 text-white">Sales Distribution</h3>
+          <div className="h-56 flex items-center justify-center glass-panel rounded-xl p-2">
+            <PieChart />
+          </div>
+        </div>
       </div>
 
       {/* Recent Activity */}
-      <div>
-        <h3 className="font-bold text-lg mb-4 text-blue-700 dark:text-blue-200">Recent Activity</h3>
-        <div className="bg-white dark:bg-gray-800 rounded-xl shadow divide-y divide-gray-200 dark:divide-gray-700 overflow-x-auto w-full min-w-0">
+      <div className="glass-panel rounded-xl p-4 shadow-lg w-full min-w-0">
+        <h3 className="font-bold text-lg mb-4 text-white">Recent Activity</h3>
+        <div className="glass-panel rounded-xl shadow divide-y divide-gray-200 overflow-x-auto w-full min-w-0">
           {recentActivity.map((activity) => (
             <div key={activity.id} className="flex items-center justify-between px-4 py-3">
-              <span className="flex items-center gap-2 font-medium text-gray-800 dark:text-gray-100">
+              <span className="flex items-center gap-2 font-medium text-white">
                 {activity.type === 'sale' && <FaMoneyBill className="text-green-500" />}
                 {activity.type === 'rental' && <FaCar className="text-blue-500" />}
                 {activity.type === 'user' && <FaUsers className="text-purple-500" />}
                 {activity.type === 'car' && <FaCar className="text-pink-500" />}
                 {activity.message}
               </span>
-              <span className="text-xs text-gray-500 dark:text-gray-400">{activity.time}</span>
+              <span className="text-xs text-white">{activity.time}</span>
             </div>
           ))}
         </div>

@@ -13,11 +13,11 @@ interface NotificationsFeedProps {
 export default function NotificationsFeed({ notifications }: NotificationsFeedProps) {
   if (!notifications || notifications.length === 0) return null;
   return (
-    <div className="bg-green-900/70 p-6 rounded-xl shadow-lg">
+    <div className="glass-panel p-6 rounded-xl shadow-lg">
       <h3 className="text-2xl font-bold text-white mb-4">Notifications</h3>
       <ul className="space-y-4">
         {notifications.map((note, idx) => (
-          <li key={idx} className="p-4 bg-green-800/80 rounded-lg">
+          <li key={idx} className="glass-panel p-4 rounded-lg">
             <div className="text-white text-sm">{note.message}</div>
             <div className="text-green-200 text-xs mt-1">{note.time}</div>
           </li>

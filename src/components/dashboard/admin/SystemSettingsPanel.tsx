@@ -79,7 +79,7 @@ export default function SystemSettingsPanel() {
   }
 
   return (
-    <div className="space-y-8">
+    <div className="glass-panel w-full max-w-6xl mx-auto p-8 rounded-2xl shadow-2xl">
       <div className="text-2xl font-bold mb-4 animate-fade-in bg-gradient-to-r from-green-700 to-blue-700 text-white p-4 rounded-xl shadow-lg">
         {getGreeting(adminName)}
       </div>

@@ -8,10 +8,10 @@ module.exports = {
   theme: {
     extend: {
       animation: {
-        gradientShift: "gradientShift 12s ease-in-out infinite", // ✅ Smooth gradient animation
-        fadeIn: "fadeIn 0.5s ease-in-out",
-        slideUp: "slideUp 0.3s ease-out",
-        scaleIn: "scaleIn 0.2s ease-out",
+        gradientShift: "gradientShift 0.15s linear infinite", // Fast gradient animation
+        fadeIn: "fadeIn 0.15s linear",
+        slideUp: "slideUp 0.15s linear",
+        scaleIn: "scaleIn 0.15s linear",
         bounce: "bounce 1s infinite",
         pulse: "pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite",
         spin: "spin 1s linear infinite",
@@ -87,8 +87,7 @@ module.exports = {
         xs: '2px',
       },
       transitionProperty: {
-        'height': 'height',
-        'spacing': 'margin, padding',
+        DEFAULT: 'all',
       },
     },
   },

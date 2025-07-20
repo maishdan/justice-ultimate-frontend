@@ -4,15 +4,20 @@
 // 📁 File: src/components/ui/Header.tsx
 import { useEffect, useRef, useState } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
-import { Sun, Moon, LogOut, ArrowLeft } from "lucide-react";
-import { Button } from "./button";
+import { Sun, Moon, LogOut, ArrowLeft, ChevronDown, User, Shield } from "lucide-react";
 import { AnimatePresence, motion } from "framer-motion";
 import logo from "../../assets/logo.png";
 import { useTheme } from '../../context/ThemeContext';
-import { useLanguage } from '../../context/LanguageContext';
 import { useTranslation } from 'react-i18next';
-import { supabase } from '../../lib/supabaseClient'; // Added supabase import
-import { secureLogout, fastLogout } from '../../lib/authUtils';
+import { fastLogout } from '../../lib/authUtils';
+
+function HeaderPortal({ children }: { children: React.ReactNode }) {
+  return (
+    <header id="GLOBAL-FIXED-HEADER">
+      {children}
+    </header>
+  );
+}
 
 export default function Header() {
   const { darkMode, setDarkMode } = useTheme();
@@ -21,10 +26,9 @@ export default function Header() {
   const [menuOpen, setMenuOpen] = useState(false);
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const dropdownTimeout = useRef<NodeJS.Timeout | null>(null);
-  const [genieOpen, setGenieOpen] = useState(false);
+  const [now, setNow] = useState(new Date());
 
   // Real-time date and time state
-  const [now, setNow] = useState(new Date());
   useEffect(() => {
     const interval = setInterval(() => setNow(new Date()), 1000);
     return () => clearInterval(interval);
@@ -51,10 +55,6 @@ export default function Header() {
     },
     { label: t('contact'), path: '/contact' },
   ];
-
-  const activeLinkClass = darkMode
-    ? "animate-pulse shadow-xl shadow-green-400 bg-green-500 text-black px-3 py-1 rounded"
-    : "animate-pulse shadow-xl shadow-green-600 bg-green-600 text-white px-3 py-1 rounded";
 
   const handleDropdownOpen = () => {
     if (dropdownTimeout.current) clearTimeout(dropdownTimeout.current);
@@ -84,7 +84,6 @@ export default function Header() {
   };
 
   const isAuthenticated = Boolean(localStorage.getItem("token") || localStorage.getItem("authToken"));
-  const isDashboard = location.pathname.includes('/dashboard');
 
   // Get user role to determine which dashboard to navigate to
   const getUserRole = () => {
@@ -95,334 +94,632 @@ export default function Header() {
   const handleDashboardNavigation = () => {
     const userRole = getUserRole();
     if (userRole === 'admin') {
-      navigate('/dashboard/admin');
+      navigate('/secure-admin-dashboard');
     } else if (userRole === 'customer') {
-      navigate('/dashboard/customer');
+      navigate('/secure-customer-dashboard');
     } else {
-      navigate('/dashboard/guest');
+      navigate('/secure-guest-dashboard');
     }
   };
 
-  const getLanguageLabel = (code: string) => {
-    const labels = {
-      'EN': 'English',
-      'SW': 'Kiswahili', 
-      'ES': 'Español',
-      'FR': 'Français',
-      'CN': '中文'
+  // ULTIMATE FIXED HEADER STYLES - Cannot be overridden
+  useEffect(() => {
+    // Remove any existing styles first
+    const existingStyle = document.getElementById('ULTIMATE-HEADER-STYLES');
+    if (existingStyle) {
+      existingStyle.remove();
+    }
+
+    const style = document.createElement('style');
+    style.id = 'ULTIMATE-HEADER-STYLES';
+    style.innerHTML = `
+      /* ULTIMATE FIXED HEADER - CANNOT BE OVERRIDDEN */
+      #GLOBAL-FIXED-HEADER {
+        position: fixed !important;
+        top: 0 !important;
+        left: 0 !important;
+        right: 0 !important;
+        width: 100vw !important;
+        height: 64px !important;
+        z-index: 2147483647 !important;
+        pointer-events: auto !important;
+        background: linear-gradient(to right, #172554 95%, #1e293b 100%) !important;
+        color: #fff !important;
+        box-shadow: 0 4px 20px rgba(0,0,0,0.15) !important;
+        overflow: visible !important;
+        padding: 0 !important;
+        margin: 0 !important;
+        backdrop-filter: blur(10px) !important;
+        -webkit-backdrop-filter: blur(10px) !important;
+        transform: none !important;
+        transition: none !important;
+      }
+      
+      /* FORCE BODY SPACING */
+      body {
+        padding-top: 64px !important;
+        margin-top: 0 !important;
+      }
+      
+      /* OVERRIDE ALL OTHER FIXED ELEMENTS */
+      *:not(#GLOBAL-FIXED-HEADER) {
+        z-index: auto !important;
+      }
+      
+      /* ENSURE NO OTHER HEADERS INTERFERE */
+      header:not(#GLOBAL-FIXED-HEADER) {
+        position: relative !important;
+        z-index: auto !important;
+      }
+      
+      /* OVERRIDE ANY CONFLICTING STYLES */
+      .header-clean, .fixed-header, .header-fixed-responsive {
+        position: relative !important;
+        z-index: auto !important;
+      }
+      
+      /* ENSURE MAIN CONTENT FLOWS UNDER HEADER */
+      .main-content-responsive {
+        padding-top: 0 !important;
+        margin-top: 0 !important;
+      }
+      
+      /* OVERRIDE CHAT CONTAINER Z-INDEX */
+      #chatContainer {
+        z-index: 999999 !important;
+      }
+      
+      /* ENSURE ALL PAGES START BELOW HEADER */
+      .min-h-screen {
+        padding-top: 0 !important;
+      }
+      
+      /* FORCE ALL CONTENT TO FLOW UNDER HEADER */
+      .app-background, .clean-container, .page-background {
+        padding-top: 0 !important;
+        margin-top: 0 !important;
+      }
+      
+      /* ADDITIONAL HEADER FIXES FOR ALL SCENARIOS */
+      .dashboard-background, .page-background, .app-background {
+        padding-top: 64px !important;
+      }
+      
+      /* ENSURE NO OTHER ELEMENTS OVERLAP HEADER */
+      header:not(#GLOBAL-FIXED-HEADER), 
+      .header:not(#GLOBAL-FIXED-HEADER),
+      .fixed-header:not(#GLOBAL-FIXED-HEADER) {
+        position: relative !important;
+        z-index: auto !important;
+      }
+      
+      /* OVERRIDE ANY CONFLICTING Z-INDEX VALUES */
+      .z-50, .z-40, .z-30, .z-20, .z-10 {
+        z-index: auto !important;
+      }
+      
+      /* ENSURE CHAT WIDGET STAYS BELOW HEADER */
+      #chatContainer, .chat-widget, .chat-container {
+        z-index: 999999 !important;
+      }
+      
+      /* FORCE ALL PAGES TO RESPECT HEADER SPACE */
+      .pt-16, .pt-20, .pt-24 {
+        padding-top: 64px !important;
+      }
+      
+      /* ULTIMATE HEADER FIX - OVERRIDE EVERYTHING */
+      #GLOBAL-FIXED-HEADER {
+        position: fixed !important;
+        top: 0 !important;
+        left: 0 !important;
+        right: 0 !important;
+        width: 100vw !important;
+        height: 64px !important;
+        z-index: 2147483647 !important;
+        pointer-events: auto !important;
+        background: linear-gradient(to right, #172554 95%, #1e293b 100%) !important;
+        color: #fff !important;
+        box-shadow: 0 4px 20px rgba(0,0,0,0.15) !important;
+        overflow: visible !important;
+        padding: 0 !important;
+        margin: 0 !important;
+        backdrop-filter: blur(10px) !important;
+        -webkit-backdrop-filter: blur(10px) !important;
+        transform: none !important;
+        transition: none !important;
+        display: block !important;
+        visibility: visible !important;
+        opacity: 1 !important;
+      }
+      
+      /* FORCE BODY TO RESPECT HEADER */
+      body {
+        padding-top: 64px !important;
+        margin-top: 0 !important;
+      }
+      
+      /* OVERRIDE ALL OTHER FIXED ELEMENTS */
+      *:not(#GLOBAL-FIXED-HEADER) {
+        z-index: auto !important;
+      }
+      
+      /* ENSURE NO OTHER HEADERS INTERFERE */
+      header:not(#GLOBAL-FIXED-HEADER) {
+        position: relative !important;
+        z-index: auto !important;
+      }
+      
+      /* OVERRIDE ANY CONFLICTING STYLES */
+      .header-clean, .fixed-header, .header-fixed-responsive {
+        position: relative !important;
+        z-index: auto !important;
+      }
+      
+      /* ENSURE MAIN CONTENT FLOWS UNDER HEADER */
+      .main-content-responsive {
+        padding-top: 0 !important;
+        margin-top: 0 !important;
+      }
+      
+      /* OVERRIDE CHAT CONTAINER Z-INDEX */
+      #chatContainer {
+        z-index: 999999 !important;
+      }
+      
+      /* ENSURE ALL PAGES START BELOW HEADER */
+      .min-h-screen {
+        padding-top: 0 !important;
+      }
+      
+      /* FORCE ALL CONTENT TO FLOW UNDER HEADER */
+      .app-background, .clean-container, .page-background {
+        padding-top: 0 !important;
+        margin-top: 0 !important;
+      }
+      
+      /* ADDITIONAL HEADER FIXES FOR ALL SCENARIOS */
+      .dashboard-background, .page-background, .app-background {
+        padding-top: 64px !important;
+      }
+      
+      /* ENSURE NO OTHER ELEMENTS OVERLAP HEADER */
+      header:not(#GLOBAL-FIXED-HEADER), 
+      .header:not(#GLOBAL-FIXED-HEADER),
+      .fixed-header:not(#GLOBAL-FIXED-HEADER) {
+        position: relative !important;
+        z-index: auto !important;
+      }
+      
+      /* OVERRIDE ANY CONFLICTING Z-INDEX VALUES */
+      .z-50, .z-40, .z-30, .z-20, .z-10 {
+        z-index: auto !important;
+      }
+      
+      /* ENSURE CHAT WIDGET STAYS BELOW HEADER */
+      #chatContainer, .chat-widget, .chat-container {
+        z-index: 999999 !important;
+      }
+      
+      /* FORCE ALL PAGES TO RESPECT HEADER SPACE */
+      .pt-16, .pt-20, .pt-24 {
+        padding-top: 64px !important;
+      }
+      
+      /* ULTIMATE HEADER FIX - OVERRIDE EVERYTHING */
+      #GLOBAL-FIXED-HEADER {
+        position: fixed !important;
+        top: 0 !important;
+        left: 0 !important;
+        right: 0 !important;
+        width: 100vw !important;
+        height: 64px !important;
+        z-index: 2147483647 !important;
+        pointer-events: auto !important;
+        background: linear-gradient(to right, #172554 95%, #1e293b 100%) !important;
+        color: #fff !important;
+        box-shadow: 0 4px 20px rgba(0,0,0,0.15) !important;
+        overflow: visible !important;
+        padding: 0 !important;
+        margin: 0 !important;
+        backdrop-filter: blur(10px) !important;
+        -webkit-backdrop-filter: blur(10px) !important;
+        transform: none !important;
+        transition: none !important;
+        display: block !important;
+        visibility: visible !important;
+        opacity: 1 !important;
+      }
+      
+      /* OVERRIDE ANY FRAMER MOTION TRANSFORMS */
+      #GLOBAL-FIXED-HEADER * {
+        transform: none !important;
+        transition: none !important;
+      }
+      
+      /* ENSURE NO STACKING CONTEXT INTERFERENCE */
+      .relative, .absolute {
+        z-index: auto !important;
+      }
+      
+      /* FORCE BODY TO RESPECT HEADER */
+      body {
+        padding-top: 64px !important;
+        margin-top: 0 !important;
+      }
+      
+      /* OVERRIDE ALL OTHER FIXED ELEMENTS */
+      *:not(#GLOBAL-FIXED-HEADER) {
+        z-index: auto !important;
+      }
+      
+      /* ENSURE NO OTHER HEADERS INTERFERE */
+      header:not(#GLOBAL-FIXED-HEADER) {
+        position: relative !important;
+        z-index: auto !important;
+      }
+      
+      /* OVERRIDE ANY CONFLICTING STYLES */
+      .header-clean, .fixed-header, .header-fixed-responsive {
+        position: relative !important;
+        z-index: auto !important;
+      }
+      
+      /* ENSURE MAIN CONTENT FLOWS UNDER HEADER */
+      .main-content-responsive {
+        padding-top: 0 !important;
+        margin-top: 0 !important;
+      }
+      
+      /* OVERRIDE CHAT CONTAINER Z-INDEX */
+      #chatContainer {
+        z-index: 999999 !important;
+      }
+      
+      /* ENSURE ALL PAGES START BELOW HEADER */
+      .min-h-screen {
+        padding-top: 0 !important;
+      }
+      
+      /* FORCE ALL CONTENT TO FLOW UNDER HEADER */
+      .app-background, .clean-container, .page-background {
+        padding-top: 0 !important;
+        margin-top: 0 !important;
+      }
+      
+      /* ADDITIONAL HEADER FIXES FOR ALL SCENARIOS */
+      .dashboard-background, .page-background, .app-background {
+        padding-top: 64px !important;
+      }
+      
+      /* ENSURE NO OTHER ELEMENTS OVERLAP HEADER */
+      header:not(#GLOBAL-FIXED-HEADER), 
+      .header:not(#GLOBAL-FIXED-HEADER),
+      .fixed-header:not(#GLOBAL-FIXED-HEADER) {
+        position: relative !important;
+        z-index: auto !important;
+      }
+      
+      /* OVERRIDE ANY CONFLICTING Z-INDEX VALUES */
+      .z-50, .z-40, .z-30, .z-20, .z-10 {
+        z-index: auto !important;
+      }
+      
+      /* ENSURE CHAT WIDGET STAYS BELOW HEADER */
+      #chatContainer, .chat-widget, .chat-container {
+        z-index: 999999 !important;
+      }
+      
+      /* FORCE ALL PAGES TO RESPECT HEADER SPACE */
+      .pt-16, .pt-20, .pt-24 {
+        padding-top: 64px !important;
+      }
+    `;
+    document.head.appendChild(style);
+
+    // Cleanup function
+    return () => {
+      const styleToRemove = document.getElementById('ULTIMATE-HEADER-STYLES');
+      if (styleToRemove) {
+        styleToRemove.remove();
+      }
     };
-    return labels[code as keyof typeof labels] || code;
-  };
+  }, []);
 
   return (
-    <header className={`w-full z-50 fixed top-0 left-0 transition-colors duration-1000 animate-gradientShift ${darkMode ? "bg-blue-950 text-white" : "bg-white text-black border-b border-gray-200"}`}>
-      <div className="max-w-7xl mx-auto px-2 sm:px-4 py-2 flex items-center justify-between text-xs sm:text-sm">
-        <div className="flex items-center gap-1 sm:gap-2">
-          <img src={logo} alt="Logo" className="w-6 h-6 sm:w-8 sm:h-8 rounded-full animate-pulse shadow-md" />
-          <span className="text-sm sm:text-lg font-bold text-green-400 whitespace-nowrap animate-pulse hidden sm:block">
-            Justice Ultimate Automobiles
-          </span>
-          <span className="text-xs sm:text-sm font-bold text-green-400 whitespace-nowrap animate-pulse sm:hidden">
-            JUA
-          </span>
-        </div>
-
-        {/* Return to Dashboard Button for Authenticated Users - Always Visible */}
-        {isAuthenticated && (
-          <div className="flex items-center gap-2 ml-2">
-            <button
-              onClick={handleDashboardNavigation}
-              className="flex items-center gap-1 px-2 py-1 bg-green-500 hover:bg-green-600 text-white text-xs rounded transition-colors shadow-lg hover:shadow-xl"
-            >
-              <ArrowLeft size={14} />
-              <span>Dashboard</span>
-            </button>
+    <HeaderPortal>
+      <div className="flex items-center justify-between w-full px-4" style={{height: '64px'}}>
+          
+          {/* Left Section - Logo & Company Name */}
+          <div className="flex items-center gap-3">
+            <div className="relative">
+              <Link to="/" className="block">
+                <div className="absolute inset-0 bg-gradient-to-r from-yellow-400 to-yellow-500 rounded-full blur-xl opacity-60 animate-pulse"></div>
+                <img 
+                  src={logo} 
+                  alt="Justice Ultimate Automobiles Logo" 
+                  className="relative w-14 h-14 sm:w-16 sm:h-16 rounded-full shadow-xl border-2 border-yellow-400/70 cursor-pointer hover:shadow-yellow-400/60 hover:scale-105 transition-all duration-300 bg-white object-cover z-10" 
+                />
+              </Link>
+            </div>
+            
+            <div className="flex items-center">
+              <span className="text-lg sm:text-xl font-bold bg-gradient-to-r from-green-400 to-green-600 bg-clip-text text-transparent whitespace-nowrap">
+                JUSTICE ULTIMATE AUTO
+              </span>
+            </div>
           </div>
-        )}
 
-        {/* Install JUA Button */}
-        <button
-          className="ml-2 px-2 py-1 bg-yellow-400 hover:bg-yellow-500 text-black text-xs rounded shadow font-semibold transition-colors"
-          style={{ fontFamily: 'inherit' }}
-          onClick={() => {
-            if (window.installJUA) window.installJUA();
-            else alert('To install, use your browser\'s install option.');
-          }}
-        >
-          Install JUA
-        </button>
-
-        <nav className="hidden lg:flex items-center gap-2 sm:gap-4">
-          {/* Home and other nav links */}
-          {navLinks.map((link, index) =>
-            link.subMenu ? (
-              <div
-                key={`nav-${index}`}
-                className="relative"
-                onMouseEnter={handleDropdownOpen}
-                onMouseLeave={handleDropdownClose}
-              >
-                <span
-                  className="cursor-pointer hover:text-green-400 text-xs sm:text-sm"
-                  onClick={() => setDropdownOpen(!dropdownOpen)}
-                >
-                  {link.label}
-                </span>
-                {dropdownOpen && (
-                  <div className="absolute mt-2 bg-gradient-to-br from-blue-900 to-blue-700 text-white rounded shadow-xl py-2 z-50 min-w-[180px]">
+          {/* Center Section - Navigation */}
+          <nav className="hidden md:flex items-center gap-1 xl:gap-2">
+            {navLinks.map((link, index) => (
+              <div key={`nav-${index}`} className="flex items-center">
+                {link.subMenu ? (
+                  <select
+                    className="px-3 py-1.5 rounded-md bg-white/20 hover:bg-white/30 transition-all duration-300 text-sm border border-white/20 backdrop-blur-sm cursor-pointer text-white appearance-none flex items-center gap-1 font-medium"
+                    style={{
+                      background: 'rgba(255, 255, 255, 0.1)',
+                      backdropFilter: 'blur(10px)',
+                      WebkitBackdropFilter: 'blur(10px)'
+                    }}
+                    onChange={e => { if (e.target.value) navigate(e.target.value); setDropdownOpen(false); }}
+                    onClick={e => e.stopPropagation()}
+                    value={location.pathname.startsWith('/news') ? '/news' : location.pathname.startsWith('/success-stories') ? '/success-stories' : location.pathname.startsWith('/about') ? '/about' : ''}
+                  >
+                    <option value="" disabled>{link.label}</option>
                     {link.subMenu.map((sub) => (
-                      <Link
-                        key={sub.path}
-                        to={sub.path}
-                        onClick={() => setDropdownOpen(false)}
-                        className="block px-4 py-2 hover:bg-green-600 hover:text-white transition-all rounded-md text-sm"
-                      >
-                        {sub.label}
-                      </Link>
+                      <option key={sub.path} value={sub.path}>{sub.label}</option>
                     ))}
-                  </div>
+                  </select>
+                ) : (
+                  <Link
+                    key={link.path}
+                    to={link.path}
+                    className={`px-3 py-1.5 rounded-md text-sm font-medium transition-all duration-300 hover:bg-white/20 hover:text-yellow-400 backdrop-blur-sm border border-white/10 ${
+                      location.pathname === link.path ? "bg-gradient-to-r from-green-500/30 to-yellow-500/30 text-yellow-400 font-bold border-yellow-400/30" : ""
+                    }`}
+                  >
+                    {link.label}
+                  </Link>
+                )}
+                {/* Vertical Separator */}
+                {index < navLinks.length - 1 && (
+                  <div className="w-px h-6 bg-white/20 mx-2"></div>
                 )}
               </div>
-            ) : (
-              <Link
-                key={link.path}
-                to={link.path}
-                className={`hover:text-green-400 text-xs sm:text-sm ${location.pathname === link.path ? activeLinkClass : ""}`}
-              >
-                {link.label}
-              </Link>
-            )
-          )}
+            ))}
+          </nav>
 
-          {!isAuthenticated && (
-            <>
-              <Link to="/register" className="border border-green-400 px-2 sm:px-3 py-1 rounded hover:bg-green-400 hover:text-black text-xs">
-                📝 {t('register')}
-              </Link>
-              <Link to="/login" className="bg-green-500 px-2 sm:px-3 py-1 rounded text-white hover:bg-green-400 text-xs">
-                🔐 {t('login')}
-              </Link>
-            </>
-          )}
-
-          {isAuthenticated && (
-            <div className="relative group ml-2">
-              <button 
-                onClick={handleLogout} 
-                data-testid="header-logout-button"
-                className="flex items-center justify-center p-1 sm:p-2 rounded hover:bg-red-100 dark:hover:bg-red-900 transition"
-              >
-                <LogOut className="w-4 h-4 sm:w-6 sm:h-6 text-gray-700 dark:text-gray-200 hover:text-red-600 cursor-pointer" />
-              </button>
-              <div className="absolute -top-8 left-1/2 -translate-x-1/2 bg-black text-white text-xs px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition whitespace-nowrap z-20">
-                {t('logout')}
+          {/* Right Section - Actions & Info */}
+          <div className="flex items-center gap-1 xl:gap-2">
+            
+            {/* Dashboard Button for Authenticated Users */}
+            {isAuthenticated && (
+              <div className="flex items-center">
+                <button
+                  onClick={handleDashboardNavigation}
+                  className="flex items-center gap-1 px-3 py-1.5 bg-gradient-to-r from-green-500/90 to-green-600/90 hover:from-green-600 hover:to-green-700 text-white rounded-md text-sm font-medium transition-all duration-300 shadow-sm backdrop-blur-sm border border-green-400/30"
+                >
+                  <ArrowLeft className="w-3 h-3" />
+                  <span className="hidden sm:inline">Dashboard</span>
+                </button>
+                <div className="w-px h-6 bg-white/20 mx-2"></div>
               </div>
+            )}
+
+            {/* Install JUA Button */}
+            <div className="flex items-center">
+              <button
+                className="px-3 py-1.5 bg-gradient-to-r from-yellow-400/90 to-yellow-500/90 hover:from-yellow-500 hover:to-yellow-600 text-black rounded-md text-sm font-medium transition-all duration-300 shadow-sm backdrop-blur-sm border border-yellow-300/30"
+                onClick={() => {
+                  if ((window as any).installJUA) (window as any).installJUA();
+                  else alert('To install, use your browser\'s install option.');
+                }}
+              >
+                Install JUA
+              </button>
+              <div className="w-px h-6 bg-white/20 mx-2"></div>
             </div>
-          )}
 
-          <button onClick={() => setDarkMode(!darkMode)} className="ml-2 hover:text-yellow-400" aria-label={t('toggleTheme')}>
-            {darkMode ? <Sun size={16} className="sm:w-[18px] sm:h-[18px]" /> : <Moon size={16} className="sm:w-[18px] sm:h-[18px]" />}
-          </button>
+            {/* Auth Buttons for Non-Authenticated Users */}
+            {!isAuthenticated && (
+              <div className="flex items-center">
+                <Link 
+                  to="/register" 
+                  className="flex items-center gap-1 px-3 py-1.5 border border-green-400/70 text-green-400 hover:bg-green-400/20 hover:text-white rounded-md text-sm font-medium transition-all duration-300 backdrop-blur-sm"
+                >
+                  <User className="w-3 h-3" />
+                  <span className="hidden sm:inline">{t('register')}</span>
+                </Link>
+                <div className="w-px h-6 bg-white/20 mx-2"></div>
+                <Link 
+                  to="/login" 
+                  className="flex items-center gap-1 px-3 py-1.5 bg-gradient-to-r from-green-500/90 to-green-600/90 hover:from-green-600 hover:to-green-700 text-white rounded-md text-sm font-medium transition-all duration-300 shadow-sm backdrop-blur-sm border border-green-400/30"
+                >
+                  <Shield className="w-3 h-3" />
+                  <span className="hidden sm:inline">{t('login')}</span>
+                </Link>
+                <div className="w-px h-6 bg-white/20 mx-2"></div>
+              </div>
+            )}
 
-          {/* Desktop language switcher */}
-          <select
-            value={i18n.language}
-            onChange={e => i18n.changeLanguage(e.target.value)}
-            className="ml-2 border px-1 sm:px-2 py-1 rounded text-xs bg-white dark:bg-gray-900 dark:text-white"
-            aria-label={t('language')}
-          >
-            <option value="en">🇺🇸 English</option>
-            <option value="sw">🇰🇪 Kiswahili</option>
-            <option value="fr">🇫🇷 Français</option>
-            <option value="ar">🇸🇦 العربية</option>
-            <option value="cn">🇨🇳 中文</option>
-          </select>
-        </nav>
+            {/* Logout Button for Authenticated Users */}
+            {isAuthenticated && (
+              <div className="flex items-center">
+                <button 
+                  onClick={handleLogout} 
+                  data-testid="header-logout-button"
+                  className="flex items-center gap-1 px-3 py-1.5 bg-gradient-to-r from-red-500/90 to-red-600/90 hover:from-red-600 hover:to-red-700 text-white rounded-md text-sm font-medium transition-all duration-300 shadow-sm backdrop-blur-sm border border-red-400/30"
+                >
+                  <LogOut className="w-4 h-4" />
+                </button>
+                <div className="w-px h-6 bg-white/20 mx-2"></div>
+              </div>
+            )}
 
-        {/* Move time and date to the far right, small size */}
-        <div className="flex flex-col items-end gap-0 ml-auto min-w-[90px]">
-          <span className="text-blue-400 font-bold text-[10px] sm:text-xs flex items-center gap-1">
-            <span role="img" aria-label="clock">⏰</span>
-            {now.toLocaleTimeString(i18n.language, { hour: '2-digit', minute: '2-digit', second: '2-digit' })}
-          </span>
-          <span className="text-yellow-500 font-semibold text-[10px] sm:text-xs flex items-center gap-1">
-            <span role="img" aria-label="calendar">📅</span>
-            {now.toLocaleDateString(i18n.language, { year: 'numeric', month: 'long', day: 'numeric', weekday: 'short' })}
-          </span>
+            {/* Theme Toggle */}
+            <div className="flex items-center">
+              <button 
+                onClick={() => setDarkMode(!darkMode)} 
+                className="p-1.5 rounded-md bg-white/20 hover:bg-white/30 transition-all duration-300 backdrop-blur-sm border border-white/20"
+                aria-label={t('toggleTheme')}
+              >
+                {darkMode ? <Sun className="w-4 h-4 text-yellow-400" /> : <Moon className="w-4 h-4 text-blue-400" />}
+              </button>
+              <div className="w-px h-6 bg-white/20 mx-2"></div>
+            </div>
+
+            {/* Language Selector */}
+            <div className="flex items-center">
+              <select
+                value={i18n.language}
+                onChange={e => i18n.changeLanguage(e.target.value)}
+                className="px-3 py-1.5 rounded-md bg-white/20 hover:bg-white/30 transition-all duration-300 text-sm border border-white/20 backdrop-blur-sm cursor-pointer text-white"
+                style={{
+                  background: 'rgba(255, 255, 255, 0.1)',
+                  backdropFilter: 'blur(10px)',
+                  WebkitBackdropFilter: 'blur(10px)'
+                }}
+                aria-label={t('language')}
+              >
+                <option value="en" className="bg-gray-800 text-white">🇺🇸 English</option>
+                <option value="sw" className="bg-gray-800 text-white">🇰🇪 Kiswahili</option>
+                <option value="fr" className="bg-gray-800 text-white">🇫🇷 Français</option>
+                <option value="ar" className="bg-gray-800 text-white">🇸🇦 العربية</option>
+                <option value="cn" className="bg-gray-800 text-white">🇨🇳 中文</option>
+              </select>
+              <div className="w-px h-6 bg-white/20 mx-2"></div>
+            </div>
+
+            {/* Mobile Menu Button (Hamburger) */}
+            <button 
+              className="md:hidden p-2 rounded-lg bg-white/10 hover:bg-white/20 transition-all duration-300 backdrop-blur-sm border border-white/20 ml-2 focus:outline-none focus:ring-2 focus:ring-yellow-400"
+              onClick={() => setMenuOpen(!menuOpen)} 
+              aria-label={menuOpen ? 'Close menu' : 'Open menu'}
+            >
+              <div className="w-7 h-7 flex flex-col justify-center items-center gap-1">
+                <div className={`w-6 h-0.5 bg-current rounded transition-all duration-300 ${menuOpen ? 'rotate-45 translate-y-2' : ''}`}></div>
+                <div className={`w-6 h-0.5 bg-current rounded transition-all duration-300 ${menuOpen ? 'opacity-0' : ''}`}></div>
+                <div className={`w-6 h-0.5 bg-current rounded transition-all duration-300 ${menuOpen ? '-rotate-45 -translate-y-2' : ''}`}></div>
+              </div>
+            </button>
+          </div>
         </div>
 
-        <Button className="lg:hidden ml-auto" onClick={() => setMenuOpen(!menuOpen)} aria-label="Toggle Menu">
-          ☰
-        </Button>
-      </div>
-
-      {/* Mobile Off-Canvas Menu (with fixed height like screenshot) */}
+      {/* Mobile Off-Canvas Menu (Enhanced) */}
       <AnimatePresence>
         {menuOpen && (
           <motion.div
-            initial={{ opacity: 0, scale: 0.1, rotate: 720, y: 300, clipPath: "circle(0% at 90% 95%)" }}
-            animate={{ opacity: 1, scale: 1, rotate: 0, y: 0, clipPath: "circle(150% at 50% 50%)" }}
-            exit={{ opacity: 0, scale: 0.1, rotate: -720, y: 300, clipPath: "circle(0% at 90% 95%)" }}
-            transition={{ duration: 0.7, type: "spring", bounce: 0.32, ease: "easeInOut" }}
-            className="lg:hidden fixed top-0 left-0 h-[90%] w-11/12 sm:w-2/3 z-50 rounded-tr-3xl rounded-br-3xl backdrop-blur-2xl bg-gradient-to-br from-blue-900/95 via-green-900/90 to-yellow-100/90 text-white shadow-2xl p-4 sm:p-6 space-y-4 text-base font-bold border-r-4 border-yellow-400/80"
-            style={{ fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto' }}
+            initial={{ opacity: 0, x: '100%' }}
+            animate={{ opacity: 1, x: 0 }}
+            exit={{ opacity: 0, x: '100%' }}
+            transition={{ duration: 0.5, ease: "easeInOut" }}
+            className="md:hidden fixed top-0 right-0 h-full w-80 max-w-[90vw] z-[2147483646] bg-gradient-to-br from-blue-950/95 via-blue-900/90 to-blue-800/95 backdrop-blur-2xl text-white shadow-2xl border-l border-white/20 flex flex-col"
             role="dialog"
             aria-modal="true"
             tabIndex={-1}
           >
-            {/* Logo and company name with animation */}
-            <motion.div
-              className="flex flex-col items-center mb-4"
-              initial={{ opacity: 0, y: -30 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.1, duration: 0.5 }}
-            >
-              <motion.img
-                src={logo}
-                alt="Logo"
-                className="w-14 h-14 rounded-2xl shadow-xl border-4 border-white/40 mb-2"
-                initial={{ scale: 0.7, rotate: -10 }}
-                animate={{ scale: 1, rotate: 0 }}
-                transition={{ type: 'spring', stiffness: 200, damping: 12 }}
-              />
-              <span className="text-xl font-extrabold text-yellow-400 drop-shadow-glow tracking-wide text-center">Justice Ultimate Automobiles</span>
-            </motion.div>
-            {/* Return to Dashboard Button in Mobile Menu for Authenticated Users */}
-            {isAuthenticated && (
-              <motion.button
-                onClick={() => {
-                  handleDashboardNavigation();
-                  setMenuOpen(false);
-                }}
-                className="flex items-center gap-2 w-full px-4 py-3 bg-gradient-to-r from-green-600 via-blue-700 to-green-800 hover:from-green-700 hover:to-blue-900 text-white rounded-2xl transition-colors mb-4 shadow-xl font-bold text-lg border-2 border-green-400"
-                initial={{ opacity: 0, x: -40 }}
-                animate={{ opacity: 1, x: 0 }}
-                transition={{ delay: 0.15, type: 'spring', stiffness: 180, damping: 18 }}
+            {/* Mobile Menu Header */}
+            <div className="p-6 border-b border-white/10 flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <img src={logo} alt="Logo" className="w-10 h-10 rounded-full shadow-lg border-2 border-yellow-400/30" />
+                <div>
+                  <div className="text-lg font-bold text-yellow-400">JUSTICE ULTIMATE</div>
+                  <div className="text-sm text-green-400">Automobiles</div>
+                </div>
+              </div>
+              <button 
+                onClick={() => setMenuOpen(false)}
+                className="p-2 rounded-lg bg-white/10 hover:bg-white/20 transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-yellow-400"
+                aria-label="Close menu"
               >
-                <ArrowLeft size={18} />
-                <span>{t('Dashboard')}</span>
-              </motion.button>
-            )}
-            {/* Animated menu tiles */}
-            <motion.div
-              className="flex flex-col gap-3 mt-2"
-              initial="hidden"
-              animate="visible"
-              variants={{
-                hidden: {},
-                visible: {
-                  transition: {
-                    staggerChildren: 0.08,
-                    delayChildren: 0.18,
-                  },
-                },
-              }}
-            >
-              {navLinks.map((link, idx) =>
-                link.subMenu ? (
-                  <motion.div
-                    key={link.label}
-                    className="space-y-1"
-                    initial={{ opacity: 0, x: -40, scale: 0.9 }}
-                    animate={{ opacity: 1, x: 0, scale: 1 }}
-                    transition={{ type: 'spring', stiffness: 180, damping: 18 }}
-                  >
-                    <span className="font-semibold cursor-pointer shadow-md rounded-xl px-3 py-2 bg-gradient-to-r from-green-500 to-blue-500 text-yellow-100 text-base">
-                      {link.label}
-                    </span>
-                    {link.subMenu.map((sub) => (
-                      <Link
-                        key={sub.path}
-                        to={sub.path}
-                        className="block ml-4 text-base font-bold text-blue-100 hover:text-yellow-300 transition-all rounded-md py-1 px-2"
-                        onClick={() => setMenuOpen(false)}
-                      >
-                        {sub.label}
-                      </Link>
-                    ))}
-                  </motion.div>
-                ) : (
-                  <motion.div
-                    key={link.path}
-                    initial={{ opacity: 0, x: -40, scale: 0.9 }}
-                    animate={{ opacity: 1, x: 0, scale: 1 }}
-                    transition={{ type: 'spring', stiffness: 180, damping: 18 }}
-                  >
+                ✕
+              </button>
+            </div>
+            {/* Mobile Menu Content */}
+            <div className="p-6 space-y-4 flex-1 overflow-y-auto">
+              {/* Dashboard Button for Authenticated Users */}
+              {isAuthenticated && (
+                <motion.button
+                  onClick={() => {
+                    handleDashboardNavigation();
+                    setMenuOpen(false);
+                  }}
+                  className="w-full flex items-center gap-3 px-4 py-3 bg-gradient-to-r from-green-500 to-green-600 text-white rounded-lg font-semibold transition-all duration-300 shadow-lg"
+                  whileHover={{ scale: 1.02 }}
+                  whileTap={{ scale: 0.98 }}
+                >
+                  <ArrowLeft className="w-5 h-5" />
+                  <span>Dashboard</span>
+                </motion.button>
+              )}
+              {/* Navigation Links */}
+              <div className="space-y-2">
+                {navLinks.map((link) =>
+                  link.subMenu ? (
+                    <div key={link.label} className="space-y-1">
+                      <div className="font-semibold text-yellow-400 px-3 py-2">{link.label}</div>
+                      {link.subMenu.map((sub) => (
+                        <Link
+                          key={sub.path}
+                          to={sub.path}
+                          className="block ml-4 px-3 py-2 text-white/80 hover:text-yellow-400 transition-all duration-300 rounded-lg"
+                          onClick={() => setMenuOpen(false)}
+                        >
+                          {sub.label}
+                        </Link>
+                      ))}
+                    </div>
+                  ) : (
                     <Link
+                      key={link.path}
                       to={link.path}
-                      className="block text-base font-extrabold bg-gradient-to-r from-blue-800 via-green-700 to-yellow-400 text-white hover:text-yellow-300 shadow-lg rounded-xl py-2 px-4 mb-1 border-2 border-yellow-300"
+                      className="block px-3 py-2 text-white/80 hover:text-yellow-400 hover:bg-white/10 transition-all duration-300 rounded-lg"
                       onClick={() => setMenuOpen(false)}
                     >
                       {link.label}
                     </Link>
-                  </motion.div>
-                )
-              )}
-            </motion.div>
-            {/* Auth and settings buttons */}
-            {!isAuthenticated && (
-              <>
-                <motion.div
-                  initial={{ opacity: 0, x: -40 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  transition={{ delay: 0.25 }}
-                >
-                  <Link to="/register" className="block text-base font-bold bg-yellow-400 text-blue-900 rounded-xl py-2 px-4 mb-1 shadow border-2 border-yellow-300" onClick={() => setMenuOpen(false)}>
-                    📝 {t('Register')}
+                  )
+                )}
+              </div>
+              {/* Auth Buttons for Non-Authenticated Users */}
+              {!isAuthenticated && (
+                <div className="space-y-2 pt-4 border-t border-white/10">
+                  <Link 
+                    to="/register" 
+                    className="block w-full px-4 py-3 border-2 border-green-400 text-green-400 hover:bg-green-400 hover:text-white rounded-lg font-semibold transition-all duration-300 text-center"
+                    onClick={() => setMenuOpen(false)}
+                  >
+                    Register
                   </Link>
-                  <Link to="/login" className="block text-base font-bold bg-green-500 text-white rounded-xl py-2 px-4 mb-1 shadow border-2 border-green-300" onClick={() => setMenuOpen(false)}>
-                    🔐 {t('Login')}
+                  <Link 
+                    to="/login" 
+                    className="block w-full px-4 py-3 bg-gradient-to-r from-green-500 to-green-600 text-white rounded-lg font-semibold transition-all duration-300 text-center"
+                    onClick={() => setMenuOpen(false)}
+                  >
+                    Login
                   </Link>
-                </motion.div>
-              </>
-            )}
-            {isAuthenticated && (
-              <motion.div
-                className="relative group ml-2"
-                initial={{ opacity: 0, x: -40 }}
-                animate={{ opacity: 1, x: 0 }}
-                transition={{ delay: 0.3 }}
-              >
-                <button onClick={handleLogout} className="flex items-center justify-center p-2 rounded-xl bg-gradient-to-r from-red-600 via-red-700 to-red-800 text-white shadow border-2 border-red-300 hover:bg-red-700 transition">
-                  <LogOut className="w-6 h-6" />
-                </button>
-                <div className="absolute -top-8 left-1/2 -translate-x-1/2 bg-black text-white text-xs px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition whitespace-nowrap z-20">
-                  {t('Logout')}
                 </div>
-              </motion.div>
-            )}
-            <motion.button
-              onClick={() => {
-                setDarkMode(!darkMode);
-                setMenuOpen(false);
-              }}
-              className="mt-2 flex items-center gap-2 text-base font-bold bg-gradient-to-r from-yellow-300 via-green-300 to-blue-300 text-blue-900 rounded-xl py-2 px-4 shadow border-2 border-yellow-200"
-              initial={{ opacity: 0, x: -40 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ delay: 0.35 }}
-            >
-              {darkMode ? <Sun size={18} /> : <Moon size={18} />} {t('toggleTheme')}
-            </motion.button>
-            {/* Mobile menu language switcher (if present) */}
-            <label className="block text-base font-bold mb-1">{t('language')}</label>
-            <select
-              value={i18n.language}
-              onChange={e => {
-                i18n.changeLanguage(e.target.value);
-                setMenuOpen(false);
-              }}
-              className="block w-full border px-2 py-2 rounded text-base bg-white dark:bg-gray-900 dark:text-white mb-2"
-              aria-label={t('language')}
-            >
-              <option value="EN">🇺🇸 English</option>
-              <option value="SW">🇹🇿 Kiswahili</option>
-              <option value="ES">🇪🇸 Español</option>
-              <option value="FR">🇫🇷 Français</option>
-              <option value="CN">🇨🇳 中文</option>
-            </select>
+              )}
+              {/* Logout Button for Authenticated Users */}
+              {isAuthenticated && (
+                <div className="pt-4 border-t border-white/10">
+                  <button 
+                    onClick={() => {
+                      handleLogout();
+                      setMenuOpen(false);
+                    }} 
+                    className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-gradient-to-r from-red-500 to-red-600 text-white rounded-lg font-semibold transition-all duration-300"
+                  >
+                    <LogOut className="w-5 h-5" />
+                    Logout
+                  </button>
+                </div>
+              )}
+            </div>
           </motion.div>
         )}
       </AnimatePresence>
-    </header>
+    </HeaderPortal>
   );
 }

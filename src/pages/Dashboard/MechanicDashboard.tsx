@@ -102,29 +102,28 @@ export default function MechanicDashboard() {
   ];
 
   return (
-    <div className="min-h-screen w-full bg-gradient-to-br from-gray-900 to-gray-800 text-white flex flex-col">
-      {/* Header */}
-      <div className="bg-gray-800 border-b border-gray-700 p-4 md:p-6 w-full">
-        <div className="flex flex-col md:flex-row justify-between items-center gap-4">
-          <div>
-            <h1 className="text-3xl font-bold text-orange-400">Mechanic Dashboard</h1>
-            <p className="text-gray-300">Professional vehicle service and maintenance management</p>
-          </div>
-          <div className="flex items-center gap-4">
-            <Button variant="outline" size="sm">
-              <FiAlertTriangle className="mr-2" />
-              Alerts
-            </Button>
-            <Button size="sm" className="bg-orange-500 text-black hover:bg-orange-400">
-              <FiTool className="mr-2" />
-              New Work Order
-            </Button>
-          </div>
+    <div className="min-h-screen w-full bg-gradient-to-br from-gray-900 to-gray-800 text-white flex flex-col" style={{ paddingTop: '64px' }}>
+      {/* Header/Info Tile at the very top, full width */}
+      <div className="bg-gray-800 border-b border-gray-700 p-4 md:p-6 w-full flex flex-col md:flex-row justify-between items-center gap-4 rounded-b-2xl shadow-xl mb-6">
+        <div>
+          <h1 className="text-3xl font-bold text-orange-400">Mechanic Dashboard</h1>
+          <p className="text-gray-300">Professional vehicle service and maintenance management</p>
+        </div>
+        <div className="flex items-center gap-4">
+          <Button variant="outline" size="sm">
+            <FiAlertTriangle className="mr-2" />
+            Alerts
+          </Button>
+          <Button size="sm" className="bg-orange-500 text-black hover:bg-orange-400">
+            <FiTool className="mr-2" />
+            New Work Order
+          </Button>
         </div>
       </div>
-      {/* Stats Cards */}
-      <div className="p-4 md:p-6 w-full">
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-4 mb-6">
+      {/* Main Panel Content below the info tile, filling the rest of the page */}
+      <div className="p-4 md:p-6 w-full flex-1 flex flex-col items-center justify-start max-w-7xl mx-auto">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-4 mb-6 w-full">
+          {/* Stats Cards */}
           <Card className="bg-gray-800 border-gray-700">
             <CardContent className="p-4">
               <div className="flex items-center justify-between">

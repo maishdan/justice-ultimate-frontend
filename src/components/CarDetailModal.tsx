@@ -23,7 +23,7 @@ export const CarDetailModal: FC<CarDetailModalProps> = ({ open, car, onClose, on
     <Dialog open={open} onOpenChange={onClose}>
       <DialogContent className="max-w-4xl w-full p-6 overflow-y-auto max-h-[90vh] bg-background">
         <DialogHeader>
-          <DialogTitle className="text-xl font-bold">{car.name}</DialogTitle>
+          <DialogTitle>{car.name}</DialogTitle>
         </DialogHeader>
 
         <motion.div
@@ -34,17 +34,15 @@ export const CarDetailModal: FC<CarDetailModalProps> = ({ open, car, onClose, on
         >
           {/* Image Carousel */}
           <Carousel>
-            <CarouselContent className="rounded-xl overflow-hidden">
-              {car.image.map((imgUrl, idx) => (
-                <CarouselItem key={idx}>
-                  <img
-                    src={imgUrl}
-                    alt={`${car.name} image ${idx + 1}`}
-                    className="w-full h-72 object-cover"
-                  />
-                </CarouselItem>
-              ))}
-            </CarouselContent>
+            {car.image.map((imgUrl, idx) => (
+              <CarouselItem key={idx}>
+                <img
+                  src={imgUrl}
+                  alt={`${car.name} image ${idx + 1}`}
+                  className="w-full h-72 object-cover rounded-xl overflow-hidden"
+                />
+              </CarouselItem>
+            ))}
           </Carousel>
 
           {/* Basic Info */}

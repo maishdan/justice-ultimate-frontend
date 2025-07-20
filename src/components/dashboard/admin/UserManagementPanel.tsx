@@ -1022,110 +1022,108 @@ export default function UserManagementPanel() {
   });
 
   return (
-    <Card className="w-full">
-      <CardContent className="p-6 space-y-6">
-        <h2 className="text-2xl font-bold mb-4">User Management</h2>
-        <UserAnalyticsPanel users={users} />
+    <div className="glass-panel w-full max-w-6xl mx-auto p-8 rounded-2xl shadow-2xl">
+      <h2 className="text-2xl font-bold mb-4">User Management</h2>
+      <UserAnalyticsPanel users={users} />
+      <div className="mb-4 flex items-center gap-4">
+        <Button variant="outline" onClick={() => setShowAuditLogPanel(true)}>
+          View Global Audit Log
+        </Button>
+      </div>
+      <AdminAuditLogPanel open={showAuditLogPanel} onClose={() => setShowAuditLogPanel(false)} />
+      {/* Admin Notification Feed */}
+      <div className="mb-4">
+        <div className="bg-green-900/80 rounded-xl p-4 shadow-lg">
+          <h3 className="text-lg font-semibold text-white mb-2 flex items-center gap-2">Admin Notifications</h3>
+          <ul className="space-y-2">
+            {adminNotifications.map((notif, i) => (
+              <li key={i} className={`p-2 rounded bg-green-800/80 text-white flex items-center gap-2 ${notif.type === 'error' ? 'border-l-4 border-red-400' : notif.type === 'success' ? 'border-l-4 border-lime-400' : 'border-l-4 border-blue-300'}`}>
+                <span className="font-bold">[{notif.type?.toUpperCase() || 'INFO'}]</span>
+                <span>{notif.message}</span>
+                <span className="ml-auto text-xs opacity-60">{notif.time}</span>
+              </li>
+            ))}
+            {adminNotifications.length === 0 && <li className="text-green-200">No admin notifications yet.</li>}
+          </ul>
+        </div>
+      </div>
+      {isAdmin && (
         <div className="mb-4 flex items-center gap-4">
-          <Button variant="outline" onClick={() => setShowAuditLogPanel(true)}>
-            View Global Audit Log
+          <Button onClick={handleSyncAuthUsers} disabled={syncing} variant="outline">
+            {syncing ? 'Syncing...' : 'Sync Auth Users'}
           </Button>
+          {syncSummary && <span className="text-green-700 dark:text-green-300 text-sm font-semibold">{syncSummary}</span>}
         </div>
-        <AdminAuditLogPanel open={showAuditLogPanel} onClose={() => setShowAuditLogPanel(false)} />
-        {/* Admin Notification Feed */}
-        <div className="mb-4">
-          <div className="bg-green-900/80 rounded-xl p-4 shadow-lg">
-            <h3 className="text-lg font-semibold text-white mb-2 flex items-center gap-2">Admin Notifications</h3>
-            <ul className="space-y-2">
-              {adminNotifications.map((notif, i) => (
-                <li key={i} className={`p-2 rounded bg-green-800/80 text-white flex items-center gap-2 ${notif.type === 'error' ? 'border-l-4 border-red-400' : notif.type === 'success' ? 'border-l-4 border-lime-400' : 'border-l-4 border-blue-300'}`}>
-                  <span className="font-bold">[{notif.type?.toUpperCase() || 'INFO'}]</span>
-                  <span>{notif.message}</span>
-                  <span className="ml-auto text-xs opacity-60">{notif.time}</span>
-                </li>
-              ))}
-              {adminNotifications.length === 0 && <li className="text-green-200">No admin notifications yet.</li>}
-            </ul>
-          </div>
-        </div>
-        {isAdmin && (
-          <div className="mb-4 flex items-center gap-4">
-            <Button onClick={handleSyncAuthUsers} disabled={syncing} variant="outline">
-              {syncing ? 'Syncing...' : 'Sync Auth Users'}
-            </Button>
-            {syncSummary && <span className="text-green-700 dark:text-green-300 text-sm font-semibold">{syncSummary}</span>}
-          </div>
-        )}
-        {/* Search and Filters */}
-        <div className="flex flex-col md:flex-row gap-4 mb-4">
-          <Input placeholder="Search by name, email, phone" value={search} onChange={e => setSearch(e.target.value)} />
-          <Select value={roleFilter} onChange={e => setRoleFilter(e.target.value)}>
-            <SelectItem value="all">All Roles</SelectItem>
-            {ROLES.map(r => <SelectItem key={r} value={r}>{r.charAt(0).toUpperCase() + r.slice(1)}</SelectItem>)}
-          </Select>
-          <Select value={statusFilter} onChange={e => setStatusFilter(e.target.value)}>
-            <SelectItem value="all">All Statuses</SelectItem>
-            {STATUSES.map(s => <SelectItem key={s} value={s}>{s.replace('_', ' ').replace(/\b\w/g, l => l.toUpperCase())}</SelectItem>)}
-          </Select>
-        </div>
-        {/* Bulk Actions */}
-        <div className="flex gap-2 mb-2">
-          <Button size="sm" variant="outline" disabled={!selected.length || loading} onClick={handleBulkApprove}>Approve</Button>
-          <Button size="sm" variant="outline" disabled={!selected.length || loading} onClick={handleBulkSuspend}>Suspend</Button>
-          <Button size="sm" variant="outline" disabled={!selected.length || loading} onClick={handleBulkDelete}>Delete</Button>
-          <Button size="sm" variant="outline" disabled={!selected.length || loading} onClick={handleBulkExport}>Export</Button>
-        </div>
-        {/* Users Table */}
-        <div className="overflow-x-auto">
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableCell><input type="checkbox" checked={selected.length === filteredUsers.length && filteredUsers.length > 0} onChange={handleSelectAll} /></TableCell>
-                <TableCell>Avatar</TableCell>
-                <TableCell>Name</TableCell>
-                <TableCell>Email</TableCell>
-                <TableCell>Role</TableCell>
-                <TableCell>Status</TableCell>
-                <TableCell>2FA</TableCell>
-                <TableCell>Actions</TableCell>
+      )}
+      {/* Search and Filters */}
+      <div className="flex flex-col md:flex-row gap-4 mb-4">
+        <Input placeholder="Search by name, email, phone" value={search} onChange={e => setSearch(e.target.value)} />
+        <Select value={roleFilter} onChange={e => setRoleFilter(e.target.value)}>
+          <SelectItem value="all">All Roles</SelectItem>
+          {ROLES.map(r => <SelectItem key={r} value={r}>{r.charAt(0).toUpperCase() + r.slice(1)}</SelectItem>)}
+        </Select>
+        <Select value={statusFilter} onChange={e => setStatusFilter(e.target.value)}>
+          <SelectItem value="all">All Statuses</SelectItem>
+          {STATUSES.map(s => <SelectItem key={s} value={s}>{s.replace('_', ' ').replace(/\b\w/g, l => l.toUpperCase())}</SelectItem>)}
+        </Select>
+      </div>
+      {/* Bulk Actions */}
+      <div className="flex gap-2 mb-2">
+        <Button size="sm" variant="outline" disabled={!selected.length || loading} onClick={handleBulkApprove}>Approve</Button>
+        <Button size="sm" variant="outline" disabled={!selected.length || loading} onClick={handleBulkSuspend}>Suspend</Button>
+        <Button size="sm" variant="outline" disabled={!selected.length || loading} onClick={handleBulkDelete}>Delete</Button>
+        <Button size="sm" variant="outline" disabled={!selected.length || loading} onClick={handleBulkExport}>Export</Button>
+      </div>
+      {/* Users Table */}
+      <div className="overflow-x-auto">
+        <Table>
+          <TableHeader>
+            <TableRow>
+              <TableCell><input type="checkbox" checked={selected.length === filteredUsers.length && filteredUsers.length > 0} onChange={handleSelectAll} /></TableCell>
+              <TableCell>Avatar</TableCell>
+              <TableCell>Name</TableCell>
+              <TableCell>Email</TableCell>
+              <TableCell>Role</TableCell>
+              <TableCell>Status</TableCell>
+              <TableCell>2FA</TableCell>
+              <TableCell>Actions</TableCell>
+            </TableRow>
+          </TableHeader>
+          <tbody>
+            {filteredUsers.map(u => (
+              <TableRow key={u.id}>
+                <TableCell><input type="checkbox" checked={selected.includes(u.id)} onChange={() => handleSelect(u.id)} /></TableCell>
+                <TableCell><img src={u.avatar_url || '/avatar.png'} alt="User" className="h-8 w-8 rounded-full" /></TableCell>
+                <TableCell>{u.full_name || `${u.first_name || ''} ${u.last_name || ''}`}</TableCell>
+                <TableCell>{u.email}</TableCell>
+                <TableCell>
+                  <Select value={u.role} onChange={e => handleRoleChange(u.id, e.target.value)}>
+                    {ROLES.map(r => <SelectItem key={r} value={r}>{r.charAt(0).toUpperCase() + r.slice(1)}</SelectItem>)}
+                  </Select>
+                </TableCell>
+                <TableCell>
+                  <Select value={u.status} onChange={e => handleStatusChange(u.id, e.target.value)}>
+                    {STATUSES.map(s => <SelectItem key={s} value={s}>{s.replace('_', ' ').replace(/\b\w/g, l => l.toUpperCase())}</SelectItem>)}
+                  </Select>
+                </TableCell>
+                <TableCell><Switch checked={!!u.two_fa_enabled} onChange={() => {}} /></TableCell>
+                <TableCell>
+                  <Button size="sm" variant="outline" onClick={() => { setProfileModalUser(u); setProfileModalOpen(true); }}>View</Button>
+                  <Button size="sm" variant="outline" onClick={() => { setEditMode(true); setProfileModalUser(u); setProfileModalOpen(true); }}>Edit</Button>
+                  <Button size="sm" variant="outline" onClick={() => handleImpersonate(u)} disabled={impersonating}>Impersonate</Button>
+                  {impersonating && <Button size="sm" variant="outline" onClick={handleRevertImpersonation}>Revert to Admin</Button>}
+                  <Button size="sm" variant="outline" onClick={() => handleStatusChange(u.id, 'active')}>Approve</Button>
+                  <Button size="sm" variant="outline" onClick={() => handleStatusChange(u.id, 'inactive')}>Suspend</Button>
+                  <Button size="sm" variant="outline" onClick={() => handleDeleteUser(u.id)}>Delete</Button>
+                  <Button size="sm" variant="outline" onClick={() => handleExportUser(u)}>Export</Button>
+                  <Button size="sm" variant="outline" onClick={() => setShow2FAModal(true)}>2FA</Button>
+                </TableCell>
               </TableRow>
-            </TableHeader>
-            <tbody>
-              {filteredUsers.map(u => (
-                <TableRow key={u.id}>
-                  <TableCell><input type="checkbox" checked={selected.includes(u.id)} onChange={() => handleSelect(u.id)} /></TableCell>
-                  <TableCell><img src={u.avatar_url || '/avatar.png'} alt="User" className="h-8 w-8 rounded-full" /></TableCell>
-                  <TableCell>{u.full_name || `${u.first_name || ''} ${u.last_name || ''}`}</TableCell>
-                  <TableCell>{u.email}</TableCell>
-                  <TableCell>
-                    <Select value={u.role} onChange={e => handleRoleChange(u.id, e.target.value)}>
-                      {ROLES.map(r => <SelectItem key={r} value={r}>{r.charAt(0).toUpperCase() + r.slice(1)}</SelectItem>)}
-                    </Select>
-                  </TableCell>
-                  <TableCell>
-                    <Select value={u.status} onChange={e => handleStatusChange(u.id, e.target.value)}>
-                      {STATUSES.map(s => <SelectItem key={s} value={s}>{s.replace('_', ' ').replace(/\b\w/g, l => l.toUpperCase())}</SelectItem>)}
-                    </Select>
-                  </TableCell>
-                  <TableCell><Switch checked={!!u.two_fa_enabled} onChange={() => {}} /></TableCell>
-                  <TableCell>
-                    <Button size="sm" variant="outline" onClick={() => { setProfileModalUser(u); setProfileModalOpen(true); }}>View</Button>
-                    <Button size="sm" variant="outline" onClick={() => { setEditMode(true); setProfileModalUser(u); setProfileModalOpen(true); }}>Edit</Button>
-                    <Button size="sm" variant="outline" onClick={() => handleImpersonate(u)} disabled={impersonating}>Impersonate</Button>
-                    {impersonating && <Button size="sm" variant="outline" onClick={handleRevertImpersonation}>Revert to Admin</Button>}
-                    <Button size="sm" variant="outline" onClick={() => handleStatusChange(u.id, 'active')}>Approve</Button>
-                    <Button size="sm" variant="outline" onClick={() => handleStatusChange(u.id, 'inactive')}>Suspend</Button>
-                    <Button size="sm" variant="outline" onClick={() => handleDeleteUser(u.id)}>Delete</Button>
-                    <Button size="sm" variant="outline" onClick={() => handleExportUser(u)}>Export</Button>
-                    <Button size="sm" variant="outline" onClick={() => setShow2FAModal(true)}>2FA</Button>
-                  </TableCell>
-                </TableRow>
-              ))}
-            </tbody>
-          </Table>
-        </div>
-        <UserProfileModal user={profileModalUser} open={profileModalOpen} onClose={() => setProfileModalOpen(false)} onRefresh={fetchUsers} />
-      </CardContent>
-    </Card>
+            ))}
+          </tbody>
+        </Table>
+      </div>
+      <UserProfileModal user={profileModalUser} open={profileModalOpen} onClose={() => setProfileModalOpen(false)} onRefresh={fetchUsers} />
+    </div>
   );
 }

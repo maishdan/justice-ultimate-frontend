@@ -30,7 +30,7 @@ export const OfferPopup = ({ onClose }: OfferPopupProps) => {
       initial={{ y: -100, opacity: 0 }}
       animate={{ y: 0, opacity: 1 }}
       exit={{ y: -100, opacity: 0 }}
-      className="fixed top-6 left-1/2 transform -translate-x-1/2 z-50 bg-yellow-400 text-black px-6 py-4 rounded-xl shadow-lg flex items-center gap-4"
+      className="fixed top-20 left-1/2 transform -translate-x-1/2 z-40 bg-yellow-400 text-black px-6 py-4 rounded-xl shadow-lg flex items-center gap-4"
     >
       <div>
         <strong>🔥 Limited Offer:</strong> Get 5% off bookings made in the next{" "}

@@ -113,29 +113,28 @@ export default function StaffDashboard() {
   ];
 
   return (
-    <div className="min-h-screen w-full bg-gradient-to-br from-gray-900 to-gray-800 text-white flex flex-col">
-      {/* Header */}
-      <div className="bg-gray-800 border-b border-gray-700 p-4 md:p-6 w-full">
-        <div className="flex flex-col md:flex-row justify-between items-center gap-4">
-          <div>
-            <h1 className="text-3xl font-bold text-yellow-400">Staff Dashboard</h1>
-            <p className="text-gray-300">Manage customers, vehicles, and sales efficiently</p>
-          </div>
-          <div className="flex items-center gap-4">
-            <Button variant="outline" size="sm">
-              <FiBell className="mr-2" />
-              Notifications
-            </Button>
-            <Button size="sm" className="bg-yellow-500 text-black hover:bg-yellow-400">
-              <FiAward className="mr-2" />
-              Performance
-            </Button>
-          </div>
+    <div className="min-h-screen w-full bg-gradient-to-br from-gray-900 to-gray-800 text-white flex flex-col" style={{ paddingTop: '64px' }}>
+      {/* Header/Info Tile at the very top, full width */}
+      <div className="bg-gray-800 border-b border-gray-700 p-4 md:p-6 w-full flex flex-col md:flex-row justify-between items-center gap-4 rounded-b-2xl shadow-xl mb-6">
+        <div>
+          <h1 className="text-3xl font-bold text-yellow-400">Staff Dashboard</h1>
+          <p className="text-gray-300">Manage customers, vehicles, and sales efficiently</p>
+        </div>
+        <div className="flex items-center gap-4">
+          <Button variant="outline" size="sm">
+            <FiBell className="mr-2" />
+            Notifications
+          </Button>
+          <Button size="sm" className="bg-yellow-500 text-black hover:bg-yellow-400">
+            <FiAward className="mr-2" />
+            Performance
+          </Button>
         </div>
       </div>
-      {/* Stats Cards */}
-      <div className="p-4 md:p-6 w-full">
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-4 mb-6">
+      {/* Main Panel Content below the info tile, filling the rest of the page */}
+      <div className="p-4 md:p-6 w-full flex-1 flex flex-col items-center justify-start max-w-7xl mx-auto">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-4 mb-6 w-full">
+          {/* Stats Cards */}
           <Card className="bg-gray-800 border-gray-700">
             <CardContent className="p-4">
               <div className="flex items-center justify-between">
@@ -210,7 +209,7 @@ export default function StaffDashboard() {
         </div>
 
         {/* CRM Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-6 w-full">
           <LeadsWidget />
           <OpportunitiesWidget />
           <ContactsWidget />
@@ -219,7 +218,7 @@ export default function StaffDashboard() {
         </div>
 
         {/* Tabs */}
-        <Card className="bg-gray-800 border-gray-700">
+        <Card className="bg-gray-800 border-gray-700 w-full">
           <CardContent className="p-6">
             <Tabs>
               <TabsList>
@@ -235,8 +234,8 @@ export default function StaffDashboard() {
 
               {selectedTab === "overview" && (
                 <TabsContent>
-                  <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                    <Card className="bg-gray-700 border-gray-600">
+                  <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 w-full">
+                    <Card className="bg-gray-700 border-gray-600 w-full">
                       <CardContent className="p-4">
                         <h3 className="text-lg font-semibold mb-4">Recent Leads</h3>
                         <div className="space-y-3">
@@ -253,7 +252,7 @@ export default function StaffDashboard() {
                       </CardContent>
                     </Card>
 
-                    <Card className="bg-gray-700 border-gray-600">
+                    <Card className="bg-gray-700 border-gray-600 w-full">
                       <CardContent className="p-4">
                         <h3 className="text-lg font-semibold mb-4">Today's Appointments</h3>
                         <div className="space-y-3">
@@ -274,7 +273,7 @@ export default function StaffDashboard() {
               )}
               {selectedTab === 'crm' && (
                 <TabsContent>
-                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 w-full">
                     <LeadsWidget />
                     <OpportunitiesWidget />
                     <ContactsWidget />
@@ -285,7 +284,7 @@ export default function StaffDashboard() {
               )}
               {selectedTab === "leads" && (
                 <TabsContent>
-                  <div className="flex gap-4 mb-4">
+                  <div className="flex gap-4 mb-4 w-full">
                     <Input placeholder="Search leads..." className="flex-1" />
                     <Select>
                       <SelectItem value="all">All Status</SelectItem>
@@ -296,7 +295,7 @@ export default function StaffDashboard() {
                     <Button>Add New Lead</Button>
                   </div>
 
-                  <Table>
+                  <Table className="w-full">
                     <TableHeader>
                       <TableRow>
                         <TableCell>Name</TableCell>
@@ -330,7 +329,7 @@ export default function StaffDashboard() {
               )}
               {selectedTab === "vehicles" && (
                 <TabsContent>
-                  <div className="flex gap-4 mb-4">
+                  <div className="flex gap-4 mb-4 w-full">
                     <Input placeholder="Search vehicles..." className="flex-1" />
                     <Select>
                       <SelectItem value="all">All Brands</SelectItem>
@@ -341,7 +340,7 @@ export default function StaffDashboard() {
                     <Button>Add Vehicle</Button>
                   </div>
 
-                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 w-full">
                     {[1, 2, 3, 4, 5, 6].map((i) => (
                       <Card key={i} className="bg-gray-700 border-gray-600">
                         <CardContent className="p-4">
@@ -368,7 +367,7 @@ export default function StaffDashboard() {
               )}
               {selectedTab === "sales" && (
                 <TabsContent>
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6 w-full">
                     <Card className="bg-gray-700 border-gray-600">
                       <CardContent className="p-4 text-center">
                         <p className="text-sm text-gray-400">This Month</p>
@@ -389,7 +388,7 @@ export default function StaffDashboard() {
                     </Card>
                   </div>
 
-                  <Table>
+                  <Table className="w-full">
                     <TableHeader>
                       <TableRow>
                         <TableCell>Customer</TableCell>
@@ -417,7 +416,7 @@ export default function StaffDashboard() {
               )}
               {selectedTab === "appointments" && (
                 <TabsContent>
-                  <div className="flex gap-4 mb-4">
+                  <div className="flex gap-4 mb-4 w-full">
                     <Input placeholder="Search appointments..." className="flex-1" />
                     <Select>
                       <SelectItem value="all">All Types</SelectItem>
@@ -428,7 +427,7 @@ export default function StaffDashboard() {
                     <Button>Schedule Appointment</Button>
                   </div>
 
-                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 w-full">
                     {[1, 2, 3, 4, 5, 6].map((i) => (
                       <Card key={i} className="bg-gray-700 border-gray-600">
                         <CardContent className="p-4">
@@ -458,7 +457,7 @@ export default function StaffDashboard() {
               )}
               {selectedTab === "performance" && (
                 <TabsContent>
-                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 w-full">
                     <Card className="bg-gray-700 border-gray-600">
                       <CardContent className="p-4 text-center">
                         <FiTarget className="text-2xl text-blue-400 mx-auto mb-2" />
@@ -489,7 +488,7 @@ export default function StaffDashboard() {
                     </Card>
                   </div>
 
-                  <Card className="bg-gray-700 border-gray-600">
+                  <Card className="bg-gray-700 border-gray-600 w-full">
                     <CardContent className="p-4">
                       <h3 className="text-lg font-semibold mb-4">Performance Metrics</h3>
                       <div className="space-y-4">
@@ -527,7 +526,7 @@ export default function StaffDashboard() {
               )}
               {selectedTab === "settings" && (
                 <TabsContent>
-                  <Card className="bg-gray-700 border-gray-600">
+                  <Card className="bg-gray-700 border-gray-600 w-full">
                     <CardContent className="p-4">
                       <h3 className="text-lg font-semibold mb-4">Profile Settings</h3>
                       <div className="space-y-4">
@@ -548,7 +547,7 @@ export default function StaffDashboard() {
                     </CardContent>
                   </Card>
 
-                  <Card className="bg-gray-700 border-gray-600">
+                  <Card className="bg-gray-700 border-gray-600 w-full">
                     <CardContent className="p-4">
                       <h3 className="text-lg font-semibold mb-4">Notification Preferences</h3>
                       <div className="space-y-3">

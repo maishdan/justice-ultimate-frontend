@@ -9,6 +9,8 @@ import zxcvbn from 'zxcvbn';
 import { FaGoogle, FaGithub } from 'react-icons/fa';
 import { useRef, useEffect } from 'react';
 import { API_ENDPOINTS } from '../lib/api';
+import { motion } from 'framer-motion';
+import { User, Mail, Lock, Shield, Phone, MapPin, Car, CheckCircle } from 'lucide-react';
 
 const countries = [
   { code: "KE", name: "Kenya", dial: "+254" },
@@ -22,8 +24,8 @@ const countries = [
 function ContinueAsGuestButton() {
   const navigate = useNavigate();
   return (
-    <button
-      className="w-full mt-4 py-2 px-4 rounded bg-yellow-400 text-black font-bold hover:bg-yellow-300 transition"
+    <motion.button
+      className="w-full mt-4 py-3 px-4 rounded-xl bg-gradient-to-r from-yellow-400 to-yellow-500 text-black font-bold hover:from-yellow-300 hover:to-yellow-400 transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-xl"
       onClick={() => {
         localStorage.removeItem("token");
         localStorage.removeItem("authToken");
@@ -31,9 +33,11 @@ function ContinueAsGuestButton() {
         navigate("/dashboard/guest");
       }}
       type="button"
+      whileHover={{ scale: 1.02 }}
+      whileTap={{ scale: 0.98 }}
     >
       Continue as Guest
-    </button>
+    </motion.button>
   );
 }
 
@@ -193,175 +197,323 @@ export default function RegisterPage() {
   const selectedCountry = countries.find(c => c.code === country);
 
   return (
-    <div className="min-h-screen w-full flex items-center justify-center bg-gradient-to-br from-blue-900 to-black p-4">
-      <ToastContainer />
-      <audio ref={audioRef} src="/sounds/iphone-notification.mp3" preload="auto" />
-      <div className="bg-white rounded-xl shadow-lg p-4 md:p-8 w-full max-w-md">
-        <h2 className="text-2xl font-bold mb-6 text-center text-blue-900">Create Your Account</h2>
-        {success ? (
-          <div className="text-center">
-            <h3 className="text-lg font-semibold text-green-600 mb-2">Check your email to confirm your account!</h3>
-            <p className="text-gray-700 mb-4">We've sent a confirmation link to <span className="font-bold">{email}</span>. Please confirm your email to activate your account and then log in.</p>
-            <button
-              className="mt-4 px-6 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition"
-              onClick={() => navigate("/login")}
-            >Go to Login</button>
-          </div>
-        ) : (
-          <form onSubmit={handleRegister} className="space-y-4">
-            <div>
-              <label className="block text-gray-700 font-medium mb-1">Full Name</label>
-              <input
-                type="text"
-                value={fullName}
-                onChange={e => setFullName(e.target.value)}
-                required
-                className="w-full px-4 py-2 border rounded focus:outline-none focus:ring-2 focus:ring-blue-400"
-                placeholder="Your full name"
-              />
-            </div>
-            <div>
-              <label className="block text-gray-700 font-medium mb-1">Email</label>
-              <input
-                type="email"
-                value={email}
-                onChange={e => setEmail(e.target.value)}
-                required
-                className="w-full px-4 py-2 border rounded focus:outline-none focus:ring-2 focus:ring-blue-400"
-                placeholder="you@email.com"
-              />
-            </div>
-            <div>
-              <label className="block text-gray-700 font-medium mb-1">Country</label>
-              <select
-                value={country}
-                onChange={e => setCountry(e.target.value)}
-                className="w-full px-4 py-2 border rounded focus:outline-none focus:ring-2 focus:ring-blue-400"
-              >
-                {countries.map(c => (
-                  <option key={c.code} value={c.code}>{c.name} ({c.dial})</option>
-                ))}
-              </select>
-            </div>
-            <div>
-              <label className="block text-gray-700 font-medium mb-1">Phone Number</label>
-              <div className="flex">
-                <span className="px-3 py-2 bg-gray-100 border border-r-0 rounded-l text-gray-600">
-                  {selectedCountry?.dial}
-                </span>
-                <input
-                  type="tel"
-                  value={phoneNumber}
-                  onChange={e => setPhoneNumber(e.target.value)}
-                  required
-                  className="flex-1 px-4 py-2 border rounded-r focus:outline-none focus:ring-2 focus:ring-blue-400"
-                  placeholder="Phone number"
-                />
-              </div>
-            </div>
-            <div>
-              <label className="block text-gray-700 font-medium mb-1">Password</label>
-              <input
-                type="password"
-                value={password}
-                onChange={e => {
-                  setPassword(e.target.value);
-                  setPasswordStrength(zxcvbn(e.target.value).score);
-                }}
-                required
-                minLength={8}
-                className="w-full px-4 py-2 border rounded focus:outline-none focus:ring-2 focus:ring-blue-400"
-                placeholder="Create a password"
-              />
-              <div className="text-xs mt-1">
-                Password strength: {["Weak","Fair","Good","Strong","Very strong"][passwordStrength]}
-              </div>
-            </div>
-            <div>
-              <label className="block text-gray-700 font-medium mb-1">Confirm Password</label>
-              <input
-                type="password"
-                value={confirmPassword}
-                onChange={e => setConfirmPassword(e.target.value)}
-                required
-                minLength={8}
-                className="w-full px-4 py-2 border rounded focus:outline-none focus:ring-2 focus:ring-blue-400"
-                placeholder="Confirm your password"
-              />
-            </div>
-            {error && <div className="text-red-600 text-sm">{error}</div>}
-            
-            {/* reCAPTCHA v3 Status Indicator */}
-            <div className="mb-4">
-              <div className="flex items-center justify-center space-x-2 p-3 bg-gray-50 rounded-lg border">
-                {captchaLoading ? (
-                  <>
-                    <div className="animate-spin h-4 w-4 border-2 border-blue-500 border-t-transparent rounded-full"></div>
-                    <span className="text-sm text-gray-600">Verifying reCAPTCHA...</span>
-                  </>
-                ) : captchaVerified ? (
-                  <>
-                    <div className="h-4 w-4 bg-green-500 rounded-full flex items-center justify-center">
-                      <svg className="h-3 w-3 text-white" fill="currentColor" viewBox="0 0 20 20">
-                        <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
-                      </svg>
-                    </div>
-                    <span className="text-sm text-green-600">reCAPTCHA verified ✓</span>
-                  </>
-                ) : (
-                  <>
-                    <div className="h-4 w-4 bg-gray-300 rounded-full"></div>
-                    <span className="text-sm text-gray-500">reCAPTCHA verification required</span>
-                  </>
-                )}
-              </div>
-              <p className="text-xs text-gray-500 text-center mt-2">
-                This site is protected by reCAPTCHA v3
-              </p>
-            </div>
-            
-            <button
-              type="submit"
-              disabled={loading || captchaLoading}
-              className={`w-full py-2 px-4 rounded font-semibold transition ${
-                loading || captchaLoading 
-                  ? 'bg-gray-400 text-gray-600 cursor-not-allowed' 
-                  : 'bg-blue-600 text-white hover:bg-blue-700'
-              }`}
+    <div 
+      className="min-h-screen w-full pt-0"
+      style={{
+        backgroundImage: "url('/images/bg-landing.png')",
+        backgroundSize: 'cover',
+        backgroundPosition: 'center',
+        backgroundRepeat: 'no-repeat',
+        backgroundAttachment: 'fixed',
+      }}
+    >
+      {/* Enhanced Background Overlay with Gradient */}
+      <div className="absolute inset-0 bg-gradient-to-br from-black/40 via-black/20 to-black/50 pointer-events-none z-10"></div>
+      
+      {/* Animated Background Particles */}
+      <div className="absolute inset-0 overflow-hidden pointer-events-none">
+        <div className="absolute top-20 left-10 w-2 h-2 bg-yellow-400/30 rounded-full animate-pulse"></div>
+        <div className="absolute top-40 right-20 w-1 h-1 bg-white/40 rounded-full animate-ping"></div>
+        <div className="absolute bottom-40 left-1/4 w-1.5 h-1.5 bg-yellow-300/50 rounded-full animate-bounce"></div>
+        <div className="absolute top-1/2 right-1/3 w-1 h-1 bg-white/30 rounded-full animate-pulse"></div>
+        <div className="absolute top-3/4 left-1/3 w-1.5 h-1.5 bg-blue-400/40 rounded-full animate-ping"></div>
+        <div className="absolute bottom-1/4 right-1/4 w-1 h-1 bg-green-400/30 rounded-full animate-bounce"></div>
+      </div>
+
+      {/* Main Content Container with Enhanced Glass Morphism */}
+      <div className="relative z-10 w-full flex justify-center items-center">
+        <motion.div 
+          className="glass-panel rounded-2xl shadow-2xl p-6 md:p-8 w-full max-w-md border border-white/20 backdrop-blur-xl"
+          initial={{ opacity: 0, y: 50, scale: 0.9 }}
+          animate={{ opacity: 1, y: 0, scale: 1 }}
+          transition={{ duration: 0.8, ease: "easeOut" }}
+        >
+          <ToastContainer />
+          <audio ref={audioRef} src="/sounds/iphone-notification.mp3" preload="auto" />
+          
+          {/* Header Section */}
+          <motion.div 
+            className="text-center mb-8"
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.8, delay: 0.2 }}
+          >
+            <h2 className="text-2xl font-bold text-yellow-400 mb-2 flex items-center justify-center gap-2">
+              <Car className="w-6 h-6" /> Create Your Account
+            </h2>
+            <p className="text-white/80 text-sm">Join Justice Ultimate Automobiles today</p>
+          </motion.div>
+
+          {success ? (
+            <motion.div 
+              className="text-center"
+              initial={{ opacity: 0, scale: 0.9 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ duration: 0.6 }}
             >
-              {loading ? "Registering..." : captchaLoading ? "Verifying..." : "Register"}
-            </button>
-            
-            <ContinueAsGuestButton />
-            {/* OAuth Buttons */}
-            <div className="space-y-2">
-              <button
-                type="button"
-                onClick={() => registerWithProvider('google')}
-                disabled={loading}
-                className="w-full py-2 bg-white border border-gray-300 rounded font-semibold transition-all duration-300 shadow-md flex justify-center items-center text-gray-700 hover:bg-gray-50"
-              >
-                <FaGoogle className="mr-2" /> Sign up with Google
-              </button>
-              <button
-                type="button"
-                onClick={() => registerWithProvider('github')}
-                disabled={loading}
-                className="w-full py-2 bg-black text-white rounded font-semibold transition-all duration-300 shadow-md flex justify-center items-center hover:bg-gray-800"
-              >
-                <FaGithub className="mr-2" /> Sign up with GitHub
-              </button>
-            </div>
-            
-            <div className="text-center text-sm mt-2">
-              Already have an account?{' '}
-              <span
-                className="text-blue-600 hover:underline cursor-pointer"
+              <div className="flex justify-center mb-4">
+                <CheckCircle className="w-16 h-16 text-green-400" />
+              </div>
+              <h3 className="text-lg font-semibold text-green-400 mb-2">Check your email to confirm your account!</h3>
+              <p className="text-white/80 mb-6">We've sent a confirmation link to <span className="font-bold text-yellow-400">{email}</span>. Please confirm your email to activate your account and then log in.</p>
+              <motion.button
+                className="px-6 py-3 bg-gradient-to-r from-yellow-400 to-yellow-500 text-black rounded-xl hover:from-yellow-300 hover:to-yellow-400 transition-all duration-300 transform hover:scale-105 font-semibold"
                 onClick={() => navigate("/login")}
-              >Login</span>
-            </div>
-          </form>
-        )}
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+              >
+                Go to Login
+              </motion.button>
+            </motion.div>
+          ) : (
+            <motion.form 
+              onSubmit={handleRegister} 
+              className="space-y-6"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ duration: 0.8, delay: 0.3 }}
+            >
+              {/* Full Name Input */}
+              <motion.div
+                initial={{ opacity: 0, x: -20 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ duration: 0.6, delay: 0.4 }}
+              >
+                <label className="block text-white/90 font-medium mb-2 flex items-center gap-2">
+                  <User className="w-4 h-4" /> Full Name
+                </label>
+                <input
+                  type="text"
+                  value={fullName}
+                  onChange={e => setFullName(e.target.value)}
+                  required
+                  className="w-full px-4 py-3 rounded-xl bg-white/10 border border-white/20 text-white placeholder-white/60 backdrop-blur-sm focus:outline-none focus:ring-2 focus:ring-yellow-400/50 focus:border-yellow-400/50 transition-all duration-300"
+                  placeholder="Your full name"
+                />
+              </motion.div>
+
+              {/* Email Input */}
+              <motion.div
+                initial={{ opacity: 0, x: -20 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ duration: 0.6, delay: 0.5 }}
+              >
+                <label className="block text-white/90 font-medium mb-2 flex items-center gap-2">
+                  <Mail className="w-4 h-4" /> Email
+                </label>
+                <input
+                  type="email"
+                  value={email}
+                  onChange={e => setEmail(e.target.value)}
+                  required
+                  className="w-full px-4 py-3 rounded-xl bg-white/10 border border-white/20 text-white placeholder-white/60 backdrop-blur-sm focus:outline-none focus:ring-2 focus:ring-yellow-400/50 focus:border-yellow-400/50 transition-all duration-300"
+                  placeholder="you@email.com"
+                />
+              </motion.div>
+
+              {/* Country Input */}
+              <motion.div
+                initial={{ opacity: 0, x: -20 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ duration: 0.6, delay: 0.6 }}
+              >
+                <label className="block text-white/90 font-medium mb-2 flex items-center gap-2">
+                  <MapPin className="w-4 h-4" /> Country
+                </label>
+                <select
+                  value={country}
+                  onChange={e => setCountry(e.target.value)}
+                  className="w-full px-4 py-3 rounded-xl bg-white/10 border border-white/20 text-white backdrop-blur-sm focus:outline-none focus:ring-2 focus:ring-yellow-400/50 focus:border-yellow-400/50 transition-all duration-300 appearance-none cursor-pointer"
+                >
+                  {countries.map(c => (
+                    <option key={c.code} value={c.code} className="bg-gray-800 text-white">{c.name} ({c.dial})</option>
+                  ))}
+                </select>
+              </motion.div>
+
+              {/* Phone Number Input */}
+              <motion.div
+                initial={{ opacity: 0, x: -20 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ duration: 0.6, delay: 0.7 }}
+              >
+                <label className="block text-white/90 font-medium mb-2 flex items-center gap-2">
+                  <Phone className="w-4 h-4" /> Phone Number
+                </label>
+                <div className="flex">
+                  <span className="px-3 py-3 bg-white/10 border border-r-0 border-white/20 rounded-l-xl text-white/80 backdrop-blur-sm">
+                    {selectedCountry?.dial}
+                  </span>
+                  <input
+                    type="tel"
+                    value={phoneNumber}
+                    onChange={e => setPhoneNumber(e.target.value)}
+                    required
+                    className="flex-1 px-4 py-3 border border-white/20 rounded-r-xl bg-white/10 text-white placeholder-white/60 backdrop-blur-sm focus:outline-none focus:ring-2 focus:ring-yellow-400/50 focus:border-yellow-400/50 transition-all duration-300"
+                    placeholder="Phone number"
+                  />
+                </div>
+              </motion.div>
+
+              {/* Password Input */}
+              <motion.div
+                initial={{ opacity: 0, x: -20 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ duration: 0.6, delay: 0.8 }}
+              >
+                <label className="block text-white/90 font-medium mb-2 flex items-center gap-2">
+                  <Lock className="w-4 h-4" /> Password
+                </label>
+                <input
+                  type="password"
+                  value={password}
+                  onChange={e => {
+                    setPassword(e.target.value);
+                    setPasswordStrength(zxcvbn(e.target.value).score);
+                  }}
+                  required
+                  minLength={8}
+                  className="w-full px-4 py-3 rounded-xl bg-white/10 border border-white/20 text-white placeholder-white/60 backdrop-blur-sm focus:outline-none focus:ring-2 focus:ring-yellow-400/50 focus:border-yellow-400/50 transition-all duration-300"
+                  placeholder="Create a password"
+                />
+                <div className="text-xs mt-2 text-white/70">
+                  Password strength: <span className={`font-semibold ${passwordStrength >= 3 ? 'text-green-400' : passwordStrength >= 2 ? 'text-yellow-400' : 'text-red-400'}`}>
+                    {["Weak","Fair","Good","Strong","Very strong"][passwordStrength]}
+                  </span>
+                </div>
+              </motion.div>
+
+              {/* Confirm Password Input */}
+              <motion.div
+                initial={{ opacity: 0, x: -20 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ duration: 0.6, delay: 0.9 }}
+              >
+                <label className="block text-white/90 font-medium mb-2 flex items-center gap-2">
+                  <Lock className="w-4 h-4" /> Confirm Password
+                </label>
+                <input
+                  type="password"
+                  value={confirmPassword}
+                  onChange={e => setConfirmPassword(e.target.value)}
+                  required
+                  minLength={8}
+                  className="w-full px-4 py-3 rounded-xl bg-white/10 border border-white/20 text-white placeholder-white/60 backdrop-blur-sm focus:outline-none focus:ring-2 focus:ring-yellow-400/50 focus:border-yellow-400/50 transition-all duration-300"
+                  placeholder="Confirm your password"
+                />
+              </motion.div>
+
+              {error && (
+                <motion.div 
+                  className="text-red-400 text-sm p-3 bg-red-500/10 rounded-xl border border-red-500/20"
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.3 }}
+                >
+                  {error}
+                </motion.div>
+              )}
+              
+              {/* reCAPTCHA v3 Status Indicator */}
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.6, delay: 1.0 }}
+              >
+                <div className="flex items-center justify-center space-x-2 p-3 bg-white/10 rounded-xl border border-white/20 backdrop-blur-sm">
+                  {captchaLoading ? (
+                    <>
+                      <div className="animate-spin h-4 w-4 border-2 border-yellow-400 border-t-transparent rounded-full"></div>
+                      <span className="text-sm text-white/80">Verifying reCAPTCHA...</span>
+                    </>
+                  ) : captchaVerified ? (
+                    <>
+                      <div className="h-4 w-4 bg-green-500 rounded-full flex items-center justify-center">
+                        <svg className="h-3 w-3 text-white" fill="currentColor" viewBox="0 0 20 20">
+                          <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                        </svg>
+                      </div>
+                      <span className="text-sm text-green-400">reCAPTCHA verified ✓</span>
+                    </>
+                  ) : (
+                    <>
+                      <Shield className="w-4 h-4 text-white/60" />
+                      <span className="text-sm text-white/60">reCAPTCHA verification required</span>
+                    </>
+                  )}
+                </div>
+                <p className="text-xs text-white/50 text-center mt-2">
+                  This site is protected by reCAPTCHA v3
+                </p>
+              </motion.div>
+              
+              {/* Register Button */}
+              <motion.button
+                type="submit"
+                disabled={loading || captchaLoading}
+                className={`w-full py-3 px-4 rounded-xl font-semibold transition-all duration-300 shadow-lg flex justify-center items-center ${
+                  loading || captchaLoading 
+                    ? 'bg-white/20 text-white/60 cursor-not-allowed' 
+                    : 'bg-gradient-to-r from-yellow-400 to-yellow-500 text-black hover:from-yellow-300 hover:to-yellow-400 transform hover:scale-105'
+                }`}
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.6, delay: 1.1 }}
+                whileHover={{ scale: loading || captchaLoading ? 1 : 1.02 }}
+                whileTap={{ scale: 0.98 }}
+              >
+                {loading ? "Registering..." : captchaLoading ? "Verifying..." : "Register"}
+              </motion.button>
+              
+              <ContinueAsGuestButton />
+
+              {/* OAuth Buttons */}
+              <motion.div 
+                className="space-y-3"
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.6, delay: 1.2 }}
+              >
+                <motion.button
+                  type="button"
+                  onClick={() => registerWithProvider('google')}
+                  disabled={loading}
+                  className="w-full py-3 bg-white/10 border border-white/20 rounded-xl font-semibold transition-all duration-300 shadow-lg flex justify-center items-center text-white hover:bg-white/20 backdrop-blur-sm"
+                  whileHover={{ scale: 1.02 }}
+                  whileTap={{ scale: 0.98 }}
+                >
+                  <FaGoogle className="mr-2" /> Sign up with Google
+                </motion.button>
+                <motion.button
+                  type="button"
+                  onClick={() => registerWithProvider('github')}
+                  disabled={loading}
+                  className="w-full py-3 bg-white/10 border border-white/20 rounded-xl font-semibold transition-all duration-300 shadow-lg flex justify-center items-center text-white hover:bg-white/20 backdrop-blur-sm"
+                  whileHover={{ scale: 1.02 }}
+                  whileTap={{ scale: 0.98 }}
+                >
+                  <FaGithub className="mr-2" /> Sign up with GitHub
+                </motion.button>
+              </motion.div>
+              
+              {/* Login Link */}
+              <motion.div 
+                className="text-center text-sm mt-4"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ duration: 0.6, delay: 1.3 }}
+              >
+                <span className="text-white/80">Already have an account?{' '}</span>
+                <span
+                  className="text-yellow-400 hover:text-yellow-300 transition-colors duration-300 cursor-pointer"
+                  onClick={() => navigate("/login")}
+                >
+                  Login
+                </span>
+              </motion.div>
+            </motion.form>
+          )}
+        </motion.div>
       </div>
     </div>
   );

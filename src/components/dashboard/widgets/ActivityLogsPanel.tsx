@@ -111,7 +111,7 @@ export default function ActivityLogsPanel() {
   };
 
   return (
-    <div className="w-full max-w-6xl mx-auto bg-white dark:bg-gray-900 rounded-2xl shadow-xl p-8 mt-8">
+    <div className="w-full max-w-6xl mx-auto glass-panel rounded-2xl shadow-xl p-8 mt-8">
       <h2 className="text-2xl font-bold mb-6 text-blue-800 dark:text-blue-200">Activity & Session Logs</h2>
       <p className="text-gray-500 mb-6">Real-time session logs for advanced security monitoring. Filter, export, and audit all user sessions.</p>
       <div className="flex flex-col md:flex-row gap-4 mb-6">

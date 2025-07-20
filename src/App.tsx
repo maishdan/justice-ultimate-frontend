@@ -39,6 +39,7 @@ import { UserProfileProvider } from './context/UserProfileContext';
 import { ThemeProvider } from './context/ThemeContext';
 import { LanguageProvider } from './context/LanguageContext';
 import { useTranslation } from 'react-i18next';
+import RentalsPage from './pages/RentalsPage';
 
 // ✅ Import the dynamic CarDetails page
 
@@ -78,11 +79,10 @@ function App() {
 
   return (
     <UserProfileProvider>
-      <div className="min-h-screen transition-colors duration-300">
-        <Header />
-
+      <Header />
+      <div className="app-background min-h-screen transition-colors duration-300 clean-container" style={{ paddingTop: '64px' }}>
         <ErrorBoundary>
-          <main className="pt-16">
+          <main className="main-content-responsive smooth-scroll">
             <Routes>
               <Route path="/" element={<LandingPage />} />
               <Route path="/services" element={<Services />} />
@@ -104,6 +104,7 @@ function App() {
               <Route path="/car/:id" element={<CarDetailPage />} />
               <Route path="/set-new-password" element={<SetNewPassword />} />
               <Route path="/setup-2fa" element={<Setup2FA />} />
+              <Route path="/rentals" element={<RentalsPage />} />
 
               {/* ✅ Dynamic Car Details Route */}
              <Route path="/all-cars-showcase" element={<AllCarsShowcase />} />
@@ -168,7 +169,7 @@ export default function WrappedApp() {
         <LanguageProvider>
           <ErrorBoundary>
             <div
-              className="min-h-screen relative"
+              className="min-h-screen clean-container"
               style={{
                 backgroundImage: "url('/images/bg-landing.png')",
                 backgroundSize: 'cover',
@@ -184,7 +185,7 @@ export default function WrappedApp() {
                   zIndex: 0,
                 }}
               />
-              <div className="relative z-10">
+              <div className="clean-container">
                 <App />
               </div>
             </div>

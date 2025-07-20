@@ -2,18 +2,19 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '../lib/supabaseClient';
 import { getUserRole, getDashboardPath, createUserProfile } from '../lib/userRoleUtils';
-import { Eye, EyeOff } from 'lucide-react';
+import { Eye, EyeOff, Mail, Lock, Shield, User, Car } from 'lucide-react';
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import { FaGoogle, FaGithub } from 'react-icons/fa';
 import { useRef, useEffect } from 'react';
 import { API_ENDPOINTS, testBackendConnection } from '../lib/api';
+import { motion } from 'framer-motion';
 
 function ContinueAsGuestButton() {
   const navigate = useNavigate();
   return (
-    <button
-      className="w-full mt-4 py-2 px-4 rounded bg-yellow-400 text-black font-bold hover:bg-yellow-300 transition"
+    <motion.button
+      className="w-full mt-4 py-3 px-4 rounded-xl bg-gradient-to-r from-yellow-400 to-yellow-500 text-black font-bold hover:from-yellow-300 hover:to-yellow-400 transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-xl"
       onClick={() => {
         localStorage.removeItem("token");
         localStorage.removeItem("authToken");
@@ -21,9 +22,11 @@ function ContinueAsGuestButton() {
         navigate("/dashboard/guest");
       }}
       type="button"
+      whileHover={{ scale: 1.02 }}
+      whileTap={{ scale: 0.98 }}
     >
       Continue as Guest
-    </button>
+    </motion.button>
   );
 }
 
@@ -222,7 +225,7 @@ const Login = () => {
               console.log('No role assigned to user, redirecting to role selection');
               
               // Store user info for role selection
-              localStorage.setItem("tempUserId", user.id);
+              localStorage.setItem("tempUserId", user.id || '');
               localStorage.setItem("tempUserEmail", user.email || '');
               
               toast.info('Please select your user role to continue.');
@@ -254,62 +257,25 @@ const Login = () => {
                 sessionStorage.setItem("sessionId", sessionId);
                 sessionStorage.setItem("userId", userId);
                 
-                toast.success(`Login successful! Welcome ${role}!`);
+                toast.success(`Login successful! Welcome ${authRole}!`);
                 navigate(dashboardPath, { replace: true });
                 return;
-              } else {
-                console.error('Invalid dashboard path for role:', role);
-                setError('Invalid user role configuration.');
-                toast.error('Invalid user role configuration.');
-                setLoading(false);
-                return;
               }
-            } else {
-              // No valid role found - redirect to role selection
-              localStorage.setItem("tempUserId", user.id);
-              localStorage.setItem("tempUserEmail", user.email || '');
-              
-              toast.info('Please select your user role to continue.');
-              navigate('/select-role', { replace: true });
-              return;
             }
-          }
-          
-        } catch (userErr) {
-          console.error('User info fetch failed:', userErr);
-          
-          // Final fallback - use session user data
-          const sessionUser = data.session.user;
-          const authRole = sessionUser.app_metadata?.role || sessionUser.user_metadata?.role;
-          
-          if (authRole && ['admin', 'staff', 'mechanic', 'customer'].includes(authRole)) {
-            const dashboardPath = getDashboardPath(authRole);
             
-            if (dashboardPath) {
-              localStorage.setItem("userRole", authRole);
-              sessionStorage.setItem("userRole", authRole);
-              
-              const sessionId = `session_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
-              const userId = sessionUser.id || `user_${Date.now()}`;
-              localStorage.setItem("sessionId", sessionId);
-              localStorage.setItem("lastSessionId", sessionId);
-              localStorage.setItem("sessionTimestamp", Date.now().toString());
-              localStorage.setItem("userId", userId);
-              sessionStorage.setItem("sessionId", sessionId);
-              sessionStorage.setItem("userId", userId);
-              
-              toast.success(`Login successful! Welcome ${authRole}!`);
-              navigate(dashboardPath, { replace: true });
-              return;
-            }
+            // No valid role found - redirect to role selection
+            localStorage.setItem("tempUserId", user.id || '');
+            localStorage.setItem("tempUserEmail", user.email || '');
+            
+            toast.info('Please select your user role to continue.');
+            navigate('/select-role', { replace: true });
+            return;
           }
-          
-          // No valid role found - redirect to role selection
-          localStorage.setItem("tempUserId", sessionUser.id);
-          localStorage.setItem("tempUserEmail", sessionUser.email || '');
-          
-          toast.info('Please select your user role to continue.');
-          navigate('/select-role', { replace: true });
+        } catch (err: any) {
+          console.error('User info fetch error:', err);
+          setError('Could not fetch user information.');
+          toast.error('Could not fetch user information.');
+          setLoading(false);
           return;
         }
       }
@@ -352,140 +318,233 @@ const Login = () => {
   return (
     <>
       <audio ref={audioRef} src="/car-start.mp3" preload="none" />
-      <div className="flex justify-center items-center min-h-screen w-full bg-gradient-to-br from-blue-50 via-white to-green-50 dark:from-gray-900 dark:to-gray-800 transition-colors duration-500">
-        <form
-          onSubmit={handleLogin}
-          className="bg-white dark:bg-gray-900 text-gray-800 dark:text-white p-6 md:p-8 rounded-xl shadow-2xl w-[95%] max-w-md transition-all duration-300"
-          style={{
-            backdropFilter: 'blur(10px)',
-            border: '1px solid rgba(0,0,0,0.1)',
-          }}
-        >
-          <h2 className="text-3xl font-bold text-center text-blue-800 dark:text-green-300 mb-6 tracking-tight">
-            Justice Ultimate Login
-          </h2>
-          {error && (
-            <p className="text-sm text-red-500 text-center mb-4">{error}</p>
-          )}
-          <div className="mb-4">
-            <label className="block text-sm font-medium mb-1">Email</label>
-            <input
-              type="email"
-              placeholder="justice@.com"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              className="w-full p-2 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-green-400 dark:bg-gray-800 dark:border-gray-600"
-            />
-          </div>
-          <div className="mb-4 relative">
-            <label className="block text-sm font-medium mb-1">Password</label>
-            <input
-              type={showPass ? 'text' : 'password'}
-              placeholder="Enter your password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              className="w-full p-2 pr-10 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-green-400 dark:bg-gray-800 dark:border-gray-600"
-            />
-            <span
-              onClick={() => setShowPass(!showPass)}
-              className="absolute top-1/2 right-3 transform -translate-y-1/2 cursor-pointer text-gray-400 hover:text-gray-600 dark:hover:text-white"
-            >
-              {showPass ? <EyeOff size={18} /> : <Eye size={18} />}
-            </span>
-          </div>
-          
-          {/* reCAPTCHA v3 Status Indicator */}
-          <div className="mb-4">
-            <div className="flex items-center justify-center space-x-2 p-3 bg-gray-50 dark:bg-gray-800 rounded-lg border">
-              {captchaLoading ? (
-                <>
-                  <div className="animate-spin h-4 w-4 border-2 border-blue-500 border-t-transparent rounded-full"></div>
-                  <span className="text-sm text-gray-600 dark:text-gray-300">Verifying reCAPTCHA...</span>
-                </>
-              ) : captchaVerified ? (
-                <>
-                  <div className="h-4 w-4 bg-green-500 rounded-full flex items-center justify-center">
-                    <svg className="h-3 w-3 text-white" fill="currentColor" viewBox="0 0 20 20">
-                      <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
-                    </svg>
-                  </div>
-                  <span className="text-sm text-green-600 dark:text-green-400">reCAPTCHA verified ✓</span>
-                </>
-              ) : (
-                <>
-                  <div className="h-4 w-4 bg-gray-300 rounded-full"></div>
-                  <span className="text-sm text-gray-500 dark:text-gray-400">reCAPTCHA verification required</span>
-                </>
-              )}
-            </div>
-            <p className="text-xs text-gray-500 text-center mt-2">
-              This site is protected by reCAPTCHA v3
-            </p>
-          </div>
-          
-          <button
-            type="submit"
-            disabled={loading || captchaLoading}
-            className={`w-full py-2 mt-2 text-white rounded-lg font-semibold transition-all duration-300 shadow-md flex justify-center items-center ${
-              loading || captchaLoading 
-                ? 'bg-gray-400 cursor-not-allowed' 
-                : 'bg-green-600 hover:bg-green-700'
-            }`}
+      <div 
+        className="min-h-screen w-full relative overflow-hidden flex justify-center items-center"
+        style={{
+          backgroundImage: "url('/images/bg-landing.png')",
+          backgroundSize: 'cover',
+          backgroundPosition: 'center',
+          backgroundRepeat: 'no-repeat',
+          backgroundAttachment: 'fixed',
+        }}
+      >
+        {/* Enhanced Background Overlay with Gradient */}
+        <div className="absolute inset-0 bg-gradient-to-br from-black/40 via-black/20 to-black/50 pointer-events-none"></div>
+        
+        {/* Animated Background Particles */}
+        <div className="absolute inset-0 overflow-hidden pointer-events-none">
+          <div className="absolute top-20 left-10 w-2 h-2 bg-yellow-400/30 rounded-full animate-pulse"></div>
+          <div className="absolute top-40 right-20 w-1 h-1 bg-white/40 rounded-full animate-ping"></div>
+          <div className="absolute bottom-40 left-1/4 w-1.5 h-1.5 bg-yellow-300/50 rounded-full animate-bounce"></div>
+          <div className="absolute top-1/2 right-1/3 w-1 h-1 bg-white/30 rounded-full animate-pulse"></div>
+          <div className="absolute top-3/4 left-1/3 w-1.5 h-1.5 bg-blue-400/40 rounded-full animate-ping"></div>
+          <div className="absolute bottom-1/4 right-1/4 w-1 h-1 bg-green-400/30 rounded-full animate-bounce"></div>
+        </div>
+
+        {/* Main Content Container with Enhanced Glass Morphism */}
+        <div className="relative z-10 w-full flex justify-center items-center p-4">
+          <motion.form
+            onSubmit={handleLogin}
+            className="glass-panel rounded-2xl shadow-2xl p-8 md:p-10 w-[95%] max-w-md border border-white/20 backdrop-blur-xl"
+            initial={{ opacity: 0, y: 50, scale: 0.9 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            transition={{ duration: 0.8, ease: "easeOut" }}
           >
-            {loading && (
-              <svg
-                className="animate-spin h-5 w-5 mr-2 text-white"
-                xmlns="http://www.w3.org/2000/svg"
-                fill="none"
-                viewBox="0 0 24 24"
+            {/* Header Section */}
+            <motion.div 
+              className="text-center mb-8"
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.8, delay: 0.2 }}
+            >
+              <h2 className="text-3xl font-bold text-yellow-400 mb-2 flex items-center justify-center gap-2">
+                <Car className="w-8 h-8" /> Justice Ultimate Login
+              </h2>
+              <p className="text-white/80 text-sm">Welcome back! Sign in to your account</p>
+            </motion.div>
+
+            {error && (
+              <motion.p 
+                className="text-sm text-red-400 text-center mb-6 p-3 bg-red-500/10 rounded-xl border border-red-500/20"
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.3 }}
               >
-                <circle
-                  className="opacity-25"
-                  cx="12"
-                  cy="12"
-                  r="10"
-                  stroke="currentColor"
-                  strokeWidth="4"
-                ></circle>
-                <path
-                  className="opacity-75"
-                  fill="currentColor"
-                  d="M4 12a8 8 0 018-8v8H4z"
-                ></path>
-              </svg>
+                {error}
+              </motion.p>
             )}
-            {loading ? 'Logging in...' : captchaLoading ? 'Verifying...' : 'Login'}
-          </button>
-          
-          <ContinueAsGuestButton />
-          {/* OAuth Buttons */}
-          <div className="mt-4 space-y-2">
-            <button
-              type="button"
-              onClick={() => loginWithProvider('google')}
-              disabled={loading}
-              className="w-full py-2 bg-white border border-gray-300 rounded-lg font-semibold transition-all duration-300 shadow-md flex justify-center items-center text-gray-700 hover:bg-gray-50"
+
+            {/* Email Input */}
+            <motion.div 
+              className="mb-6"
+              initial={{ opacity: 0, x: -20 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ duration: 0.6, delay: 0.3 }}
             >
-              <FaGoogle className="mr-2" /> Sign in with Google
-            </button>
-            <button
-              type="button"
-              onClick={() => loginWithProvider('github')}
-              disabled={loading}
-              className="w-full py-2 bg-black text-white rounded-lg font-semibold transition-all duration-300 shadow-md flex justify-center items-center hover:bg-gray-800"
+              <label className="block text-sm font-medium mb-2 text-white/90 flex items-center gap-2">
+                <Mail className="w-4 h-4" /> Email
+              </label>
+              <input
+                type="email"
+                placeholder="justice@example.com"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                className="w-full p-3 rounded-xl bg-white/10 border border-white/20 text-white placeholder-white/60 backdrop-blur-sm focus:outline-none focus:ring-2 focus:ring-yellow-400/50 focus:border-yellow-400/50 transition-all duration-300"
+              />
+            </motion.div>
+
+            {/* Password Input */}
+            <motion.div 
+              className="mb-6 relative"
+              initial={{ opacity: 0, x: -20 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ duration: 0.6, delay: 0.4 }}
             >
-              <FaGithub className="mr-2" /> Sign in with GitHub
-            </button>
-          </div>
-          
-          <div className="flex justify-between text-sm text-gray-500 mt-4">
-            <a href="/reset-password" className="hover:underline">Forgot password?</a>
-            <a href="/register" className="hover:underline">Register</a>
-          </div>
-          <div className="mt-6 text-xs text-center text-gray-400 dark:text-gray-500">
-            <p>🌐 International login ready | v1.0</p>
-          </div>
-        </form>
+              <label className="block text-sm font-medium mb-2 text-white/90 flex items-center gap-2">
+                <Lock className="w-4 h-4" /> Password
+              </label>
+              <input
+                type={showPass ? 'text' : 'password'}
+                placeholder="Enter your password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                className="w-full p-3 pr-12 rounded-xl bg-white/10 border border-white/20 text-white placeholder-white/60 backdrop-blur-sm focus:outline-none focus:ring-2 focus:ring-yellow-400/50 focus:border-yellow-400/50 transition-all duration-300"
+              />
+              <span
+                onClick={() => setShowPass(!showPass)}
+                className="absolute top-1/2 right-3 transform -translate-y-1/2 cursor-pointer text-white/60 hover:text-white transition-colors duration-300"
+              >
+                {showPass ? <EyeOff size={18} /> : <Eye size={18} />}
+              </span>
+            </motion.div>
+            
+            {/* reCAPTCHA v3 Status Indicator */}
+            <motion.div 
+              className="mb-6"
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6, delay: 0.5 }}
+            >
+              <div className="flex items-center justify-center space-x-2 p-3 bg-white/10 rounded-xl border border-white/20 backdrop-blur-sm">
+                {captchaLoading ? (
+                  <>
+                    <div className="animate-spin h-4 w-4 border-2 border-yellow-400 border-t-transparent rounded-full"></div>
+                    <span className="text-sm text-white/80">Verifying reCAPTCHA...</span>
+                  </>
+                ) : captchaVerified ? (
+                  <>
+                    <div className="h-4 w-4 bg-green-500 rounded-full flex items-center justify-center">
+                      <svg className="h-3 w-3 text-white" fill="currentColor" viewBox="0 0 20 20">
+                        <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                      </svg>
+                    </div>
+                    <span className="text-sm text-green-400">reCAPTCHA verified ✓</span>
+                  </>
+                ) : (
+                  <>
+                    <Shield className="w-4 h-4 text-white/60" />
+                    <span className="text-sm text-white/60">reCAPTCHA verification required</span>
+                  </>
+                )}
+              </div>
+              <p className="text-xs text-white/50 text-center mt-2">
+                This site is protected by reCAPTCHA v3
+              </p>
+            </motion.div>
+            
+            {/* Login Button */}
+            <motion.button
+              type="submit"
+              disabled={loading || captchaLoading}
+              className={`w-full py-3 mt-2 text-white rounded-xl font-semibold transition-all duration-300 shadow-lg flex justify-center items-center ${
+                loading || captchaLoading 
+                  ? 'bg-white/20 cursor-not-allowed' 
+                  : 'bg-gradient-to-r from-yellow-400 to-yellow-500 hover:from-yellow-300 hover:to-yellow-400 transform hover:scale-105'
+              }`}
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6, delay: 0.6 }}
+              whileHover={{ scale: loading || captchaLoading ? 1 : 1.02 }}
+              whileTap={{ scale: 0.98 }}
+            >
+              {loading && (
+                <svg
+                  className="animate-spin h-5 w-5 mr-2 text-white"
+                  xmlns="http://www.w3.org/2000/svg"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                >
+                  <circle
+                    className="opacity-25"
+                    cx="12"
+                    cy="12"
+                    r="10"
+                    stroke="currentColor"
+                    strokeWidth="4"
+                  ></circle>
+                  <path
+                    className="opacity-75"
+                    fill="currentColor"
+                    d="M4 12a8 8 0 018-8v8H4z"
+                  ></path>
+                </svg>
+              )}
+              {loading ? 'Logging in...' : captchaLoading ? 'Verifying...' : 'Login'}
+            </motion.button>
+            
+            <ContinueAsGuestButton />
+
+            {/* OAuth Buttons */}
+            <motion.div 
+              className="mt-6 space-y-3"
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6, delay: 0.7 }}
+            >
+              <motion.button
+                type="button"
+                onClick={() => loginWithProvider('google')}
+                disabled={loading}
+                className="w-full py-3 bg-white/10 border border-white/20 rounded-xl font-semibold transition-all duration-300 shadow-lg flex justify-center items-center text-white hover:bg-white/20 backdrop-blur-sm"
+                whileHover={{ scale: 1.02 }}
+                whileTap={{ scale: 0.98 }}
+              >
+                <FaGoogle className="mr-2" /> Sign in with Google
+              </motion.button>
+              <motion.button
+                type="button"
+                onClick={() => loginWithProvider('github')}
+                disabled={loading}
+                className="w-full py-3 bg-white/10 border border-white/20 rounded-xl font-semibold transition-all duration-300 shadow-lg flex justify-center items-center text-white hover:bg-white/20 backdrop-blur-sm"
+                whileHover={{ scale: 1.02 }}
+                whileTap={{ scale: 0.98 }}
+              >
+                <FaGithub className="mr-2" /> Sign in with GitHub
+              </motion.button>
+            </motion.div>
+            
+            {/* Links */}
+            <motion.div 
+              className="flex justify-between text-sm text-white/80 mt-6"
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6, delay: 0.8 }}
+            >
+              <a href="/reset-password" className="hover:text-yellow-400 transition-colors duration-300">Forgot password?</a>
+              <a href="/register" className="hover:text-yellow-400 transition-colors duration-300">Register</a>
+            </motion.div>
+
+            {/* Footer */}
+            <motion.div 
+              className="mt-6 text-xs text-center text-white/50"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ duration: 0.6, delay: 0.9 }}
+            >
+              <p>🌐 International login ready | v1.0</p>
+            </motion.div>
+          </motion.form>
+        </div>
         <ToastContainer position="top-center" autoClose={3000} hideProgressBar />
       </div>
     </>
