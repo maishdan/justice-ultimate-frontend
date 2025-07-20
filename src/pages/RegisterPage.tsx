@@ -8,7 +8,7 @@ import allCountries from "../data/allCountries";
 import zxcvbn from 'zxcvbn';
 import { FaGoogle, FaGithub } from 'react-icons/fa';
 import { useRef, useEffect } from 'react';
-import { API_ENDPOINTS } from '../lib/api';
+import { API_ENDPOINTS, testBackendConnection, testRecaptchaEndpoint } from '../lib/api';
 import { motion } from 'framer-motion';
 import { User, Mail, Lock, Shield, Phone, MapPin, Car, CheckCircle } from 'lucide-react';
 
@@ -52,6 +52,31 @@ export default function RegisterPage() {
     script.async = true;
     script.defer = true;
     document.head.appendChild(script);
+    
+    // Test backend connection for register
+    console.log('🔍 Testing backend connectivity for register...');
+    console.log('Current backend URL:', API_ENDPOINTS.verifyRecaptcha);
+    
+    // Test general backend connection
+    testBackendConnection().then(result => {
+      if (result.success) {
+        console.log('✅ Backend connection successful for register');
+        toast.success('Backend connected successfully for registration');
+      } else {
+        console.error('❌ Backend connection failed for register:', result.error);
+        toast.error('Backend connection failed for registration - check console for details');
+      }
+    });
+    
+    // Test reCAPTCHA endpoint specifically
+    testRecaptchaEndpoint().then(result => {
+      if (result.success) {
+        console.log('✅ reCAPTCHA endpoint accessible for register');
+      } else {
+        console.error('❌ reCAPTCHA endpoint failed for register:', result.error);
+        toast.error('reCAPTCHA endpoint not accessible for registration - check console for details');
+      }
+    });
     
     return () => {
       if (document.head.contains(script)) {

@@ -24,6 +24,11 @@ export default function Header() {
   const { t } = useTranslation();
   const { i18n } = useTranslation();
   const [menuOpen, setMenuOpen] = useState(false);
+  
+  // Debug menu state
+  useEffect(() => {
+    console.log('Menu state changed:', menuOpen);
+  }, [menuOpen]);
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const dropdownTimeout = useRef<NodeJS.Timeout | null>(null);
   const [now, setNow] = useState(new Date());
@@ -208,212 +213,7 @@ export default function Header() {
         padding-top: 64px !important;
       }
       
-      /* ULTIMATE HEADER FIX - OVERRIDE EVERYTHING */
-      #GLOBAL-FIXED-HEADER {
-        position: fixed !important;
-        top: 0 !important;
-        left: 0 !important;
-        right: 0 !important;
-        width: 100vw !important;
-        height: 64px !important;
-        z-index: 2147483647 !important;
-        pointer-events: auto !important;
-        background: linear-gradient(to right, #172554 95%, #1e293b 100%) !important;
-        color: #fff !important;
-        box-shadow: 0 4px 20px rgba(0,0,0,0.15) !important;
-        overflow: visible !important;
-        padding: 0 !important;
-        margin: 0 !important;
-        backdrop-filter: blur(10px) !important;
-        -webkit-backdrop-filter: blur(10px) !important;
-        transform: none !important;
-        transition: none !important;
-        display: block !important;
-        visibility: visible !important;
-        opacity: 1 !important;
-      }
-      
-      /* FORCE BODY TO RESPECT HEADER */
-      body {
-        padding-top: 64px !important;
-        margin-top: 0 !important;
-      }
-      
-      /* OVERRIDE ALL OTHER FIXED ELEMENTS */
-      *:not(#GLOBAL-FIXED-HEADER) {
-        z-index: auto !important;
-      }
-      
-      /* ENSURE NO OTHER HEADERS INTERFERE */
-      header:not(#GLOBAL-FIXED-HEADER) {
-        position: relative !important;
-        z-index: auto !important;
-      }
-      
-      /* OVERRIDE ANY CONFLICTING STYLES */
-      .header-clean, .fixed-header, .header-fixed-responsive {
-        position: relative !important;
-        z-index: auto !important;
-      }
-      
-      /* ENSURE MAIN CONTENT FLOWS UNDER HEADER */
-      .main-content-responsive {
-        padding-top: 0 !important;
-        margin-top: 0 !important;
-      }
-      
-      /* OVERRIDE CHAT CONTAINER Z-INDEX */
-      #chatContainer {
-        z-index: 999999 !important;
-      }
-      
-      /* ENSURE ALL PAGES START BELOW HEADER */
-      .min-h-screen {
-        padding-top: 0 !important;
-      }
-      
-      /* FORCE ALL CONTENT TO FLOW UNDER HEADER */
-      .app-background, .clean-container, .page-background {
-        padding-top: 0 !important;
-        margin-top: 0 !important;
-      }
-      
-      /* ADDITIONAL HEADER FIXES FOR ALL SCENARIOS */
-      .dashboard-background, .page-background, .app-background {
-        padding-top: 64px !important;
-      }
-      
-      /* ENSURE NO OTHER ELEMENTS OVERLAP HEADER */
-      header:not(#GLOBAL-FIXED-HEADER), 
-      .header:not(#GLOBAL-FIXED-HEADER),
-      .fixed-header:not(#GLOBAL-FIXED-HEADER) {
-        position: relative !important;
-        z-index: auto !important;
-      }
-      
-      /* OVERRIDE ANY CONFLICTING Z-INDEX VALUES */
-      .z-50, .z-40, .z-30, .z-20, .z-10 {
-        z-index: auto !important;
-      }
-      
-      /* ENSURE CHAT WIDGET STAYS BELOW HEADER */
-      #chatContainer, .chat-widget, .chat-container {
-        z-index: 999999 !important;
-      }
-      
-      /* FORCE ALL PAGES TO RESPECT HEADER SPACE */
-      .pt-16, .pt-20, .pt-24 {
-        padding-top: 64px !important;
-      }
-      
-      /* ULTIMATE HEADER FIX - OVERRIDE EVERYTHING */
-      #GLOBAL-FIXED-HEADER {
-        position: fixed !important;
-        top: 0 !important;
-        left: 0 !important;
-        right: 0 !important;
-        width: 100vw !important;
-        height: 64px !important;
-        z-index: 2147483647 !important;
-        pointer-events: auto !important;
-        background: linear-gradient(to right, #172554 95%, #1e293b 100%) !important;
-        color: #fff !important;
-        box-shadow: 0 4px 20px rgba(0,0,0,0.15) !important;
-        overflow: visible !important;
-        padding: 0 !important;
-        margin: 0 !important;
-        backdrop-filter: blur(10px) !important;
-        -webkit-backdrop-filter: blur(10px) !important;
-        transform: none !important;
-        transition: none !important;
-        display: block !important;
-        visibility: visible !important;
-        opacity: 1 !important;
-      }
-      
-      /* OVERRIDE ANY FRAMER MOTION TRANSFORMS */
-      #GLOBAL-FIXED-HEADER * {
-        transform: none !important;
-        transition: none !important;
-      }
-      
-      /* ENSURE NO STACKING CONTEXT INTERFERENCE */
-      .relative, .absolute {
-        z-index: auto !important;
-      }
-      
-      /* FORCE BODY TO RESPECT HEADER */
-      body {
-        padding-top: 64px !important;
-        margin-top: 0 !important;
-      }
-      
-      /* OVERRIDE ALL OTHER FIXED ELEMENTS */
-      *:not(#GLOBAL-FIXED-HEADER) {
-        z-index: auto !important;
-      }
-      
-      /* ENSURE NO OTHER HEADERS INTERFERE */
-      header:not(#GLOBAL-FIXED-HEADER) {
-        position: relative !important;
-        z-index: auto !important;
-      }
-      
-      /* OVERRIDE ANY CONFLICTING STYLES */
-      .header-clean, .fixed-header, .header-fixed-responsive {
-        position: relative !important;
-        z-index: auto !important;
-      }
-      
-      /* ENSURE MAIN CONTENT FLOWS UNDER HEADER */
-      .main-content-responsive {
-        padding-top: 0 !important;
-        margin-top: 0 !important;
-      }
-      
-      /* OVERRIDE CHAT CONTAINER Z-INDEX */
-      #chatContainer {
-        z-index: 999999 !important;
-      }
-      
-      /* ENSURE ALL PAGES START BELOW HEADER */
-      .min-h-screen {
-        padding-top: 0 !important;
-      }
-      
-      /* FORCE ALL CONTENT TO FLOW UNDER HEADER */
-      .app-background, .clean-container, .page-background {
-        padding-top: 0 !important;
-        margin-top: 0 !important;
-      }
-      
-      /* ADDITIONAL HEADER FIXES FOR ALL SCENARIOS */
-      .dashboard-background, .page-background, .app-background {
-        padding-top: 64px !important;
-      }
-      
-      /* ENSURE NO OTHER ELEMENTS OVERLAP HEADER */
-      header:not(#GLOBAL-FIXED-HEADER), 
-      .header:not(#GLOBAL-FIXED-HEADER),
-      .fixed-header:not(#GLOBAL-FIXED-HEADER) {
-        position: relative !important;
-        z-index: auto !important;
-      }
-      
-      /* OVERRIDE ANY CONFLICTING Z-INDEX VALUES */
-      .z-50, .z-40, .z-30, .z-20, .z-10 {
-        z-index: auto !important;
-      }
-      
-      /* ENSURE CHAT WIDGET STAYS BELOW HEADER */
-      #chatContainer, .chat-widget, .chat-container {
-        z-index: 999999 !important;
-      }
-      
-      /* FORCE ALL PAGES TO RESPECT HEADER SPACE */
-      .pt-16, .pt-20, .pt-24 {
-        padding-top: 64px !important;
-      }
+
     `;
     document.head.appendChild(style);
 
@@ -429,6 +229,22 @@ export default function Header() {
   return (
     <HeaderPortal>
       <div className="flex items-center justify-between w-full px-4" style={{height: '64px'}}>
+        {/* Professional Hamburger Menu Button - Left Side */}
+        <div className="absolute top-0 left-0 p-2 z-[9999]">
+          <button 
+            onClick={() => setMenuOpen(!menuOpen)}
+            className="p-2 rounded-lg bg-blue-600/90 hover:bg-blue-700/90 transition-all duration-300 backdrop-blur-sm border border-blue-500/30 focus:outline-none focus:ring-2 focus:ring-blue-400 hover:scale-105 active:scale-95 shadow-lg"
+            aria-label={menuOpen ? 'Close menu' : 'Open menu'}
+          >
+            <div className="w-6 h-5 flex flex-col justify-center items-center gap-1">
+              <div className={`w-5 h-0.5 bg-white rounded transition-all duration-300 ease-in-out ${menuOpen ? 'rotate-45 translate-y-1.5' : ''}`}></div>
+              <div className={`w-5 h-0.5 bg-white rounded transition-all duration-300 ease-in-out ${menuOpen ? 'opacity-0 scale-0' : ''}`}></div>
+              <div className={`w-5 h-0.5 bg-white rounded transition-all duration-300 ease-in-out ${menuOpen ? '-rotate-45 -translate-y-1.5' : ''}`}></div>
+            </div>
+          </button>
+        </div>
+
+
           
           {/* Left Section - Logo & Company Name */}
           <div className="flex items-center gap-3">
@@ -451,7 +267,7 @@ export default function Header() {
           </div>
 
           {/* Center Section - Navigation */}
-          <nav className="hidden md:flex items-center gap-1 xl:gap-2">
+          <nav className="hidden lg:flex items-center gap-1 xl:gap-2">
             {navLinks.map((link, index) => (
               <div key={`nav-${index}`} className="flex items-center">
                 {link.subMenu ? (
@@ -491,7 +307,7 @@ export default function Header() {
           </nav>
 
           {/* Right Section - Actions & Info */}
-          <div className="flex items-center gap-1 xl:gap-2">
+          <div className="flex items-center gap-1 xl:gap-2 min-w-0 flex-shrink-0">
             
             {/* Dashboard Button for Authenticated Users */}
             {isAuthenticated && (
@@ -591,79 +407,59 @@ export default function Header() {
               <div className="w-px h-6 bg-white/20 mx-2"></div>
             </div>
 
-            {/* Mobile Menu Button (Hamburger) */}
-            <button 
-              className="md:hidden p-2 rounded-lg bg-white/10 hover:bg-white/20 transition-all duration-300 backdrop-blur-sm border border-white/20 ml-2 focus:outline-none focus:ring-2 focus:ring-yellow-400"
-              onClick={() => setMenuOpen(!menuOpen)} 
-              aria-label={menuOpen ? 'Close menu' : 'Open menu'}
-            >
-              <div className="w-7 h-7 flex flex-col justify-center items-center gap-1">
-                <div className={`w-6 h-0.5 bg-current rounded transition-all duration-300 ${menuOpen ? 'rotate-45 translate-y-2' : ''}`}></div>
-                <div className={`w-6 h-0.5 bg-current rounded transition-all duration-300 ${menuOpen ? 'opacity-0' : ''}`}></div>
-                <div className={`w-6 h-0.5 bg-current rounded transition-all duration-300 ${menuOpen ? '-rotate-45 -translate-y-2' : ''}`}></div>
-              </div>
-            </button>
+
+            
+
           </div>
         </div>
 
-      {/* Mobile Off-Canvas Menu (Enhanced) */}
-      <AnimatePresence>
-        {menuOpen && (
-          <motion.div
-            initial={{ opacity: 0, x: '100%' }}
-            animate={{ opacity: 1, x: 0 }}
-            exit={{ opacity: 0, x: '100%' }}
-            transition={{ duration: 0.5, ease: "easeInOut" }}
-            className="md:hidden fixed top-0 right-0 h-full w-80 max-w-[90vw] z-[2147483646] bg-gradient-to-br from-blue-950/95 via-blue-900/90 to-blue-800/95 backdrop-blur-2xl text-white shadow-2xl border-l border-white/20 flex flex-col"
-            role="dialog"
-            aria-modal="true"
-            tabIndex={-1}
-          >
-            {/* Mobile Menu Header */}
-            <div className="p-6 border-b border-white/10 flex items-center justify-between">
-              <div className="flex items-center gap-3">
-                <img src={logo} alt="Logo" className="w-10 h-10 rounded-full shadow-lg border-2 border-yellow-400/30" />
-                <div>
-                  <div className="text-lg font-bold text-yellow-400">JUSTICE ULTIMATE</div>
-                  <div className="text-sm text-green-400">Automobiles</div>
-                </div>
-              </div>
-              <button 
-                onClick={() => setMenuOpen(false)}
-                className="p-2 rounded-lg bg-white/10 hover:bg-white/20 transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-yellow-400"
-                aria-label="Close menu"
-              >
-                ✕
-              </button>
-            </div>
-            {/* Mobile Menu Content */}
-            <div className="p-6 space-y-4 flex-1 overflow-y-auto">
-              {/* Dashboard Button for Authenticated Users */}
+      {/* Professional Dropdown Menu - Left Side with Click Outside */}
+      {menuOpen && (
+        <>
+          {/* Backdrop for click outside */}
+          <div 
+            className="fixed inset-0 bg-black/20 z-[2147483645]"
+            onClick={() => setMenuOpen(false)}
+          />
+          <div className="absolute top-full left-0 w-80 z-[2147483646] bg-gradient-to-br from-blue-950/95 via-blue-900/90 to-blue-800/95 backdrop-blur-2xl text-white shadow-2xl border border-blue-400/30 rounded-2xl mt-2 overflow-hidden">
+            <div className="p-4 space-y-3">
+              {/* Dashboard Button */}
               {isAuthenticated && (
-                <motion.button
+                <button
                   onClick={() => {
                     handleDashboardNavigation();
                     setMenuOpen(false);
                   }}
-                  className="w-full flex items-center gap-3 px-4 py-3 bg-gradient-to-r from-green-500 to-green-600 text-white rounded-lg font-semibold transition-all duration-300 shadow-lg"
-                  whileHover={{ scale: 1.02 }}
-                  whileTap={{ scale: 0.98 }}
+                  className="w-full px-3 py-2 bg-green-600/90 hover:bg-green-700/90 text-white rounded-xl font-medium transition-all duration-300 text-sm shadow-lg"
                 >
-                  <ArrowLeft className="w-5 h-5" />
-                  <span>Dashboard</span>
-                </motion.button>
+                  Dashboard
+                </button>
               )}
+              
+              {/* Install JUA Button */}
+              <button
+                className="w-full px-3 py-2 bg-yellow-500/90 hover:bg-yellow-600/90 text-black rounded-xl font-medium transition-all duration-300 text-sm shadow-lg"
+                onClick={() => {
+                  if ((window as any).installJUA) (window as any).installJUA();
+                  else alert('To install, use your browser\'s install option.');
+                  setMenuOpen(false);
+                }}
+              >
+                Install JUA
+              </button>
+              
               {/* Navigation Links */}
-              <div className="space-y-2">
+              <div className="space-y-1">
+                <div className="text-xs font-semibold text-blue-200 px-2 py-1 uppercase tracking-wider">Navigation</div>
                 {navLinks.map((link) =>
                   link.subMenu ? (
                     <div key={link.label} className="space-y-1">
-                      <div className="font-semibold text-yellow-400 px-3 py-2">{link.label}</div>
+                      <div className="font-medium text-yellow-400 px-2 py-1 text-sm">{link.label}</div>
                       {link.subMenu.map((sub) => (
                         <Link
                           key={sub.path}
                           to={sub.path}
-                          className="block ml-4 px-3 py-2 text-white/80 hover:text-yellow-400 transition-all duration-300 rounded-lg"
+                          className="block ml-3 px-2 py-1 text-blue-100 hover:text-yellow-400 hover:bg-blue-800/50 transition-all duration-300 rounded-lg text-sm"
                           onClick={() => setMenuOpen(false)}
                         >
                           {sub.label}
@@ -674,7 +470,7 @@ export default function Header() {
                     <Link
                       key={link.path}
                       to={link.path}
-                      className="block px-3 py-2 text-white/80 hover:text-yellow-400 hover:bg-white/10 transition-all duration-300 rounded-lg"
+                      className="block px-2 py-1 text-blue-100 hover:text-yellow-400 hover:bg-blue-800/50 transition-all duration-300 rounded-lg text-sm"
                       onClick={() => setMenuOpen(false)}
                     >
                       {link.label}
@@ -682,44 +478,67 @@ export default function Header() {
                   )
                 )}
               </div>
-              {/* Auth Buttons for Non-Authenticated Users */}
-              {!isAuthenticated && (
-                <div className="space-y-2 pt-4 border-t border-white/10">
+              
+              {/* Auth Buttons */}
+              {!isAuthenticated ? (
+                <div className="space-y-2 pt-3 border-t border-blue-400/20">
+                  <div className="text-xs font-semibold text-blue-200 px-2 py-1 uppercase tracking-wider">Account</div>
                   <Link 
                     to="/register" 
-                    className="block w-full px-4 py-3 border-2 border-green-400 text-green-400 hover:bg-green-400 hover:text-white rounded-lg font-semibold transition-all duration-300 text-center"
+                    className="block w-full px-3 py-2 border border-green-400/70 text-green-400 hover:bg-green-400/20 hover:text-white rounded-xl font-medium transition-all duration-300 text-center text-sm shadow-lg"
                     onClick={() => setMenuOpen(false)}
                   >
                     Register
                   </Link>
                   <Link 
                     to="/login" 
-                    className="block w-full px-4 py-3 bg-gradient-to-r from-green-500 to-green-600 text-white rounded-lg font-semibold transition-all duration-300 text-center"
+                    className="block w-full px-3 py-2 bg-green-600/90 hover:bg-green-700/90 text-white rounded-xl font-medium transition-all duration-300 text-center text-sm shadow-lg"
                     onClick={() => setMenuOpen(false)}
                   >
                     Login
                   </Link>
                 </div>
-              )}
-              {/* Logout Button for Authenticated Users */}
-              {isAuthenticated && (
-                <div className="pt-4 border-t border-white/10">
+              ) : (
+                <div className="pt-3 border-t border-blue-400/20">
+                  <div className="text-xs font-semibold text-blue-200 px-2 py-1 uppercase tracking-wider">Account</div>
                   <button 
                     onClick={() => {
                       handleLogout();
                       setMenuOpen(false);
                     }} 
-                    className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-gradient-to-r from-red-500 to-red-600 text-white rounded-lg font-semibold transition-all duration-300"
+                    className="w-full px-3 py-2 bg-red-600/90 hover:bg-red-700/90 text-white rounded-xl font-medium transition-all duration-300 text-sm shadow-lg"
                   >
-                    <LogOut className="w-5 h-5" />
                     Logout
                   </button>
                 </div>
               )}
+              
+              {/* Settings */}
+              <div className="pt-3 border-t border-blue-400/20">
+                <div className="text-xs font-semibold text-blue-200 px-2 py-1 uppercase tracking-wider">Settings</div>
+                <button 
+                  onClick={() => setDarkMode(!darkMode)} 
+                  className="w-full flex items-center justify-between px-3 py-2 bg-blue-800/50 hover:bg-blue-700/50 transition-all duration-300 rounded-xl text-sm"
+                >
+                  <span className="text-blue-100">Theme</span>
+                  <span className="text-xs text-blue-200">{darkMode ? 'Dark' : 'Light'}</span>
+                </button>
+                <select
+                  value={i18n.language}
+                  onChange={e => i18n.changeLanguage(e.target.value)}
+                  className="w-full mt-2 px-3 py-2 bg-blue-800/50 hover:bg-blue-700/50 transition-all duration-300 rounded-xl text-sm border border-blue-400/30 cursor-pointer text-blue-100"
+                >
+                  <option value="en" className="bg-blue-900 text-white">🇺🇸 English</option>
+                  <option value="sw" className="bg-blue-900 text-white">🇰🇪 Kiswahili</option>
+                  <option value="fr" className="bg-blue-900 text-white">🇫🇷 Français</option>
+                  <option value="ar" className="bg-blue-900 text-white">🇸🇦 العربية</option>
+                  <option value="cn" className="bg-blue-900 text-white">🇨🇳 中文</option>
+                </select>
+              </div>
             </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
+          </div>
+        </>
+      )}
     </HeaderPortal>
   );
 }

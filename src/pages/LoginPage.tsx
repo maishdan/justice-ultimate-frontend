@@ -7,7 +7,7 @@ import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import { FaGoogle, FaGithub } from 'react-icons/fa';
 import { useRef, useEffect } from 'react';
-import { API_ENDPOINTS, testBackendConnection } from '../lib/api';
+import { API_ENDPOINTS, testBackendConnection, testRecaptchaEndpoint } from '../lib/api';
 import { motion } from 'framer-motion';
 
 function ContinueAsGuestButton() {
@@ -51,12 +51,27 @@ const Login = () => {
   
   // Test backend connection on component mount
   useEffect(() => {
+    console.log('🔍 Testing backend connectivity for login...');
     console.log('Current backend URL:', API_ENDPOINTS.verifyRecaptcha);
+    
+    // Test general backend connection
     testBackendConnection().then(result => {
       if (result.success) {
         console.log('✅ Backend connection successful');
+        toast.success('Backend connected successfully');
       } else {
         console.error('❌ Backend connection failed:', result.error);
+        toast.error('Backend connection failed - check console for details');
+      }
+    });
+    
+    // Test reCAPTCHA endpoint specifically
+    testRecaptchaEndpoint().then(result => {
+      if (result.success) {
+        console.log('✅ reCAPTCHA endpoint accessible');
+      } else {
+        console.error('❌ reCAPTCHA endpoint failed:', result.error);
+        toast.error('reCAPTCHA endpoint not accessible - check console for details');
       }
     });
   }, []);
@@ -241,25 +256,27 @@ const Login = () => {
               role = authRole;
               console.log('Using role from auth metadata:', role);
               
-              dashboardPath = getDashboardPath(role);
-              if (dashboardPath) {
-                // Store user role
-                localStorage.setItem("userRole", role);
-                sessionStorage.setItem("userRole", role);
-                
-                // Set session values
-                const sessionId = `session_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
-                const userId = user.id || `user_${Date.now()}`;
-                localStorage.setItem("sessionId", sessionId);
-                localStorage.setItem("lastSessionId", sessionId);
-                localStorage.setItem("sessionTimestamp", Date.now().toString());
-                localStorage.setItem("userId", userId);
-                sessionStorage.setItem("sessionId", sessionId);
-                sessionStorage.setItem("userId", userId);
-                
-                toast.success(`Login successful! Welcome ${authRole}!`);
-                navigate(dashboardPath, { replace: true });
-                return;
+              if (role) {
+                dashboardPath = getDashboardPath(role);
+                if (dashboardPath) {
+                  // Store user role
+                  localStorage.setItem("userRole", role);
+                  sessionStorage.setItem("userRole", role);
+                  
+                  // Set session values
+                  const sessionId = `session_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+                  const userId = user.id || `user_${Date.now()}`;
+                  localStorage.setItem("sessionId", sessionId);
+                  localStorage.setItem("lastSessionId", sessionId);
+                  localStorage.setItem("sessionTimestamp", Date.now().toString());
+                  localStorage.setItem("userId", userId);
+                  sessionStorage.setItem("sessionId", sessionId);
+                  sessionStorage.setItem("userId", userId);
+                  
+                  toast.success(`Login successful! Welcome ${authRole}!`);
+                  navigate(dashboardPath, { replace: true });
+                  return;
+                }
               }
             }
             
