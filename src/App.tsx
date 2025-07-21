@@ -40,6 +40,7 @@ import { ThemeProvider } from './context/ThemeContext';
 import { LanguageProvider } from './context/LanguageContext';
 import { useTranslation } from 'react-i18next';
 import RentalsPage from './pages/RentalsPage';
+import TestHeaderFixed from "./pages/TestHeaderFixed";
 
 // ✅ Import the dynamic CarDetails page
 
@@ -105,6 +106,7 @@ function App() {
               <Route path="/set-new-password" element={<SetNewPassword />} />
               <Route path="/setup-2fa" element={<Setup2FA />} />
               <Route path="/rentals" element={<RentalsPage />} />
+              <Route path="/test-header" element={<TestHeaderFixed />} />
 
               {/* ✅ Dynamic Car Details Route */}
              <Route path="/all-cars-showcase" element={<AllCarsShowcase />} />
