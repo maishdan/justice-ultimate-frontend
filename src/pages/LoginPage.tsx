@@ -77,15 +77,15 @@ const Login = () => {
   }, []);
   
   const playCling = () => {
-    if (audioRef.current) {
-      try {
+    try {
+      if (audioRef.current) {
         audioRef.current.currentTime = 0;
         audioRef.current.play().catch((error) => {
-          console.warn('Audio playback failed:', error);
+          console.warn('Audio play failed:', error);
         });
-      } catch (error) {
-        console.warn('Audio playback error:', error);
       }
+    } catch (error) {
+      console.warn('Audio play error:', error);
     }
   };
   const navigate = useNavigate();
@@ -99,156 +99,181 @@ const Login = () => {
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
-    setLoading(true);
     setError('');
-    
-    let recaptchaToken: string;
-    
-    try {
-      setCaptchaLoading(true);
-      // Execute reCAPTCHA v3
-      recaptchaToken = await new Promise<string>((resolve, reject) => {
-        if (typeof window !== 'undefined' && (window as any).grecaptcha) {
-          (window as any).grecaptcha.ready(() => {
-            (window as any).grecaptcha.execute('6Lf2HYgrAAAAAGLA2Pdh_EgRNFLVNtFr8wChye0T', { action: 'login' })
-              .then((token: string) => resolve(token))
-              .catch((error: any) => reject(error));
-          });
-        } else {
-          reject(new Error('reCAPTCHA not loaded'));
-        }
-      });
-      
-      setCaptchaVerified(true);
-      setCaptchaLoading(false);
-    } catch (error) {
-      setCaptchaLoading(false);
-      setError('reCAPTCHA verification failed. Please try again.');
-      toast.error('reCAPTCHA verification failed. Please try again.');
-      setLoading(false);
-      return;
-    }
-    
-    // Very short timeout to prevent hanging
-    const timeoutId = setTimeout(() => {
-      setError('Login timeout. Please try again.');
-      setLoading(false);
-    }, 10000); // 10 second timeout
-    
-    try {
-      // Verify reCAPTCHA with backend
-      const recaptchaResponse = await fetch(API_ENDPOINTS.verifyRecaptcha, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          'g-recaptcha-response': recaptchaToken
-        }),
-      });
+    setLoading(true);
+    setCaptchaLoading(true);
 
-      if (!recaptchaResponse.ok) {
+    try {
+      // First, check if backend is accessible
+      try {
+        const healthResponse = await fetch('https://backend-jua.onrender.com/health', {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+        });
+        
+        if (!healthResponse.ok) {
+          console.warn('Backend health check failed:', healthResponse.status);
+        }
+      } catch (healthError) {
+        console.warn('Backend health check error:', healthError);
+        // Continue with login even if health check fails
+      }
+
+      // Get reCAPTCHA token
+      let recaptchaToken: string;
+      try {
+        recaptchaToken = await new Promise<string>((resolve, reject) => {
+          if (typeof window !== 'undefined' && (window as any).grecaptcha) {
+            (window as any).grecaptcha.ready(() => {
+              (window as any).grecaptcha.execute('6Lf2HYgrAAAAAGLA2Pdh_EgRNFLVNtFr8wChye0T', { action: 'login' })
+                .then((token: string) => resolve(token))
+                .catch((error: any) => reject(error));
+            });
+          } else {
+            reject(new Error('reCAPTCHA not loaded'));
+          }
+        });
+      } catch (recaptchaError) {
+        console.error('reCAPTCHA error:', recaptchaError);
+        setCaptchaLoading(false);
         setError('reCAPTCHA verification failed. Please try again.');
         toast.error('reCAPTCHA verification failed. Please try again.');
         setLoading(false);
         return;
       }
-
-      // Clear any stale session data first
-      localStorage.removeItem("token");
-      localStorage.removeItem("authToken");
-      localStorage.removeItem("sessionId");
-      localStorage.removeItem("userRole");
-      sessionStorage.removeItem("userRole");
-      sessionStorage.removeItem("sessionId");
       
-      const { data, error } = await supabase.auth.signInWithPassword({
-        email,
-        password,
-      });
+      setCaptchaVerified(true);
+      setCaptchaLoading(false);
       
-      clearTimeout(timeoutId);
-      
-      if (error) {
-        setError(error.message);
-        toast.error(error.message);
+      // Very short timeout to prevent hanging
+      const timeoutId = setTimeout(() => {
+        setError('Login timeout. Please try again.');
         setLoading(false);
-        return;
-      }
+      }, 10000); // 10 second timeout
       
-      if (data.session) {
-        playCling();
+      try {
+        // Verify reCAPTCHA with backend
+        const recaptchaResponse = await fetch(API_ENDPOINTS.verifyRecaptcha, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            'g-recaptcha-response': recaptchaToken
+          }),
+        });
+
+        if (!recaptchaResponse.ok) {
+          clearTimeout(timeoutId);
+          setError('reCAPTCHA verification failed. Please try again.');
+          toast.error('reCAPTCHA verification failed. Please try again.');
+          setLoading(false);
+          return;
+        }
+
+        // Clear any stale session data first
+        localStorage.removeItem("token");
+        localStorage.removeItem("authToken");
+        localStorage.removeItem("sessionId");
+        localStorage.removeItem("userRole");
+        sessionStorage.removeItem("userRole");
+        sessionStorage.removeItem("sessionId");
         
-        // Set tokens immediately
-        localStorage.setItem("token", data.session.access_token);
-        localStorage.setItem("authToken", data.session.access_token);
-        localStorage.removeItem("guestSession");
+        const { data, error } = await supabase.auth.signInWithPassword({
+          email,
+          password,
+        });
         
-        // Get user info and determine role
-        try {
-          const { data: { user }, error: userError } = await supabase.auth.getUser();
-          
-          if (userError || !user) {
-            setError('Could not fetch user info.');
-            toast.error('Could not fetch user info.');
-            setLoading(false);
-            return;
+        clearTimeout(timeoutId);
+        
+        if (error) {
+          setError(error.message);
+          toast.error(error.message);
+          setLoading(false);
+          return;
+        }
+        
+        if (data.session) {
+          try {
+            playCling();
+          } catch (audioError) {
+            console.warn('Audio play failed:', audioError);
           }
           
-          console.log('User authenticated:', user.email);
+          // Set tokens immediately
+          localStorage.setItem("token", data.session.access_token);
+          localStorage.setItem("authToken", data.session.access_token);
+          localStorage.removeItem("guestSession");
           
-          // Determine user role - NO DEFAULTS
-          let role: string | null = null;
-          let dashboardPath: string | null = null;
-          
+          // Get user info and determine role
           try {
-            // First, try to get role from profiles table
-            role = await getUserRole(user.id);
-            console.log('Role determined:', role);
+            const { data: { user }, error: userError } = await supabase.auth.getUser();
             
-            if (role) {
-              // Role found, get dashboard path
-              dashboardPath = getDashboardPath(role);
-              
-              if (dashboardPath) {
-                // Store user role
-                localStorage.setItem("userRole", role);
-                sessionStorage.setItem("userRole", role);
-                
-                // Set session values
-                const sessionId = `session_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
-                const userId = user.id || `user_${Date.now()}`;
-                localStorage.setItem("sessionId", sessionId);
-                localStorage.setItem("lastSessionId", sessionId);
-                localStorage.setItem("sessionTimestamp", Date.now().toString());
-                localStorage.setItem("userId", userId);
-                sessionStorage.setItem("sessionId", sessionId);
-                sessionStorage.setItem("userId", userId);
-                
-                toast.success(`Login successful! Welcome ${role}!`);
-                navigate(dashboardPath, { replace: true });
-                return;
-              } else {
-                console.error('Invalid dashboard path for role:', role);
-                setError('Invalid user role configuration.');
-                toast.error('Invalid user role configuration.');
-                setLoading(false);
-                return;
-              }
-            } else {
-              // No role found - redirect to role selection
-              console.log('No role assigned to user, redirecting to role selection');
-              
-              // Store user info for role selection
-              localStorage.setItem("tempUserId", user.id || '');
-              localStorage.setItem("tempUserEmail", user.email || '');
-              
-              toast.info('Please select your user role to continue.');
-              navigate('/select-role', { replace: true });
+            if (userError || !user) {
+              setError('Could not fetch user info.');
+              toast.error('Could not fetch user info.');
+              setLoading(false);
               return;
             }
-          } catch (profileErr) {
-            console.log('Profile operation failed:', profileErr);
+            
+            console.log('User authenticated:', user.email);
+            
+            // Determine user role - NO DEFAULTS
+            let role: string | null = null;
+            let dashboardPath: string | null = null;
+            
+            try {
+              // First, try to get role from profiles table
+              if (user && user.id) {
+                role = await getUserRole(user.id);
+                console.log('Role determined:', role);
+                
+                if (role) {
+                  // Set role in storage
+                  localStorage.setItem("userRole", role);
+                  sessionStorage.setItem("userRole", role);
+                  
+                  // Determine dashboard path based on role
+                  switch (role.toLowerCase()) {
+                    case 'admin':
+                      dashboardPath = '/dashboard/admin';
+                      break;
+                    case 'staff':
+                      dashboardPath = '/dashboard/staff';
+                      break;
+                    case 'mechanic':
+                      dashboardPath = '/dashboard/mechanic';
+                      break;
+                    case 'customer':
+                      dashboardPath = '/dashboard/customer';
+                      break;
+                    default:
+                      dashboardPath = '/dashboard/guest';
+                  }
+                  
+                  // Navigate to appropriate dashboard
+                  if (dashboardPath) {
+                    navigate(dashboardPath, { replace: true });
+                    return;
+                  }
+                }
+              }
+              
+              // If no role found, redirect to role selection
+              if (user && user.email) {
+                console.log('No role found, redirecting to role selection');
+                navigate('/select-role', { replace: true });
+                return;
+              }
+            } catch (roleError) {
+              console.error('Role determination error:', roleError);
+              setError('Could not determine user role.');
+              toast.error('Could not determine user role.');
+              setLoading(false);
+              return;
+            }
             
             // Fallback to auth metadata
             const authRole = user.app_metadata?.role || user.user_metadata?.role;
@@ -287,23 +312,33 @@ const Login = () => {
             toast.info('Please select your user role to continue.');
             navigate('/select-role', { replace: true });
             return;
+          } catch (userFetchError) {
+            console.error('User fetch error:', userFetchError);
+            setError('Could not fetch user information.');
+            toast.error('Could not fetch user information.');
+            setLoading(false);
+            return;
           }
-        } catch (err: any) {
-          console.error('User info fetch error:', err);
-          setError('Could not fetch user information.');
-          toast.error('Could not fetch user information.');
+        } else {
+          setError('Login failed. No session created.');
+          toast.error('Login failed. No session created.');
           setLoading(false);
-          return;
         }
+        
+      } catch (loginError) {
+        clearTimeout(timeoutId);
+        console.error('Login error:', loginError);
+        setError('Login failed. Please try again.');
+        toast.error('Login failed. Please try again.');
+        setLoading(false);
       }
-    } catch (err: any) {
-      clearTimeout(timeoutId);
+      
+    } catch (outerError) {
+      console.error('Outer login error:', outerError);
       setError('Login failed. Please try again.');
       toast.error('Login failed. Please try again.');
-    } finally {
-      clearTimeout(timeoutId);
       setLoading(false);
-      setCaptchaVerified(false);
+      setCaptchaLoading(false);
     }
   };
 

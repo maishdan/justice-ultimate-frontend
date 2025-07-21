@@ -153,8 +153,8 @@ function BranchDetails({ branch, onBack, onEdit, onAddStaff, onTransfer, onUploa
 
   // PDF Export for Branch Profile (official, professional)
   const handleExportProfilePDF = async () => {
-    const COMPANY_LOGO = "https://tyypdmhxuehzddudeuww.supabase.co/storage/v1/object/public/avatars//logo.png";
-    const COURT_LOGO = "https://tyypdmhxuehzddudeuww.supabase.co/storage/v1/object/public/avatars//kenyan%20coat%20of%20arms.png";
+    const COMPANY_LOGO = "https://tyypdmhxuehzddudeuww.supabase.co/storage/v1/object/public/avatars/logo.png";
+    const COURT_LOGO = "https://tyypdmhxuehzddudeuww.supabase.co/storage/v1/object/public/avatars/kenyan%20coat%20of%20arms.png";
     const COMPANY_NAME = "Justice Ultimate Automobiles";
     const COMPANY_CONTACT = "07222827458 | justiceultimateautomobiles@gmail.com";
     const COMPANY_FOOTER = "Justice Ultimate Automobiles 2025 : your trusted car masters";
@@ -303,9 +303,9 @@ function BranchDetails({ branch, onBack, onEdit, onAddStaff, onTransfer, onUploa
   return (
     <div ref={branchTileRef} className="w-full max-w-5xl mx-auto bg-white dark:bg-gray-900 rounded-2xl shadow-xl p-8 mt-8">
       <div className="flex justify-between items-center mb-6">
-        <img src="https://tyypdmhxuehzddudeuww.supabase.co/storage/v1/object/public/avatars//logo.png" alt="Company Logo" className="h-12 w-auto object-contain" />
+        <img src="https://tyypdmhxuehzddudeuww.supabase.co/storage/v1/object/public/avatars/logo.png" alt="Company Logo" className="h-12 w-auto object-contain" />
         <button className="text-blue-600 hover:underline flex items-center gap-1" onClick={onBack}><FiArrowRightCircle className="rotate-180" /> Back to Branches</button>
-        <img src="https://tyypdmhxuehzddudeuww.supabase.co/storage/v1/object/public/avatars//kenyan%20coat%20of%20arms.png" alt="Kenyan Coat of Arms" className="h-12 w-auto object-contain" />
+        <img src="https://tyypdmhxuehzddudeuww.supabase.co/storage/v1/object/public/avatars/kenyan%20coat%20of%20arms.png" alt="Kenyan Coat of Arms" className="h-12 w-auto object-contain" />
       </div>
       <h2 className="text-2xl font-bold mb-2 text-blue-800 dark:text-blue-200 flex items-center gap-2">{branch.flag} {branch.branch_name} <span className="text-xs bg-blue-100 text-blue-700 px-2 py-0.5 rounded-full ml-2">{branch.branch_code}</span></h2>
       <div className="flex flex-wrap gap-4 mb-4">

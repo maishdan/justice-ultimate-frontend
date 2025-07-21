@@ -6,8 +6,8 @@ import { Button } from "../components/ui/button";
 import QRCode from "qrcode";
 import axios from 'axios';
 
-const COMPANY_LOGO = "https://tyypdmhxuehzddudeuww.supabase.co/storage/v1/object/public/avatars//logo.png";
-const COURT_LOGO = "https://tyypdmhxuehzddudeuww.supabase.co/storage/v1/object/public/avatars//kenyan%20coat%20of%20arms.png";
+const COMPANY_LOGO = "https://tyypdmhxuehzddudeuww.supabase.co/storage/v1/object/public/avatars/logo.png";
+const COURT_LOGO = "https://tyypdmhxuehzddudeuww.supabase.co/storage/v1/object/public/avatars/kenyan%20coat%20of%20arms.png";
 const COMPANY_NAME = "Justice Ultimate Automobiles";
 const COMPANY_CONTACT = "07222827458 | justiceultimateautomobiles@gmail.com";
 const COMPANY_FOOTER = "Justice Ultimate Automobiles 2025 : your trusted car masters";

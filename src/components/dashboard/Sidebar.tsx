@@ -266,7 +266,7 @@ const Sidebar: React.FC<SidebarProps> = ({ activePanel, setActivePanel, admin })
             animate={{ scale: 1, rotate: 0 }}
             transition={{ type: 'spring', stiffness: 200, damping: 12 }}
           >
-            <img src="https://tyypdmhxuehzddudeuww.supabase.co/storage/v1/object/public/avatars//logo.png" alt="Logo" className="w-12 h-12 object-contain" />
+            <img src="https://tyypdmhxuehzddudeuww.supabase.co/storage/v1/object/public/avatars/logo.png" alt="Logo" className="w-12 h-12 object-contain" />
           </motion.div>
           {!isCollapsed && (
             <motion.div
