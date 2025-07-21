@@ -7,6 +7,7 @@ import { supabase } from '../../../lib/supabaseClient';
 import { uploadConfig, getOptimizedTimeout, createTimeoutPromise, validateFile, generateFileName } from '../../../lib/uploadConfig';
 import SimpleConnectionTest from '../../SimpleConnectionTest';
 import Papa from 'papaparse';
+import { useNavigate } from 'react-router-dom';
 
 const STATUS_COLORS: Record<string, string> = {
   draft: 'bg-gray-400',
@@ -1032,9 +1033,13 @@ const AllCarsPanel = ({ fetchCars }: { fetchCars: () => Promise<void> }) => {
   const [cars, setCars] = useState<any[]>([]);
   const [rentals, setRentals] = useState<any[]>([]);
   const [tradeIns, setTradeIns] = useState<any[]>([]);
-  const [soldCars, setSoldCars] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+  const [viewCounts, setViewCounts] = useState({});
+  const [incrementView, setIncrementView] = useState(0);
+  const [editingCar, setEditingCar] = useState<any | null>(null);
+  const navigate = useNavigate();
+
   useEffect(() => {
     async function fetchAll() {
       setLoading(true);
@@ -1045,8 +1050,7 @@ const AllCarsPanel = ({ fetchCars }: { fetchCars: () => Promise<void> }) => {
           supabase.from('rentals').select('*'),
           supabase.from('trade_ins').select('*').eq('status', 'approved'),
         ]);
-        setCars((carsData || []).filter((c: any) => !c.is_sold));
-        setSoldCars((carsData || []).filter((c: any) => c.is_sold));
+        setCars(carsData || []); // Show all cars, sold and not sold
         setRentals(rentalsData || []);
         setTradeIns(tradeInsData || []);
       } catch (err: any) {
@@ -1065,11 +1069,32 @@ const AllCarsPanel = ({ fetchCars }: { fetchCars: () => Promise<void> }) => {
       supabase.removeChannel(tradeInCh);
     };
   }, []);
-  function handleView(item: any, type: string) {
-    if (type === 'For Sale') window.location.hash = '#addCar';
-    else if (type === 'Rental') window.location.hash = '#rentals';
-    else if (type === 'Trade-In') window.location.hash = '#tradeins';
+
+  async function handleView(item: any, type: string) {
+    // Increment view count in Supabase
+    await supabase.from('cars').update({ view_count: (item.view_count || 0) + 1 }).eq('id', item.id);
+    // Navigate to showroom and scroll to car
+    navigate(`/vehicle-catalogue?carId=${item.id}`);
   }
+
+  function handleEdit(car: any) {
+    // Navigate to addCar page with car id for editing
+    navigate(`/addCar?id=${car.id}`);
+  }
+
+  async function handleSoldOut(item: any) {
+    // Mark as sold in Supabase
+    await supabase.from('cars').update({ is_sold: true, sold_out_date: new Date().toISOString() }).eq('id', item.id);
+    // Optionally, trigger a tag in the showroom (handled by showroom page)
+    fetchCars();
+  }
+
+  async function handleOnSale(item: any) {
+    // Mark as on sale in Supabase
+    await supabase.from('cars').update({ is_sold: false, sold_out_date: null }).eq('id', item.id);
+    fetchCars();
+  }
+
   async function handleDelete(item: any, type: string) {
     if (!window.confirm('Delete this item?')) return;
     if (type === 'For Sale' || type === 'Sold') await supabase.from('cars').delete().eq('id', item.id);
@@ -1079,62 +1104,98 @@ const AllCarsPanel = ({ fetchCars }: { fetchCars: () => Promise<void> }) => {
   async function handleApprove(item: any) {
     await supabase.from('trade_ins').update({ status: 'approved' }).eq('id', item.id);
   }
-  async function handleToggleSold(item: any) {
-    const newStatus = item.status === 'sold' ? 'published' : 'sold';
-    await supabase.from('cars').update({ status: newStatus }).eq('id', item.id);
-  }
   return (
     <div className="space-y-10">
       <div className="overflow-x-auto glass-panel rounded-2xl p-6 shadow-xl border border-white/20 backdrop-blur-xl">
-        <h3 className="text-2xl font-bold mb-4 text-yellow-500">Cars for Sale</h3>
-        <TableSection items={cars} type="For Sale" handleView={handleView} handleDelete={handleDelete} handleToggleSold={handleToggleSold} />
+        <h3 className="text-2xl font-bold mb-4 text-yellow-500">All Cars</h3>
+        <TableSection
+          items={cars}
+          type="All"
+          handleView={handleView}
+          handleEdit={handleEdit}
+          handleSoldOut={handleSoldOut}
+          handleOnSale={handleOnSale}
+          handleDelete={handleDelete}
+          viewCounts={viewCounts}
+          incrementView={incrementView}
+        />
       </div>
       <div className="overflow-x-auto glass-panel rounded-2xl p-6 shadow-xl border border-white/20 backdrop-blur-xl">
         <h3 className="text-2xl font-bold mb-4 text-blue-500">Rentals</h3>
-        <TableSection items={rentals} type="Rental" handleView={handleView} handleDelete={handleDelete} />
+        <TableSection items={rentals} type="Rental" handleView={handleView} handleDelete={handleDelete} handleApprove={handleApprove} handleEdit={handleEdit} viewCounts={viewCounts} incrementView={incrementView} />
       </div>
       <div className="overflow-x-auto glass-panel rounded-2xl p-6 shadow-xl border border-white/20 backdrop-blur-xl">
         <h3 className="text-2xl font-bold mb-4 text-green-500">Trade-Ins</h3>
-        <TableSection items={tradeIns} type="Trade-In" handleView={handleView} handleDelete={handleDelete} handleApprove={handleApprove} />
+        <TableSection items={tradeIns} type="Trade-In" handleView={handleView} handleDelete={handleDelete} handleApprove={handleApprove} handleEdit={handleEdit} viewCounts={viewCounts} incrementView={incrementView} />
       </div>
-      {soldCars.length > 0 && (
-        <div className="overflow-x-auto glass-panel rounded-2xl p-6 shadow-xl border border-white/20 backdrop-blur-xl">
-          <h3 className="text-2xl font-bold mb-4 text-gray-500">Sold Cars</h3>
-          <TableSection items={soldCars} type="Sold" handleView={handleView} handleDelete={handleDelete} />
-        </div>
-      )}
     </div>
   );
 };
 
-function TableSection({ items, type, handleView, handleDelete, handleToggleSold, handleApprove }: any) {
+function TableSection({ items, type, handleView, handleEdit, handleSoldOut, handleOnSale, handleDelete, viewCounts, incrementView }: any) {
+  const isForSale = type === 'For Sale' || type === 'All';
   return (
-    <table className="min-w-full table-auto border rounded shadow bg-white dark:bg-gray-900">
+    <table className="min-w-full table-auto border-none rounded shadow bg-transparent">
       <thead>
-        <tr>
-          <th className="p-2">Type</th>
-          <th className="p-2">Name/Make</th>
-          <th className="p-2">Model</th>
-          <th className="p-2">Year</th>
-          <th className="p-2">Price</th>
-          <th className="p-2">Status</th>
-          <th className="p-2">Actions</th>
+        <tr className={isForSale ? 'bg-gradient-to-r from-blue-900/80 to-gray-900/80' : ''}>
+          <th className="p-3 text-left text-lg text-yellow-300">Type</th>
+          <th className="p-3 text-left text-lg text-yellow-300">Name/Make</th>
+          <th className="p-3 text-left text-lg text-yellow-300">Model</th>
+          <th className="p-3 text-left text-lg text-yellow-300">Year</th>
+          <th className="p-3 text-left text-lg text-yellow-300">Price</th>
+          <th className="p-3 text-left text-lg text-yellow-300">Status</th>
+          <th className="p-3 text-left text-lg text-yellow-300">Views</th>
+          <th className="p-3 text-left text-lg text-yellow-300">Actions</th>
         </tr>
       </thead>
       <tbody>
         {items.map((item: any) => (
-          <tr key={item.id} className="border-t">
-            <td className="p-2">{type}</td>
-            <td className="p-2">{item.name || item.make || item.car_make}</td>
-            <td className="p-2">{item.model || item.car_model}</td>
-            <td className="p-2">{item.year || item.car_year}</td>
-            <td className="p-2">{item.price?.toLocaleString() || item.price_per_day?.toLocaleString() || '-'}</td>
-            <td className="p-2">{item.status || (item.available ? 'Available' : 'Not Available')}</td>
-            <td className="p-2 flex gap-2">
-              <Button size="sm" variant="outline" onClick={() => handleView(item, type)}>View</Button>
-              {type === 'For Sale' && <Button size="sm" variant="outline" onClick={() => handleToggleSold(item)}>{item.status === 'sold' ? 'In Stock' : 'Sold Out'}</Button>}
-              {type === 'Trade-In' && <Button size="sm" variant="outline" onClick={() => handleApprove(item)} disabled={item.status === 'approved'}>Approve</Button>}
-              <Button size="sm" variant="danger" onClick={() => handleDelete(item, type)}>Delete</Button>
+          <tr
+            key={item.id}
+            className={
+              isForSale
+                ? "transition-all bg-gradient-to-r from-blue-900/80 to-gray-900/80 hover:from-blue-800/90 hover:to-gray-800/90 border border-blue-800 shadow-2xl rounded-2xl text-white"
+                : "border-t"
+            }
+            style={isForSale ? { boxShadow: '0 4px 24px 0 rgba(0,0,0,0.25)', marginBottom: 16 } : {}}
+          >
+            <td className="p-4 font-bold text-yellow-300 text-lg">{type}</td>
+            <td className="p-4 font-extrabold text-white text-xl drop-shadow">{item.name || item.make || item.car_make}</td>
+            <td className="p-4 text-blue-200 font-semibold">{item.model || item.car_model}</td>
+            <td className="p-4 text-blue-200 font-semibold">{item.year || item.car_year}</td>
+            <td className="p-4 font-bold text-green-300 text-lg">{item.price?.toLocaleString() || item.price_per_day?.toLocaleString() || '-'}</td>
+            <td className="p-4">
+              <span className={
+                isForSale
+                  ? `px-2 py-0.5 rounded-full text-xs font-bold ${item.status === 'sold' ? 'bg-yellow-500 text-gray-900' : 'bg-green-500 text-white'} shadow whitespace-nowrap`
+                  : 'px-2 py-1 rounded text-xs text-white bg-gray-500'
+              } style={{fontSize:'0.8rem', minWidth: 80, display: 'inline-block'}}>
+                {item.status || (item.available ? 'Available' : 'Not Available')}
+              </span>
+            </td>
+            <td className="p-4">
+              <span className="inline-block bg-blue-700 text-white px-2 py-0.5 rounded-full text-xs font-bold" style={{minWidth: 32}}>
+                {viewCounts[item.id] || 0}
+              </span>
+            </td>
+            <td className="p-4 flex gap-2 flex-wrap items-center">
+              <Button size="sm" variant="outline" className="font-bold border-blue-400 text-blue-300 hover:bg-blue-800/60" onClick={() => handleView(item, type)}>View</Button>
+              <Button size="sm" variant="outline" className="font-bold border-green-400 text-green-300 hover:bg-green-800/60" onClick={() => handleEdit(item)}>Edit</Button>
+              {/* Toggle Switch for Sold Out/On Sale */}
+              <div className="flex flex-col items-center">
+                <span className={`mb-1 text-xs font-bold ${item.is_sold ? 'text-red-400' : 'text-green-400'}`}>{item.is_sold ? 'Sold Out' : 'On Sale'}</span>
+                <button
+                  className={`relative w-12 h-6 rounded-full transition-colors duration-300 focus:outline-none ${item.is_sold ? 'bg-red-500' : 'bg-green-500'}`}
+                  onClick={() => item.is_sold ? handleOnSale(item) : handleSoldOut(item)}
+                  aria-label={item.is_sold ? 'Mark On Sale' : 'Mark Sold Out'}
+                >
+                  <span
+                    className={`absolute left-0 top-0 w-6 h-6 bg-white rounded-full shadow transform transition-transform duration-300 ${item.is_sold ? 'translate-x-6' : 'translate-x-0'}`}
+                    style={{ boxShadow: '0 2px 8px rgba(0,0,0,0.15)' }}
+                  ></span>
+                </button>
+              </div>
+              <Button size="sm" variant="danger" className="font-bold bg-red-600 text-white hover:bg-red-800" onClick={() => handleDelete(item, type)}>Delete</Button>
             </td>
           </tr>
         ))}

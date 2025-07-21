@@ -13,6 +13,34 @@ import './lib/authCheck.ts' // Auto-run authentication check
 import './lib/finalStorageTest.ts' // Auto-run final storage test
 import './lib/vehicleCatalogueTest.ts' // Auto-run vehicle catalogue data test
 
+// Global console suppression for public view
+(function() {
+  const methods = ['log', 'info', 'warn', 'error', 'debug'];
+  methods.forEach(method => {
+    const original = (console as any)[method];
+    (console as any)[method] = function(...args: any[]) {
+      if (typeof window !== 'undefined' && window.SHOW_PRIVATE_LOGS) {
+        original.apply(console, args);
+      }
+      // else do nothing (hide from public)
+    };
+  });
+})();
+
+// Suppress React DevTools info message in development
+if (import.meta.env.DEV) {
+  const originalInfo = (console as any).info;
+  (console as any).info = function (...args: any[]) {
+    if (
+      typeof args[0] === 'string' &&
+      args[0].includes('Download the React DevTools')
+    ) {
+      return;
+    }
+    originalInfo.apply(console, args);
+  };
+}
+
 // Configure router to handle warnings
 configureRouter();
 

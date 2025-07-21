@@ -120,7 +120,14 @@ export default function RegisterPage() {
         if (typeof window !== 'undefined' && (window as any).grecaptcha) {
           (window as any).grecaptcha.ready(() => {
             (window as any).grecaptcha.execute('6Lf2HYgrAAAAAGLA2Pdh_EgRNFLVNtFr8wChye0T', { action: 'register' })
-              .then((token: string) => resolve(token))
+              .then((token: string) => {
+                console.log('reCAPTCHA token before register:', token);
+                if (!token) {
+                  reject(new Error('No reCAPTCHA token received'));
+                } else {
+                  resolve(token);
+                }
+              })
               .catch((error: any) => reject(error));
           });
         } else {
@@ -132,8 +139,15 @@ export default function RegisterPage() {
       setCaptchaLoading(false);
     } catch (error) {
       setCaptchaLoading(false);
-      setError('reCAPTCHA verification failed. Please try again.');
-      toast.error('reCAPTCHA verification failed. Please try again.');
+      setError('reCAPTCHA verification failed. Please refresh and try again.');
+      toast.error('reCAPTCHA verification failed. Please refresh and try again.');
+      setLoading(false);
+      return;
+    }
+
+    // Do not proceed if token is empty/undefined
+    if (!recaptchaToken) {
+      setError('reCAPTCHA failed to load. Please refresh and try again.');
       setLoading(false);
       return;
     }

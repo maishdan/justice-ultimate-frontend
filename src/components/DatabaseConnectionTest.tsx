@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { supabase } from '../lib/supabaseClient';
 import { uploadConfig, getOptimizedTimeout, createTimeoutPromise } from '../lib/uploadConfig';
 
@@ -73,17 +73,19 @@ export default function DatabaseConnectionTest() {
     const connectionTimeout = getOptimizedTimeout('connection');
     const connectionPromise = supabase.from('cars').select('count').limit(1);
     const timeoutPromise = createTimeoutPromise(connectionTimeout, 'Connection timeout');
-    
-            const { data, error } = await Promise.race([connectionPromise, timeoutPromise]) as { data: any; error: any };
-    
+    // Await both and check which resolves first
+    const result = await Promise.race([connectionPromise, timeoutPromise]);
+    // result can be { data, error } or a string (timeout message)
+    if (typeof result === 'string') throw new Error(result);
+    const { data, error } = result as { data: any; error: any };
     if (error) throw new Error(`Connection failed: ${error.message}`);
     return `Connected successfully. Found ${data?.length || 0} records.`;
   };
 
   const testDatabaseRead = async (): Promise<string> => {
-    const { data, error } = await supabase.from('cars').select('id, name').limit(5);
+    const { data: _data, error } = await supabase.from('cars').select('id, name').limit(5);
     if (error) throw new Error(`Read failed: ${error.message}`);
-    return `Read successful. Retrieved ${data?.length || 0} cars.`;
+    return `Read successful.`;
   };
 
   const testDatabaseWrite = async (): Promise<string> => {
@@ -96,14 +98,12 @@ export default function DatabaseConnectionTest() {
       status: 'draft'
     };
     
-    const { data, error } = await supabase.from('cars').insert([testData]).select();
+    const { data: _data, error } = await supabase.from('cars').insert([testData]).select();
     if (error) throw new Error(`Write failed: ${error.message}`);
-    
     // Clean up test data
-    if (data && data[0]) {
-      await supabase.from('cars').delete().eq('id', data[0].id);
+    if (_data && _data[0]) {
+      await supabase.from('cars').delete().eq('id', _data[0].id);
     }
-    
     return 'Write and delete test successful.';
   };
 
@@ -125,9 +125,11 @@ export default function DatabaseConnectionTest() {
       upsert: true,
       cacheControl: uploadConfig.supabase.cacheControl
     });
-    const timeoutPromise = createTimeoutPromise(uploadTimeout, 'Upload timeout');
+    const timeoutPromise: Promise<never> = createTimeoutPromise(uploadTimeout, 'Upload timeout');
     
-    const { data, error } = await Promise.race([uploadPromise, timeoutPromise]) as any;
+    const result = await (Promise.race([uploadPromise, timeoutPromise]) as Promise<{ data: any; error: any } | string>);
+    if (typeof result === 'string') throw new Error(result);
+    const { data, error } = result;
     if (error) throw new Error(`Upload failed: ${error.message}`);
     
     // Clean up test file
@@ -141,7 +143,6 @@ export default function DatabaseConnectionTest() {
       isDevelopment: uploadConfig.environment.isDevelopment,
       isProduction: uploadConfig.environment.isProduction,
       isVercel: uploadConfig.environment.isVercel,
-      supabaseUrl: supabase.supabaseUrl,
       bucket: uploadConfig.supabase.bucket
     };
     

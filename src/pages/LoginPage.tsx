@@ -128,7 +128,14 @@ const Login = () => {
           if (typeof window !== 'undefined' && (window as any).grecaptcha) {
             (window as any).grecaptcha.ready(() => {
               (window as any).grecaptcha.execute('6Lf2HYgrAAAAAGLA2Pdh_EgRNFLVNtFr8wChye0T', { action: 'login' })
-                .then((token: string) => resolve(token))
+                .then((token: string) => {
+                  console.log('reCAPTCHA token before login:', token);
+                  if (!token) {
+                    reject(new Error('No reCAPTCHA token received'));
+                  } else {
+                    resolve(token);
+                  }
+                })
                 .catch((error: any) => reject(error));
             });
           } else {
@@ -138,8 +145,15 @@ const Login = () => {
       } catch (recaptchaError) {
         console.error('reCAPTCHA error:', recaptchaError);
         setCaptchaLoading(false);
-        setError('reCAPTCHA verification failed. Please try again.');
-        toast.error('reCAPTCHA verification failed. Please try again.');
+        setError('reCAPTCHA verification failed. Please refresh and try again.');
+        toast.error('reCAPTCHA verification failed. Please refresh and try again.');
+        setLoading(false);
+        return;
+      }
+      
+      // Do not proceed if token is empty/undefined
+      if (!recaptchaToken) {
+        setError('reCAPTCHA failed to load. Please refresh and try again.');
         setLoading(false);
         return;
       }
@@ -147,7 +161,7 @@ const Login = () => {
       setCaptchaVerified(true);
       setCaptchaLoading(false);
       
-      // Very short timeout to prevent hanging
+      // Send token to backend as { 'g-recaptcha-response': token }
       const timeoutId = setTimeout(() => {
         setError('Login timeout. Please try again.');
         setLoading(false);

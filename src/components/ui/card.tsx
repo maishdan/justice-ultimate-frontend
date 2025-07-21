@@ -9,7 +9,8 @@ export function Card({
   className?: string;
 }) {
   return (
-    <div className={`rounded border p-4 shadow-md bg-white text-black dark:bg-gray-900 dark:text-white ${className}`}>
+    <div className={`rounded-xl border p-4 shadow-md glass-panel bg-gradient-to-br from-blue-700/80 via-blue-900/70 to-blue-950/90 border-blue-400/40 backdrop-blur-xl ring-2 ring-blue-400/20 hover:ring-blue-300/40 transition-all duration-300 text-white dark:text-white ${className}`}
+      style={{ boxShadow: '0 8px 32px 0 rgba(0, 60, 255, 0.25)' }}>
       {children}
     </div>
   );

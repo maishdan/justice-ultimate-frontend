@@ -34,7 +34,7 @@ export const CarDetailModal: FC<CarDetailModalProps> = ({ open, car, onClose, on
         >
           {/* Image Carousel */}
           <Carousel>
-            {car.image.map((imgUrl, idx) => (
+            {(car.image ?? []).map((imgUrl, idx) => (
               <CarouselItem key={idx}>
                 <img
                   src={imgUrl}
@@ -51,7 +51,7 @@ export const CarDetailModal: FC<CarDetailModalProps> = ({ open, car, onClose, on
             <p className="text-sm font-mono text-gray-500 dark:text-gray-400">Stock ID: {car.stockId}</p>
 
             <div className="flex flex-wrap gap-2 mt-2">
-              {car.tags.map((tag) => (
+              {(car.tags ?? []).map((tag) => (
                 <Badge key={tag} variant="outline">
                   {tag}
                 </Badge>
@@ -59,20 +59,20 @@ export const CarDetailModal: FC<CarDetailModalProps> = ({ open, car, onClose, on
             </div>
 
             <div className="text-xl font-semibold text-primary mt-3">
-              {car.currency === "KES" ? "Ksh" : "$"} {car.price.toLocaleString()}
+              {(car.currency === "KES" ? "Ksh" : "$") + ' ' + ((car.price ?? null) !== null ? car.price?.toLocaleString() : 'Contact for price')}
             </div>
           </div>
 
           {/* Specifications */}
           <div className="grid grid-cols-2 md:grid-cols-3 gap-4 text-sm mt-4">
-            <div><strong>Year:</strong> {car.specs.year}</div>
-            <div><strong>Fuel:</strong> {car.specs.fuel}</div>
-            <div><strong>Transmission:</strong> {car.specs.transmission}</div>
-            <div><strong>Drive:</strong> {car.specs.drivetrain}</div>
-            <div><strong>Mileage:</strong> {car.specs.mileage.toLocaleString()} km</div>
-            <div><strong>Color:</strong> {car.specs.color}</div>
-            <div><strong>Location:</strong> {car.location}</div>
-            <div><strong>Availability:</strong> {car.availability}</div>
+            <div><strong>Year:</strong> {car.specs?.year ?? car.year ?? '-'}</div>
+            <div><strong>Fuel:</strong> {car.specs?.fuel ?? car.fuel_type ?? '-'}</div>
+            <div><strong>Transmission:</strong> {car.specs?.transmission ?? car.transmission ?? '-'}</div>
+            <div><strong>Drive:</strong> {car.specs?.drivetrain ?? '-'}</div>
+            <div><strong>Mileage:</strong> {(car.specs?.mileage ?? car.mileage) ? `${(car.specs?.mileage ?? car.mileage)?.toLocaleString()} km` : '-'}</div>
+            <div><strong>Color:</strong> {car.specs?.color ?? car.color ?? '-'}</div>
+            <div><strong>Location:</strong> {car.location ?? '-'}</div>
+            <div><strong>Availability:</strong> {car.availability ?? '-'}</div>
           </div>
 
           {/* Description */}

@@ -2,9 +2,9 @@
 // npm install framer-motion
 
 // 📁 File: src/components/ui/Header.tsx
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
-import { Sun, Moon, LogOut, ArrowLeft, ChevronDown, User, Shield } from "lucide-react";
+import { Sun, Moon, LogOut, ArrowLeft, User, Shield } from "lucide-react";
 import { AnimatePresence, motion } from "framer-motion";
 import logo from "../../assets/logo.png";
 import { useTheme } from '../../context/ThemeContext';
@@ -29,15 +29,6 @@ export default function Header() {
   useEffect(() => {
     console.log('Menu state changed:', menuOpen);
   }, [menuOpen]);
-  const [dropdownOpen, setDropdownOpen] = useState(false);
-  const dropdownTimeout = useRef<NodeJS.Timeout | null>(null);
-  const [now, setNow] = useState(new Date());
-
-  // Real-time date and time state
-  useEffect(() => {
-    const interval = setInterval(() => setNow(new Date()), 1000);
-    return () => clearInterval(interval);
-  }, []);
 
   const location = useLocation();
   const navigate = useNavigate();
@@ -60,17 +51,6 @@ export default function Header() {
     },
     { label: t('contact'), path: '/contact' },
   ];
-
-  const handleDropdownOpen = () => {
-    if (dropdownTimeout.current) clearTimeout(dropdownTimeout.current);
-    setDropdownOpen(true);
-  };
-
-  const handleDropdownClose = () => {
-    dropdownTimeout.current = setTimeout(() => {
-      setDropdownOpen(false);
-    }, 500);
-  };
 
   const handleLogout = async () => {
     // Show confirmation dialog
@@ -229,42 +209,38 @@ export default function Header() {
   return (
     <HeaderPortal>
       <div className="flex items-center justify-between w-full px-4" style={{height: '64px'}}>
-        {/* Professional Hamburger Menu Button - Left Side */}
-        <div className="absolute top-0 left-0 p-2 z-[9999]">
-          <button 
-            onClick={() => setMenuOpen(!menuOpen)}
-            className="p-2 rounded-lg bg-blue-600/90 hover:bg-blue-700/90 transition-all duration-300 backdrop-blur-sm border border-blue-500/30 focus:outline-none focus:ring-2 focus:ring-blue-400 hover:scale-105 active:scale-95 shadow-lg"
-            aria-label={menuOpen ? 'Close menu' : 'Open menu'}
-          >
-            <div className="w-6 h-5 flex flex-col justify-center items-center gap-1">
-              <div className={`w-5 h-0.5 bg-white rounded transition-all duration-300 ease-in-out ${menuOpen ? 'rotate-45 translate-y-1.5' : ''}`}></div>
-              <div className={`w-5 h-0.5 bg-white rounded transition-all duration-300 ease-in-out ${menuOpen ? 'opacity-0 scale-0' : ''}`}></div>
-              <div className={`w-5 h-0.5 bg-white rounded transition-all duration-300 ease-in-out ${menuOpen ? '-rotate-45 -translate-y-1.5' : ''}`}></div>
-            </div>
-          </button>
-        </div>
-
-
-          
-          {/* Left Section - Logo & Company Name */}
-          <div className="flex items-center gap-3">
-            <div className="relative">
-              <Link to="/" className="block">
-                <div className="absolute inset-0 bg-gradient-to-r from-yellow-400 to-yellow-500 rounded-full blur-xl opacity-60 animate-pulse"></div>
-                <img 
-                  src={logo} 
-                  alt="Justice Ultimate Automobiles Logo" 
-                  className="relative w-14 h-14 sm:w-16 sm:h-16 rounded-full shadow-xl border-2 border-yellow-400/70 cursor-pointer hover:shadow-yellow-400/60 hover:scale-105 transition-all duration-300 bg-white object-cover z-10" 
-                />
-              </Link>
-            </div>
-            
-            <div className="flex items-center">
-              <span className="text-lg sm:text-xl font-bold bg-gradient-to-r from-green-400 to-green-600 bg-clip-text text-transparent whitespace-nowrap">
-                JUSTICE ULTIMATE AUTO
-              </span>
+        {/* Logo & Company Name */}
+        <div className="flex items-center gap-3 relative">
+          <div className="relative">
+            <Link to="/" className="block">
+              <div className="absolute inset-0 bg-gradient-to-r from-yellow-400 to-yellow-500 rounded-full blur-xl opacity-60 animate-pulse"></div>
+              <img 
+                src={logo} 
+                alt="Justice Ultimate Automobiles Logo" 
+                className="h-14 w-14 rounded-full border-4 border-white shadow-lg object-cover bg-white" style={{ maxHeight: '3.5rem', maxWidth: '3.5rem' }}
+              />
+            </Link>
+            {/* Hamburger Menu Button - now just below the logo */}
+            <div className="absolute left-1 top-full mt-1 z-[9999]">
+              <button 
+                onClick={() => setMenuOpen(!menuOpen)}
+                className="p-2 rounded-lg bg-blue-600/90 hover:bg-blue-700/90 transition-all duration-300 backdrop-blur-sm border border-blue-500/30 focus:outline-none focus:ring-2 focus:ring-blue-400 hover:scale-105 active:scale-95 shadow-lg"
+                aria-label={menuOpen ? 'Close menu' : 'Open menu'}
+              >
+                <div className="w-6 h-5 flex flex-col justify-center items-center gap-1">
+                  <div className={`w-5 h-0.5 bg-white rounded transition-all duration-300 ease-in-out ${menuOpen ? 'rotate-45 translate-y-1.5' : ''}`}></div>
+                  <div className={`w-5 h-0.5 bg-white rounded transition-all duration-300 ease-in-out ${menuOpen ? 'opacity-0 scale-0' : ''}`}></div>
+                  <div className={`w-5 h-0.5 bg-white rounded transition-all duration-300 ease-in-out ${menuOpen ? '-rotate-45 -translate-y-1.5' : ''}`}></div>
+                </div>
+              </button>
             </div>
           </div>
+          <div className="flex items-center">
+            <span className="text-lg sm:text-xl font-bold bg-gradient-to-r from-green-400 to-green-600 bg-clip-text text-transparent whitespace-nowrap">
+              JUSTICE ULTIMATE AUTO
+            </span>
+          </div>
+        </div>
 
           {/* Center Section - Navigation */}
           <nav className="hidden lg:flex items-center gap-1 xl:gap-2">
@@ -278,7 +254,7 @@ export default function Header() {
                       backdropFilter: 'blur(10px)',
                       WebkitBackdropFilter: 'blur(10px)'
                     }}
-                    onChange={e => { if (e.target.value) navigate(e.target.value); setDropdownOpen(false); }}
+                    onChange={e => { if (e.target.value) navigate(e.target.value); }}
                     onClick={e => e.stopPropagation()}
                     value={location.pathname.startsWith('/news') ? '/news' : location.pathname.startsWith('/success-stories') ? '/success-stories' : location.pathname.startsWith('/about') ? '/about' : ''}
                   >

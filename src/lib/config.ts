@@ -47,13 +47,5 @@ export const getBackendUrl = () => {
 
 // Helper function to log environment info
 export const logEnvironmentInfo = () => {
-  const env = getCurrentEnvironment();
-  const backendUrl = getBackendUrl();
-  
-  console.log('🌍 Environment Information:');
-  console.log(`   Environment: ${env}`);
-  console.log(`   Backend URL: ${backendUrl}`);
-  console.log(`   Description: ${config[env].description}`);
-  console.log(`   Debug Logging: ${config.features.enableDebugLogging}`);
-  console.log(`   reCAPTCHA Enabled: ${config.features.enableRecaptcha}`);
+  // All environment/config logs removed for security
 }; 

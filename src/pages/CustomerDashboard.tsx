@@ -157,7 +157,7 @@ export default function CustomerDashboard() {
       </button>
       
       {/* Sidebar */}
-      <div className={`min-h-screen p-6 shadow-xl flex flex-col fixed md:static z-30 md:z-auto top-0 left-0 md:relative transition-transform duration-300 ${sidebarOpen ? 'translate-x-0' : 'translate-x-[-100%] md:translate-x-0'}`}>
+      <div className={`min-h-screen p-6 shadow-xl flex flex-col fixed md:relative transition-transform duration-300 ${sidebarOpen ? 'translate-x-0' : 'translate-x-[-100%] md:translate-x-0'}`}>
         <div className="text-2xl font-extrabold mb-10 text-center tracking-wide drop-shadow-lg">Justice Ultimate Automobiles</div>
         <nav className="flex-1">
           <ul className="space-y-2">

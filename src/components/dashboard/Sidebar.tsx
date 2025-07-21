@@ -1,20 +1,17 @@
-import React, { useState, useEffect, useRef } from 'react';
+import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { supabase } from '../../lib/supabaseClient'; // Added import for supabase
 import LogoutButton from '../auth/LogoutButton';
-import { FiLogOut, FiMenu, FiX, FiMap, FiShield } from 'react-icons/fi';
+import { FiLogOut, FiMenu, FiX } from 'react-icons/fi';
 import { useTranslation } from 'react-i18next';
 
 interface SidebarProps {
   activePanel: string;
   setActivePanel: (panel: string) => void;
-  admin?: boolean;
 }
 
-const Sidebar: React.FC<SidebarProps> = ({ activePanel, setActivePanel, admin }) => {
+const Sidebar: React.FC<SidebarProps> = ({ activePanel, setActivePanel }) => {
   const { t } = useTranslation();
   const [isCollapsed, setIsCollapsed] = useState(false);
-  const [focusedIndex, setFocusedIndex] = useState(-1);
 
   const menuItems = [
     { 
@@ -177,31 +174,31 @@ const Sidebar: React.FC<SidebarProps> = ({ activePanel, setActivePanel, admin })
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.target && (e.target as HTMLElement).closest('.sidebar')) {
-        const currentIndex = focusedIndex;
+        const currentIndex = -1; // No longer tracking focusedIndex
         
         switch (e.key) {
           case 'ArrowDown':
             e.preventDefault();
-            setFocusedIndex(prev => Math.min(prev + 1, menuItems.length - 1));
+            // setFocusedIndex(prev => Math.min(prev + 1, menuItems.length - 1)); // No longer tracking focusedIndex
             break;
           case 'ArrowUp':
             e.preventDefault();
-            setFocusedIndex(prev => Math.max(prev - 1, 0));
+            // setFocusedIndex(prev => Math.max(prev - 1, 0)); // No longer tracking focusedIndex
             break;
           case 'Enter':
           case ' ':
             e.preventDefault();
-            if (currentIndex >= 0 && currentIndex < menuItems.length) {
-              setActivePanel(menuItems[currentIndex].key);
-            }
+            // if (currentIndex >= 0 && currentIndex < menuItems.length) { // No longer tracking focusedIndex
+            //   setActivePanel(menuItems[currentIndex].key);
+            // }
             break;
           case 'Home':
             e.preventDefault();
-            setFocusedIndex(0);
+            // setFocusedIndex(0); // No longer tracking focusedIndex
             break;
           case 'End':
             e.preventDefault();
-            setFocusedIndex(menuItems.length - 1);
+            // setFocusedIndex(menuItems.length - 1); // No longer tracking focusedIndex
             break;
         }
       }
@@ -209,7 +206,7 @@ const Sidebar: React.FC<SidebarProps> = ({ activePanel, setActivePanel, admin })
 
     document.addEventListener('keydown', handleKeyDown);
     return () => document.removeEventListener('keydown', handleKeyDown);
-  }, [focusedIndex, menuItems, setActivePanel]);
+  }, [activePanel, menuItems, setActivePanel]); // Removed focusedIndex from dependency array
 
   // Greeting logic
   function getGreeting() {
@@ -249,7 +246,7 @@ const Sidebar: React.FC<SidebarProps> = ({ activePanel, setActivePanel, admin })
           clipPath: 'ellipse(60% 10% at 0% 0%)',
         }}
         transition={{ duration: 0.7, type: 'spring', bounce: 0.32 }}
-        className={`dashboard-sidebar fixed top-16 left-0 h-full z-40 bg-gradient-to-br from-blue-900/90 via-green-900/90 to-black/95 backdrop-blur-2xl shadow-2xl border-r-4 border-yellow-400/80 w-64 md:w-80 transition-all flex flex-col min-w-0 w-full md:static md:relative md:z-auto md:h-auto md:border-none md:shadow-none md:bg-none`}
+        className={`dashboard-sidebar fixed top-16 left-0 h-full z-40 bg-gradient-to-br from-blue-900/90 via-green-900/90 to-black/95 backdrop-blur-2xl shadow-2xl border-r-4 border-yellow-400/80 w-64 md:w-80 transition-all flex flex-col min-w-0 md:z-auto md:h-auto md:border-none md:shadow-none md:bg-none`}
         role="navigation"
         aria-label="Main navigation menu"
       >
@@ -260,14 +257,7 @@ const Sidebar: React.FC<SidebarProps> = ({ activePanel, setActivePanel, admin })
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.1, duration: 0.5 }}
         >
-          <motion.div
-            className="w-16 h-16 bg-gradient-to-br from-yellow-300 via-green-400 to-blue-400 rounded-2xl flex items-center justify-center shadow-2xl border-4 border-white/40 mb-2"
-            initial={{ scale: 0.7, rotate: -10 }}
-            animate={{ scale: 1, rotate: 0 }}
-            transition={{ type: 'spring', stiffness: 200, damping: 12 }}
-          >
-            <img src="https://tyypdmhxuehzddudeuww.supabase.co/storage/v1/object/public/avatars/logo.png" alt="Logo" className="w-12 h-12 object-contain" />
-          </motion.div>
+          {/* Logo removed as per user request */}
           {!isCollapsed && (
             <motion.div
               initial={{ opacity: 0, x: -20 }}
@@ -276,11 +266,11 @@ const Sidebar: React.FC<SidebarProps> = ({ activePanel, setActivePanel, admin })
               className="w-full text-center"
             >
               <h2 className="text-2xl font-extrabold text-yellow-400 tracking-wide drop-shadow-glow mb-1">Justice Admin</h2>
-              <p className="text-xs text-green-200 font-mono mb-2">v2.0 &bull; World-Class System</p>
-              <div className="text-lg font-bold text-white/90 mb-1 animate-pulse">
+              <p className="text-xs font-mono mb-2" style={{ color: '#22c55e' }}>v2.0 &bull; World-Class System</p>
+              <div className="text-lg font-bold mb-1 animate-pulse" style={{ color: '#60a5fa' }}>
                 {getGreeting()}, {userName}!
               </div>
-              <div className="text-xs text-blue-200 italic">Empowering Excellence Every Day</div>
+              <div className="text-xs italic" style={{ color: '#93c5fd' }}>Empowering Excellence Every Day</div>
             </motion.div>
           )}
           {/* Collapse/Expand button - always visible, floating */}
@@ -324,14 +314,15 @@ const Sidebar: React.FC<SidebarProps> = ({ activePanel, setActivePanel, admin })
               >
             <button
               onClick={() => setActivePanel(item.key)}
-                  onFocus={() => setFocusedIndex(index)}
-                  onBlur={() => setFocusedIndex(-1)}
+                  onFocus={() => {}} // Removed setFocusedIndex(index)
+                  onBlur={() => {}} // Removed setFocusedIndex(-1)
                   className={`w-full flex items-center gap-4 p-4 rounded-2xl transition-all duration-200 text-left group relative font-extrabold tracking-wide text-lg shadow-lg border-2 border-transparent focus:border-yellow-400 focus:ring-2 focus:ring-yellow-300 ${
                     activePanel === item.key 
                       ? 'bg-gradient-to-r from-yellow-400 via-green-500 to-blue-700 text-blue-900 shadow-2xl border-yellow-400' 
                       : 'text-green-100 bg-gradient-to-r from-blue-900/60 via-green-900/60 to-black/80 hover:bg-green-700/40 hover:text-yellow-300'
                   } ${
-                    focusedIndex === index ? 'ring-2 ring-yellow-400 ring-offset-2 ring-offset-green-950' : ''
+                    // Removed focusedIndex === index ? 'ring-2 ring-yellow-400 ring-offset-2 ring-offset-green-950' : ''
+                    false ? 'ring-2 ring-yellow-400 ring-offset-2 ring-offset-green-950' : '' // Placeholder for focused state
                   }`}
                   role="menuitem"
                   aria-current={activePanel === item.key ? 'page' : undefined}
