@@ -169,7 +169,7 @@ export default function WrappedApp() {
         <LanguageProvider>
           <ErrorBoundary>
             <div
-              className="min-h-screen clean-container"
+              className="min-h-screen"
               style={{
                 backgroundImage: "url('/images/bg-landing.png')",
                 backgroundSize: 'cover',
@@ -185,9 +185,7 @@ export default function WrappedApp() {
                   zIndex: 0,
                 }}
               />
-              <div className="clean-container">
-                <App />
-              </div>
+              <App />
             </div>
           </ErrorBoundary>
         </LanguageProvider>

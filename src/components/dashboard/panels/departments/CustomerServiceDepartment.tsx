@@ -754,13 +754,13 @@ const CustomerServiceDepartment: React.FC = () => {
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
-          className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4"
+          className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4"
         >
           <motion.div
             initial={{ scale: 0.95, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}
             exit={{ scale: 0.95, opacity: 0 }}
-            className="glassmorphic bg-white/90 dark:bg-gray-900/90 rounded-lg max-w-2xl w-full max-h-[90vh] overflow-y-auto shadow-2xl"
+            className="glassmorphic bg-white/90 dark:bg-gray-900/90 rounded-lg max-w-2xl w-full max-h-[90vh] overflow-y-auto"
           >
             <div className="p-6">
               <h3 className="text-lg font-semibold mb-4">
@@ -937,7 +937,7 @@ const CustomerServiceDepartment: React.FC = () => {
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
-          className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4"
+          className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4"
         >
           <motion.div
             initial={{ scale: 0.95, opacity: 0 }}

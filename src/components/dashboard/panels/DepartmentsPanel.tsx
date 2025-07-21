@@ -67,7 +67,7 @@ function DepartmentsOverview({ onExplore }: { onExplore: (key: string) => void }
         {DEPARTMENT_LIST.filter(d => d.key !== 'overview').map(dep => (
           <div
             key={dep.key}
-            className="relative group bg-gradient-to-br from-blue-100/90 via-white/90 to-blue-200/90 dark:from-blue-900/90 dark:to-blue-800/90 glassmorphic shadow-lg rounded-xl flex flex-col items-center justify-center border border-blue-200 dark:border-blue-800 transition-all duration-300 hover:scale-105 hover:shadow-2xl hover:z-10 cursor-pointer overflow-hidden w-full min-w-[210px] min-h-[210px] max-w-sm aspect-square m-4 ring-1 ring-blue-100 dark:ring-blue-900 hover:ring-4 hover:ring-blue-400"
+            className="group bg-gradient-to-br from-blue-100/90 via-white/90 to-blue-200/90 dark:from-blue-900/90 dark:to-blue-800/90 glassmorphic rounded-xl flex flex-col items-center justify-center border border-blue-200 dark:border-blue-800 transition-all duration-300 hover:scale-105 cursor-pointer overflow-hidden w-full min-w-[210px] min-h-[210px] max-w-sm aspect-square m-4 ring-1 ring-blue-100 dark:ring-blue-900 hover:ring-4 hover:ring-blue-400"
           >
             <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300 bg-gradient-to-br from-blue-400/20 to-blue-700/20 pointer-events-none rounded-xl" />
             <div className="text-3xl mb-2 text-blue-600 dark:text-blue-300 drop-shadow-lg group-hover:scale-110 transition-transform duration-300">

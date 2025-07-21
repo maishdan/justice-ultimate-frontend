@@ -1708,12 +1708,12 @@ html, body, * {
 /* Ensure only one scrollbar */
 body {
   overflow-x: hidden;
-  overflow-y: auto;
+  overflow-y: visible !important;
 }
 
 html {
   overflow-x: hidden;
-  overflow-y: auto;
+  overflow-y: visible !important;
 }
 
 /* Ensure content flows naturally without boundaries */

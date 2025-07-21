@@ -29,6 +29,7 @@ import SecurityEventsTable from '../../components/security/SecurityEventsTable';
 import ProtectedRoute from '../../components/auth/ProtectedRoute';
 import SessionManager from '../../components/dashboard/widgets/SessionManager';
 import RoleTestPanel from '../../components/RoleTestPanel';
+import RightSidebarMenu from '../../components/dashboard/RightSidebarMenu';
 
 // Enhanced accessibility and performance hooks
 const useKeyboardNavigation = () => {
@@ -260,31 +261,8 @@ export default function AdminDashboard() {
       <a href="#main-content" className="skip-link">
         Skip to main content
       </a>
-      {/* Mobile menu button */}
-      <button
-        className="fixed top-20 left-4 z-40 lg:hidden bg-green-600 text-white p-3 rounded-lg shadow-lg"
-        onClick={() => setSidebarOpen(!sidebarOpen)}
-        aria-label="Toggle navigation menu"
-        aria-expanded={sidebarOpen}
-        aria-controls="dashboard-sidebar"
-      >
-        <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
-        </svg>
-      </button>
-      {/* Sidebar with glass morphism */}
-      <aside 
-        id="dashboard-sidebar"
-        className={`dashboard-sidebar glass-panel ${sidebarOpen ? 'open' : ''}`}
-        role="navigation"
-        aria-label="Main navigation"
-      >
-        <Sidebar 
-          activePanel={activePanel} 
-          setActivePanel={handlePanelChange} 
-          admin 
-        />
-      </aside>
+      {/* Right Sidebar Menu - fixed top right */}
+      <RightSidebarMenu activePanel={activePanel} setActivePanel={setActivePanel} />
       {/* Main Content Area */}
       <main 
         id="main-content"
@@ -300,8 +278,8 @@ export default function AdminDashboard() {
         }}
       >
         {/* Welcome/Info Tile at the very top, full width */}
-        <section role="region" aria-label="Welcome and user information" className="glass-panel mb-6 w-full max-w-4xl mx-auto rounded-2xl shadow-xl p-6 flex flex-col items-center justify-center">
-          <WelcomeCard user={adminUser} />
+        <section role="region" aria-label="Welcome and user information" className="glass-panel mb-6 w-full max-w-4xl mx-auto rounded-2xl p-6 flex flex-col items-center justify-center">
+          <WelcomeCard user={adminUser} setActivePanel={setActivePanel} onLogout={() => {}} />
         </section>
         {/* Main Panel Content below the info tile, filling the rest of the page */}
         <section 
@@ -331,13 +309,7 @@ export default function AdminDashboard() {
         </footer>
       </main>
       {/* Mobile overlay for sidebar */}
-      {sidebarOpen && (
-        <div 
-          className="fixed inset-0 bg-black/50 z-40 lg:hidden"
-          onClick={() => setSidebarOpen(false)}
-          aria-hidden="true"
-        />
-      )}
+      {/* Removed sidebar overlay */}
     </div>
   );
 }

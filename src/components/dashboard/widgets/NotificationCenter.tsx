@@ -646,7 +646,7 @@ export default function NotificationCenter() {
 
       {/* Notification Details Modal */}
       {selectedNotification && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center">
           <motion.div
             initial={{ opacity: 0, scale: 0.9 }}
             animate={{ opacity: 1, scale: 1 }}
@@ -715,7 +715,7 @@ export default function NotificationCenter() {
 
             {/* Add popup notification UI */}
       {popupNotification && preferences.notifications && (!preferences.dnd || !isWithinDND(preferences.dnd, preferences.dndStart, preferences.dndEnd)) && preferences.popup && (
-        <div className="fixed top-20 right-6 z-40 bg-white dark:bg-gray-900 border border-yellow-400 shadow-xl rounded-xl p-4 animate-fade-in-out w-96 max-w-full" style={{ animationDuration: '30s' }}>
+        <div className="fixed top-20 right-6 bg-white dark:bg-gray-900 border border-yellow-400 rounded-xl p-4 animate-fade-in-out w-96 max-w-full" style={{ animationDuration: '30s' }}>
           <div className="flex items-center gap-4 mb-2">
             <FiBell className="text-yellow-400 text-2xl" />
             <div className="flex-1">
@@ -792,7 +792,7 @@ export default function NotificationCenter() {
 
       {/* Missed notifications summary popup */}
       {showMissedSummary && (
-        <div className="fixed top-20 right-6 z-40 bg-blue-700 text-white border border-blue-400 shadow-xl rounded-xl p-4 flex flex-col gap-2 animate-fade-in-out w-96 max-w-full">
+        <div className="fixed top-20 right-6 bg-blue-700 text-white border border-blue-400 rounded-xl p-4 flex flex-col gap-2 animate-fade-in-out w-96 max-w-full">
           <div className="font-bold text-lg">{t('missedNotificationsCount', { count: missedNotifications.length })}</div>
           <div className="text-sm mb-2">{t('missedNotificationsClick')}</div>
           <button
@@ -895,7 +895,7 @@ export default function NotificationCenter() {
       </Dialog>
       {/* Notification Preferences Modal */}
       {showPreferences && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center">
           <motion.div
             initial={{ opacity: 0, scale: 0.9 }}
             animate={{ opacity: 1, scale: 1 }}

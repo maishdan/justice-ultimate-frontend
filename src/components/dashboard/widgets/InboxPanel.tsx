@@ -293,7 +293,7 @@ export default function InboxPanel() {
       </div>
       {/* Add popup notification UI */}
       {popup && (
-        <div className="fixed top-20 right-6 z-40 bg-white dark:bg-gray-900 border border-yellow-400 shadow-xl rounded-xl p-4 flex items-center gap-4 animate-fade-in-out" style={{ animationDuration: '30s' }}>
+        <div className="fixed top-20 right-6 bg-white dark:bg-gray-900 border border-yellow-400 rounded-xl p-4 flex items-center gap-4 animate-fade-in-out" style={{ animationDuration: '30s' }}>
           <FiInbox className="text-yellow-400 text-2xl" />
           <div>
             <div className="font-bold text-lg">Inbox Refreshed</div>

@@ -39,7 +39,7 @@ const WelcomeCard: React.FC<WelcomeCardProps> = ({ user, setActivePanel, onLogou
     return 'Good evening, Admin!';
   }
   return (
-    <div className="glass-panel rounded-2xl p-6 flex flex-col gap-2 relative shadow-2xl border-4 border-transparent bg-clip-padding bg-gradient-to-br from-blue-800/90 via-purple-900/80 to-blue-950/95" style={{ boxShadow: '0 8px 32px 0 rgba(0, 60, 255, 0.25), 0 0 24px 4px #6366f1, 0 0 0 6px #facc15 inset' }}>
+    <div className="glass-panel rounded-2xl p-6 flex flex-col gap-2 border-4 border-transparent bg-clip-padding bg-gradient-to-br from-blue-800/90 via-purple-900/80 to-blue-950/95" style={{ boxShadow: '0 8px 32px 0 rgba(0, 60, 255, 0.25), 0 0 24px 4px #6366f1, 0 0 0 6px #facc15 inset' }}>
       {/* Greeting at the top */}
       <div className="mb-2 text-center font-extrabold" style={{ color: '#ffd700', fontSize: '1.5rem', fontFamily: 'Montserrat, Arial, sans-serif', letterSpacing: '0.03em', textShadow: '0 2px 12px #1e293b, 0 0 16px #ffd700' }}>{getGreeting()}</div>
       {/* Main Row: Profile (left), Info (center), Settings (right) */}
@@ -78,7 +78,7 @@ const WelcomeCard: React.FC<WelcomeCardProps> = ({ user, setActivePanel, onLogou
             <FiSettings className="text-2xl text-white" />
           </button>
           {dropdownOpen && (
-            <div className="absolute right-0 mt-2 w-56 glass-panel bg-gradient-to-br from-blue-800/90 to-blue-950/90 border border-blue-400/30 rounded-xl shadow-2xl py-2 z-50 backdrop-blur-xl animate-fade-in">
+            <div className="absolute right-0 mt-2 w-56 glass-panel bg-gradient-to-br from-blue-800/90 to-blue-950/90 border border-blue-400/30 rounded-xl py-2 backdrop-blur-xl animate-fade-in">
               <button
                 className="w-full flex items-center gap-3 px-4 py-3 text-white hover:bg-blue-700/40 rounded-xl transition-all text-lg font-semibold"
                 onClick={() => { setActivePanel('settings'); setDropdownOpen(false); }}

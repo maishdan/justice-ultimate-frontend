@@ -11,7 +11,7 @@ interface SidebarProps {
 
 const Sidebar: React.FC<SidebarProps> = ({ activePanel, setActivePanel }) => {
   const { t } = useTranslation();
-  const [isCollapsed, setIsCollapsed] = useState(false);
+  // const [isCollapsed, setIsCollapsed] = useState(false); // REMOVE
 
   const menuItems = [
     { 
@@ -220,24 +220,18 @@ const Sidebar: React.FC<SidebarProps> = ({ activePanel, setActivePanel }) => {
   return (
     <AnimatePresence>
       <motion.aside
-        key={isCollapsed ? 'collapsed' : 'open'}
+        key={'open'}
         initial={{
-          x: isCollapsed ? -120 : 0,
+          x: 0,
           opacity: 0.7,
-          clipPath: isCollapsed
-            ? 'ellipse(60% 10% at 0% 0%)'
-            : 'ellipse(120% 120% at 50% 50%)',
+          clipPath: 'ellipse(120% 120% at 50% 50%)',
           boxShadow: '0 0 0px #00FFAA',
         }}
         animate={{
           x: 0,
           opacity: 1,
-          clipPath: isCollapsed
-            ? 'ellipse(60% 10% at 0% 0%)'
-            : 'ellipse(120% 120% at 50% 50%)',
-          boxShadow: isCollapsed
-            ? '0 0 0px #00FFAA'
-            : '0 12px 48px 0 rgba(0,255,170,0.30), 0 0 24px #00FFAA',
+          clipPath: 'ellipse(120% 120% at 50% 50%)',
+          boxShadow: '0 12px 48px 0 rgba(0,255,170,0.30), 0 0 24px #00FFAA',
           transition: { type: 'spring', stiffness: 120, damping: 18 },
         }}
         exit={{
@@ -246,7 +240,7 @@ const Sidebar: React.FC<SidebarProps> = ({ activePanel, setActivePanel }) => {
           clipPath: 'ellipse(60% 10% at 0% 0%)',
         }}
         transition={{ duration: 0.7, type: 'spring', bounce: 0.32 }}
-        className={`dashboard-sidebar fixed top-16 left-0 h-full z-40 bg-gradient-to-br from-blue-900/90 via-green-900/90 to-black/95 backdrop-blur-2xl shadow-2xl border-r-4 border-yellow-400/80 w-64 md:w-80 transition-all flex flex-col min-w-0 md:z-auto md:h-auto md:border-none md:shadow-none md:bg-none`}
+        className={`dashboard-sidebar fixed top-16 left-0 h-full z-40 bg-gradient-to-br from-blue-900/90 via-green-900/90 to-black/95 backdrop-blur-2xl shadow-2xl border-r-4 border-yellow-400/80 w-64 md:w-80 transition-all flex flex-col min-w-0`}
         role="navigation"
         aria-label="Main navigation menu"
       >
@@ -257,32 +251,19 @@ const Sidebar: React.FC<SidebarProps> = ({ activePanel, setActivePanel }) => {
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.1, duration: 0.5 }}
         >
-          {/* Logo removed as per user request */}
-          {!isCollapsed && (
-            <motion.div
-              initial={{ opacity: 0, x: -20 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ delay: 0.2 }}
-              className="w-full text-center"
-            >
-              <h2 className="text-2xl font-extrabold text-yellow-400 tracking-wide drop-shadow-glow mb-1">Justice Admin</h2>
-              <p className="text-xs font-mono mb-2" style={{ color: '#22c55e' }}>v2.0 &bull; World-Class System</p>
-              <div className="text-lg font-bold mb-1 animate-pulse" style={{ color: '#60a5fa' }}>
-                {getGreeting()}, {userName}!
-              </div>
-              <div className="text-xs italic" style={{ color: '#93c5fd' }}>Empowering Excellence Every Day</div>
-            </motion.div>
-          )}
-          {/* Collapse/Expand button - always visible, floating */}
-          <button
-            onClick={() => setIsCollapsed(!isCollapsed)}
-            className="absolute top-4 right-4 p-2 rounded-full bg-yellow-400/90 hover:bg-yellow-500 shadow-lg border-2 border-white/60 z-50 focus:outline-none focus:ring-2 focus:ring-yellow-300"
-            aria-label={isCollapsed ? 'Expand sidebar' : 'Collapse sidebar'}
-            aria-expanded={!isCollapsed}
-            style={{ boxShadow: '0 2px 12px 0 #facc15' }}
+          <motion.div
+            initial={{ opacity: 0, x: -20 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ delay: 0.2 }}
+            className="w-full text-center"
           >
-            {isCollapsed ? <FiMenu size={24} className="text-blue-900" /> : <FiX size={24} className="text-blue-900" />}
-          </button>
+            <h2 className="text-2xl font-extrabold text-yellow-400 tracking-wide drop-shadow-glow mb-1">Justice Admin</h2>
+            <p className="text-xs font-mono mb-2" style={{ color: '#22c55e' }}>v2.0 &bull; World-Class System</p>
+            <div className="text-lg font-bold mb-1 animate-pulse" style={{ color: '#60a5fa' }}>
+              {getGreeting()}, {userName}!
+            </div>
+            <div className="text-xs italic" style={{ color: '#93c5fd' }}>Empowering Excellence Every Day</div>
+          </motion.div>
         </motion.div>
 
         {/* Navigation Menu with genie effect */}
@@ -333,26 +314,12 @@ const Sidebar: React.FC<SidebarProps> = ({ activePanel, setActivePanel }) => {
                   <span className="text-3xl flex-shrink-0 drop-shadow-glow" aria-hidden="true">
                     {item.icon}
                   </span>
-                  {!isCollapsed && (
-                    <div className="flex-1 min-w-0">
-                      <span className="font-extrabold truncate block text-lg">{item.name}</span>
-                      <span className="text-xs text-yellow-200 opacity-0 group-hover:opacity-100 transition-opacity font-mono">
-                        {item.shortcut}
-                      </span>
-                    </div>
-                  )}
-                  {/* Tooltip for collapsed state */}
-                  {isCollapsed && (
-                    <div 
-                      id={`tooltip-${item.key}`}
-                      className="absolute left-full ml-2 px-2 py-1 bg-gray-900 text-white text-sm rounded opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none whitespace-nowrap z-50 shadow-lg"
-                      role="tooltip"
-                    >
-                      {item.name}
-                      <div className="text-xs text-gray-300">{item.description}</div>
-                      <div className="text-xs text-yellow-400">{item.shortcut}</div>
-                    </div>
-                  )}
+                  <div className="flex-1 min-w-0">
+                    <span className="font-extrabold truncate block text-lg">{item.name}</span>
+                    <span className="text-xs text-yellow-200 opacity-0 group-hover:opacity-100 transition-opacity font-mono">
+                      {item.shortcut}
+                    </span>
+                  </div>
             </button>
               </motion.li>
             ))}
@@ -366,22 +333,20 @@ const Sidebar: React.FC<SidebarProps> = ({ activePanel, setActivePanel }) => {
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.2, duration: 0.5 }}
         >
-          {!isCollapsed && (
-            <div className="mb-4 p-4 bg-gradient-to-r from-green-800/60 via-blue-900/60 to-green-900/60 rounded-2xl shadow-inner">
-              <button
-                onClick={() => setActivePanel('sessions')}
-                className="w-full text-left hover:bg-green-700/40 rounded-lg p-2 transition-colors"
-              >
-                <div className="flex items-center gap-2 text-base text-yellow-200 font-bold">
-                  <div className="w-3 h-3 bg-green-400 rounded-full animate-pulse"></div>
-                  <span>Session Active</span>
-                </div>
-                <div className="text-xs text-yellow-300 mt-1 font-mono">
-                  {localStorage.getItem('sessionId')?.slice(-8) || 'N/A'}
-                </div>
-              </button>
-            </div>
-          )}
+          <div className="mb-4 p-4 bg-gradient-to-r from-green-800/60 via-blue-900/60 to-green-900/60 rounded-2xl shadow-inner">
+            <button
+              onClick={() => setActivePanel('sessions')}
+              className="w-full text-left hover:bg-green-700/40 rounded-lg p-2 transition-colors"
+            >
+              <div className="flex items-center gap-2 text-base text-yellow-200 font-bold">
+                <div className="w-3 h-3 bg-green-400 rounded-full animate-pulse"></div>
+                <span>Session Active</span>
+              </div>
+              <div className="text-xs text-yellow-300 mt-1 font-mono">
+                {localStorage.getItem('sessionId')?.slice(-8) || 'N/A'}
+              </div>
+            </button>
+          </div>
           <LogoutButton
             variant="destructive"
             size="lg"
@@ -392,7 +357,7 @@ const Sidebar: React.FC<SidebarProps> = ({ activePanel, setActivePanel }) => {
             data-testid="logout-button"
           >
             <FiLogOut size={26} />
-            {!isCollapsed && <span>{t('logout')}</span>}
+            <span>{t('logout')}</span>
           </LogoutButton>
         </motion.div>
 

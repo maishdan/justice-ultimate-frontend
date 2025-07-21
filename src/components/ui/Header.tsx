@@ -10,12 +10,14 @@ import logo from "../../assets/logo.png";
 import { useTheme } from '../../context/ThemeContext';
 import { useTranslation } from 'react-i18next';
 import { fastLogout } from '../../lib/authUtils';
+import { createPortal } from "react-dom";
 
 function HeaderPortal({ children }: { children: React.ReactNode }) {
-  return (
+  return createPortal(
     <header id="GLOBAL-FIXED-HEADER">
       {children}
-    </header>
+    </header>,
+    document.body
   );
 }
 
