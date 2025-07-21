@@ -52,11 +52,11 @@ export default function DashboardOverview() {
           setTimeout(() => reject(new Error('Request timeout')), 3000)
         );
 
-        // Fetch real data with timeout
+        // Fetch real data with timeout - only use existing tables
         const dataPromise = Promise.all([
-          supabase.from('profiles').select('count').limit(1),
           supabase.from('cars').select('count').limit(1),
-          supabase.from('bookings').select('count').limit(1)
+          supabase.from('rentals').select('count').limit(1),
+          supabase.from('sales').select('count').limit(1)
         ]);
 
         const results = await Promise.race([dataPromise, timeoutPromise]) as any;
@@ -65,9 +65,9 @@ export default function DashboardOverview() {
         if (results && results.length >= 3) {
           setKpis(prev => ({
             ...prev,
-            totalUsers: results[0]?.count || prev.totalUsers,
-            inventory: results[1]?.count || prev.inventory,
-            totalRentals: results[2]?.count || prev.totalRentals,
+            totalUsers: prev.totalUsers, // Keep mock data for users
+            inventory: results[0]?.count || prev.inventory,
+            totalRentals: results[1]?.count || prev.totalRentals,
           }));
         }
       } catch (error) {

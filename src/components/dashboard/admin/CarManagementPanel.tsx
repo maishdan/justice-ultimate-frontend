@@ -4,6 +4,8 @@ import { Tabs, TabsList, TabsTrigger, TabsContent } from '../../ui/tabs';
 import { Card, CardContent } from '../../ui/card';
 import { Button } from '../../ui/button';
 import { supabase } from '../../../lib/supabaseClient';
+import { uploadConfig, getOptimizedTimeout, createTimeoutPromise, validateFile, generateFileName } from '../../../lib/uploadConfig';
+import SimpleConnectionTest from '../../SimpleConnectionTest';
 import Papa from 'papaparse';
 
 const STATUS_COLORS: Record<string, string> = {
@@ -197,39 +199,131 @@ function AddCarFormV2({ onCarAdded }: { onCarAdded: () => void }) {
     setError('');
     let mainImageUrl = '';
     let additionalImageUrls: string[] = [];
+    
     try {
-      // Upload main image if present
+      console.log('Starting optimized image upload process...');
+      
+      // Upload main image if present with optimized timeout
       if (mainImage) {
-        const ext = mainImage.name.split('.').pop();
-        const fileName = `main_${Date.now()}.${ext}`;
-        const { data: uploadData, error: uploadError } = await supabase.storage.from('car-images').upload(fileName, mainImage, { upsert: true });
-        if (uploadError) throw uploadError;
-        const { data: publicUrlData } = supabase.storage.from('car-images').getPublicUrl(fileName);
+        console.log('Uploading main image...');
+        
+        // Validate file before upload
+        const validation = validateFile(mainImage);
+        if (!validation.valid) {
+          throw new Error(validation.error);
+        }
+        
+        const fileName = generateFileName('car_main', mainImage.name, Date.now());
+        
+        const { data: uploadData, error: uploadError } = await supabase.storage.from(uploadConfig.supabase.bucket).upload(fileName, mainImage, { 
+          upsert: uploadConfig.supabase.upsert,
+          cacheControl: uploadConfig.supabase.cacheControl
+        });
+        
+        if (uploadError) {
+          console.error('Main image upload error:', uploadError);
+          throw uploadError;
+        }
+        const { data: publicUrlData } = supabase.storage.from('vehicles').getPublicUrl(fileName);
         mainImageUrl = publicUrlData.publicUrl;
+        console.log('Main image uploaded successfully:', mainImageUrl);
       }
-      // Upload additional images if present
-      for (const img of additionalImages) {
-        const ext = img.name.split('.').pop();
-        const fileName = `additional_${Date.now()}_${Math.random().toString(36).slice(2, 8)}.${ext}`;
-        const { data: uploadData, error: uploadError } = await supabase.storage.from('car-images').upload(fileName, img, { upsert: true });
-        if (uploadError) throw uploadError;
-        const { data: publicUrlData } = supabase.storage.from('car-images').getPublicUrl(fileName);
-        additionalImageUrls.push(publicUrlData.publicUrl);
+      
+      // Upload additional images if present with chunked processing
+      if (additionalImages.length > 0) {
+        console.log(`Uploading ${additionalImages.length} additional images...`);
+        
+        // Process images in chunks to avoid overwhelming the server
+        const chunkSize = uploadConfig.chunks.size;
+        for (let i = 0; i < additionalImages.length; i += chunkSize) {
+          const chunk = additionalImages.slice(i, i + chunkSize);
+          const uploadPromises = chunk.map(async (img, index) => {
+            // Validate file before upload
+            const validation = validateFile(img);
+            if (!validation.valid) {
+              throw new Error(`Additional image ${i + index + 1}: ${validation.error}`);
+            }
+            
+            const fileName = generateFileName(`car_additional_${i + index}`, img.name, Date.now());
+            
+            const { data: uploadData, error: uploadError } = await supabase.storage.from(uploadConfig.supabase.bucket).upload(fileName, img, { 
+              upsert: uploadConfig.supabase.upsert,
+              cacheControl: uploadConfig.supabase.cacheControl
+            });
+            
+            if (uploadError) {
+              console.error(`Additional image ${i + index + 1} upload error:`, uploadError);
+              throw uploadError;
+            }
+            
+            const { data: publicUrlData } = supabase.storage.from('vehicles').getPublicUrl(fileName);
+            console.log(`Additional image ${i + index + 1} uploaded successfully`);
+            return publicUrlData.publicUrl;
+          });
+          
+          const chunkResults = await Promise.all(uploadPromises);
+          additionalImageUrls.push(...chunkResults);
+        }
       }
-      // Insert car with image URLs
-      const { data, error } = await supabase.from('cars').insert([{ ...form, main_image: mainImageUrl, additional_images: additionalImageUrls }]);
-      setLoading(false);
-      if (error) setError(error.message);
-      else {
-        setSuccess('Car added!');
+      
+      console.log('All images uploaded, inserting car data...');
+      
+      // Clean up form data - handle colors field properly
+      const cleanForm: any = { ...form };
+      
+      // Handle colors field - convert to array if it's a string, or make it optional
+      if (cleanForm.colors) {
+        if (typeof cleanForm.colors === 'string') {
+          // If it's a single color, convert to array
+          cleanForm.colors = [cleanForm.colors];
+        } else if (Array.isArray(cleanForm.colors)) {
+          // If it's already an array, keep it
+          cleanForm.colors = cleanForm.colors;
+        } else {
+          // If it's invalid, remove it
+          delete cleanForm.colors;
+        }
+      } else {
+        // If no colors, remove the field entirely
+        delete cleanForm.colors;
+      }
+      
+      // Remove empty fields to avoid database errors
+      Object.keys(cleanForm).forEach(key => {
+        if (cleanForm[key] === '' || cleanForm[key] === null || cleanForm[key] === undefined) {
+          delete cleanForm[key];
+        }
+      });
+      
+      // Insert car with image URLs with timeout
+      const carData = {
+        ...cleanForm,
+        main_image: mainImageUrl,
+        additional_images: additionalImageUrls
+      };
+      
+      const insertPromise = supabase.from('cars').insert([carData]);
+      const insertTimeout = getOptimizedTimeout('database');
+      const insertTimeoutPromise = createTimeoutPromise(insertTimeout, 'Database insert timeout');
+      
+      const { data, error } = await Promise.race([insertPromise, insertTimeoutPromise]) as any;
+      
+      if (error) {
+        console.error('Database insert error:', error);
+        setError(error.message);
+      } else {
+        console.log('Car added successfully:', data);
+        setSuccess('Car added successfully!');
         setForm({});
         setMainImage(null);
         setAdditionalImages([]);
         onCarAdded();
       }
     } catch (err: any) {
+      console.error('Error in handleSubmit:', err);
+      setError('Upload failed: ' + (err.message || err));
+    } finally {
       setLoading(false);
-      setError('Image upload failed: ' + (err.message || err));
     }
   }
   return (
@@ -241,7 +335,7 @@ function AddCarFormV2({ onCarAdded }: { onCarAdded: () => void }) {
         {YEARS.map(y => <option key={y} value={y}>{y}</option>)}
       </select>
       <select name="colors" value={form.colors || ''} onChange={handleInputChange} className="input bg-white/10 border border-yellow-400/30 text-white focus:ring-2 focus:ring-yellow-400/50 focus:border-yellow-400/50 h-12 px-3 rounded-lg">
-        <option value="">Select Color</option>
+        <option value="">Select Color (Optional)</option>
         {COLORS.map(c => <option key={c} value={c}>{c}</option>)}
       </select>
       <input name="engine_type" placeholder="Engine Type" value={form.engine_type || ''} onChange={handleInputChange} className="input bg-white/10 border border-yellow-400/30 text-white placeholder-yellow-200 focus:ring-2 focus:ring-yellow-400/50 focus:border-yellow-400/50" />
@@ -301,7 +395,7 @@ function AddCarFormV2({ onCarAdded }: { onCarAdded: () => void }) {
         <input type="file" accept="image/*" multiple onChange={handleAdditionalImagesChange} className="input bg-white/10 border border-yellow-400/30 text-white placeholder-yellow-200 focus:ring-2 focus:ring-yellow-400/50 focus:border-yellow-400/50" />
         {additionalImages.length > 0 && <div className="text-xs text-gray-500 mt-1">{additionalImages.map(img => img.name).join(', ')}</div>}
       </div>
-      <button type="submit" className="col-span-2 bg-gradient-to-r from-yellow-400 to-yellow-500 text-black font-bold py-2 rounded-lg mt-4 shadow-lg hover:from-yellow-300 hover:to-yellow-400 transition-all duration-300" disabled={loading}>{loading ? 'Adding...' : 'Add Car'}</button>
+      <button type="submit" className="col-span-2 bg-gradient-to-r from-yellow-400 to-yellow-500 text-black font-bold py-2 rounded-lg mt-4 shadow-lg hover:from-yellow-300 hover:to-yellow-400 transition-all duration-300" disabled={loading}>{loading ? 'Uploading Images & Adding Car...' : 'Add Car'}</button>
       {success && <div className="text-green-600 col-span-2">{success}</div>}
       {error && <div className="text-red-600 col-span-2">{error}</div>}
     </form>
@@ -549,12 +643,19 @@ function RentalsPanel() {
     setAddForm({ ...addForm, [name]: type === 'checkbox' ? (e.target as HTMLInputElement).checked : value });
   }
 
+  const [addMainImage, setAddMainImage] = useState<File | null>(null);
+  const [addAdditionalImages, setAddAdditionalImages] = useState<File[]>([]);
+
   function handleMainImageChange(e: React.ChangeEvent<HTMLInputElement>) {
-    // Handle main image upload
+    if (e.target.files && e.target.files[0]) {
+      setAddMainImage(e.target.files[0]);
+    }
   }
 
   function handleAdditionalImagesChange(e: React.ChangeEvent<HTMLInputElement>) {
-    // Handle additional images upload
+    if (e.target.files) {
+      setAddAdditionalImages(Array.from(e.target.files));
+    }
   }
 
   async function handleAddSubmit(e: React.FormEvent) {
@@ -562,24 +663,119 @@ function RentalsPanel() {
     setAddLoading(true);
     setAddSuccess('');
     setAddError('');
-    const { error } = await supabase.from('rentals').insert([addForm]);
-    if (error) setAddError(error.message);
-    else {
-      setAddSuccess('Rental added successfully!');
-      setAddForm({
-        make: '',
-        model: '',
-        year: '',
-        price_per_day: '',
-        available: true,
-        location: '',
-        description: '',
-        features: ''
-      });
-      setShowAdd(false);
-      fetchRentals();
+    
+    let mainImageUrl = '';
+    let additionalImageUrls: string[] = [];
+    
+    try {
+      console.log('Starting optimized rental image upload process...');
+      
+      // Upload main image if present with timeout
+      if (addMainImage) {
+        console.log('Uploading rental main image...');
+        const ext = addMainImage.name.split('.').pop();
+        const fileName = `rental_main_${Date.now()}.${ext}`;
+        
+        const uploadPromise = supabase.storage.from('vehicles').upload(fileName, addMainImage, { 
+          upsert: true,
+          cacheControl: '3600'
+        });
+        
+        const timeoutPromise = new Promise((_, reject) => 
+          setTimeout(() => reject(new Error('Upload timeout')), 30000)
+        );
+        
+        const { data: uploadData, error: uploadError } = await Promise.race([uploadPromise, timeoutPromise]) as any;
+        
+        if (uploadError) {
+          console.error('Rental main image upload error:', uploadError);
+          throw uploadError;
+        }
+        const { data: publicUrlData } = supabase.storage.from('vehicles').getPublicUrl(fileName);
+        mainImageUrl = publicUrlData.publicUrl;
+        console.log('Rental main image uploaded successfully:', mainImageUrl);
+      }
+      
+      // Upload additional images if present with chunked processing
+      if (addAdditionalImages.length > 0) {
+        console.log(`Uploading ${addAdditionalImages.length} rental additional images...`);
+        
+        const chunkSize = 2;
+        for (let i = 0; i < addAdditionalImages.length; i += chunkSize) {
+          const chunk = addAdditionalImages.slice(i, i + chunkSize);
+          const uploadPromises = chunk.map(async (img, index) => {
+            const ext = img.name.split('.').pop();
+            const fileName = `rental_additional_${Date.now()}_${i + index}_${Math.random().toString(36).slice(2, 8)}.${ext}`;
+            
+            const uploadPromise = supabase.storage.from('vehicles').upload(fileName, img, { 
+              upsert: true,
+              cacheControl: '3600'
+            });
+            
+            const timeoutPromise = new Promise((_, reject) => 
+              setTimeout(() => reject(new Error('Upload timeout')), 30000)
+            );
+            
+            const { data: uploadData, error: uploadError } = await Promise.race([uploadPromise, timeoutPromise]) as any;
+            
+            if (uploadError) {
+              console.error(`Rental additional image ${i + index + 1} upload error:`, uploadError);
+              throw uploadError;
+            }
+            
+            const { data: publicUrlData } = supabase.storage.from('vehicles').getPublicUrl(fileName);
+            console.log(`Rental additional image ${i + index + 1} uploaded successfully`);
+            return publicUrlData.publicUrl;
+          });
+          
+          const chunkResults = await Promise.all(uploadPromises);
+          additionalImageUrls.push(...chunkResults);
+        }
+      }
+      
+      console.log('All rental images uploaded, inserting rental data...');
+      
+      // Insert rental with image URLs with timeout
+      const rentalData = {
+        ...addForm,
+        main_image: mainImageUrl,
+        additional_images: additionalImageUrls
+      };
+      
+      const insertPromise = supabase.from('rentals').insert([rentalData]);
+      const insertTimeoutPromise = new Promise((_, reject) => 
+        setTimeout(() => reject(new Error('Database insert timeout')), 15000)
+      );
+      
+      const { error } = await Promise.race([insertPromise, insertTimeoutPromise]) as any;
+      
+      if (error) {
+        console.error('Rental database insert error:', error);
+        setAddError(error.message);
+      } else {
+        console.log('Rental added successfully');
+        setAddSuccess('Rental added successfully!');
+        setAddForm({
+          make: '',
+          model: '',
+          year: '',
+          price_per_day: '',
+          available: true,
+          location: '',
+          description: '',
+          features: ''
+        });
+        setAddMainImage(null);
+        setAddAdditionalImages([]);
+        setShowAdd(false);
+        fetchRentals();
+      }
+    } catch (err: any) {
+      console.error('Error in rental handleAddSubmit:', err);
+      setAddError('Upload failed: ' + (err.message || err));
+    } finally {
+      setAddLoading(false);
     }
-    setAddLoading(false);
   }
 
   return (
@@ -738,7 +934,7 @@ function RentalsPanel() {
                 disabled={addLoading}
                 className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg"
               >
-                {addLoading ? 'Adding...' : 'Add Rental'}
+                {addLoading ? 'Uploading Images & Adding Rental...' : 'Add Rental'}
               </Button>
               <Button 
                 type="button" 
@@ -949,10 +1145,31 @@ function TableSection({ items, type, handleView, handleDelete, handleToggleSold,
 
 export default function CarManagementPanel() {
   const { t } = useLanguage();
-  const [tab, setTab] = useState('all');
   const [cars, setCars] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+  const [activeTab, setActiveTab] = useState('test'); // Changed from 'all' to 'test'
+
+  // Optimized connection testing - only test once on mount with timeout
+  useEffect(() => {
+    async function testConnection() {
+      try {
+        console.log('Testing Supabase connection...');
+        
+        // Simple connection test without aggressive timeout
+        const { data, error } = await supabase.from('cars').select('count').limit(1);
+        
+        if (error) {
+          console.error('Supabase connection error:', error);
+        } else {
+          console.log('Supabase connection successful');
+        }
+      } catch (err) {
+        console.error('Supabase connection test failed:', err);
+      }
+    }
+    testConnection();
+  }, []); // Only run once on mount
 
   async function fetchCars() {
     setLoading(true);
@@ -975,18 +1192,20 @@ export default function CarManagementPanel() {
     <div className="glass-panel w-full max-w-6xl mx-auto p-8 rounded-2xl shadow-2xl">
       <h2 className="text-2xl font-bold mb-4">{t('carsManagement')}</h2>
       <Tabs>
-        <TabsList>
-          <TabsTrigger label={String(t('allCars') || 'All Cars')} selected={tab === 'all'} onClick={() => setTab('all')} />
-          <TabsTrigger label={String(t('addCar') || 'Add Car')} selected={tab === 'add'} onClick={() => setTab('add')} />
-          <TabsTrigger label={String(t('bulkUpload') || 'Bulk Upload')} selected={tab === 'bulk'} onClick={() => setTab('bulk')} />
-          <TabsTrigger label={"Rentals"} selected={tab === 'rentals'} onClick={() => setTab('rentals')} />
-          <TabsTrigger label={"Trade-Ins"} selected={tab === 'tradeins'} onClick={() => setTab('tradeins')} />
-        </TabsList>
-        <TabsContent>{tab === 'all' && <AllCarsPanel fetchCars={fetchCars} />}</TabsContent>
-        <TabsContent>{tab === 'add' && <AddCarFormV2 onCarAdded={fetchCars} />}</TabsContent>
-        <TabsContent>{tab === 'bulk' && <BulkUpload />}</TabsContent>
-        <TabsContent>{tab === 'rentals' && <RentalsPanel />}</TabsContent>
-        <TabsContent>{tab === 'tradeins' && <TradeInsPanel />}</TabsContent>
+                  <TabsList>
+            <TabsTrigger label={String(t('allCars') || 'All Cars')} selected={activeTab === 'all'} onClick={() => setActiveTab('all')} />
+            <TabsTrigger label={String(t('addCar') || 'Add Car')} selected={activeTab === 'add'} onClick={() => setActiveTab('add')} />
+            <TabsTrigger label={String(t('bulkUpload') || 'Bulk Upload')} selected={activeTab === 'bulk'} onClick={() => setActiveTab('bulk')} />
+            <TabsTrigger label={"Rentals"} selected={activeTab === 'rentals'} onClick={() => setActiveTab('rentals')} />
+            <TabsTrigger label={"Trade-Ins"} selected={activeTab === 'tradeins'} onClick={() => setActiveTab('tradeins')} />
+            <TabsTrigger label={"Connection Test"} selected={activeTab === 'test'} onClick={() => setActiveTab('test')} />
+          </TabsList>
+                  <TabsContent>{activeTab === 'all' && <AllCarsPanel fetchCars={fetchCars} />}</TabsContent>
+          <TabsContent>{activeTab === 'add' && <AddCarFormV2 onCarAdded={fetchCars} />}</TabsContent>
+          <TabsContent>{activeTab === 'bulk' && <BulkUpload />}</TabsContent>
+          <TabsContent>{activeTab === 'rentals' && <RentalsPanel />}</TabsContent>
+          <TabsContent>{activeTab === 'tradeins' && <TradeInsPanel />}</TabsContent>
+          <TabsContent>{activeTab === 'test' && <SimpleConnectionTest />}</TabsContent>
       </Tabs>
     </div>
   );

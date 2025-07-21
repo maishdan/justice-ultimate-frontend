@@ -29,6 +29,9 @@ export default function VehicleCatalogue() {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const navigate = useNavigate();
   const [showRentals, setShowRentals] = useState(false);
+  const [rentals, setRentals] = useState<any[]>([]);
+  const [rentalsLoading, setRentalsLoading] = useState(false);
+  const [rentalsError, setRentalsError] = useState('');
 
   async function fetchRentals() {
     setRentalsLoading(true);
@@ -81,15 +84,21 @@ export default function VehicleCatalogue() {
 
   const filteredCars = useMemo(() => {
     return cars.filter(car => {
+      // Add null checks to prevent toLowerCase errors
+      const carName = car.name || car.title || '';
+      const carBrand = car.brand || car.make || '';
+      
       const matchesSearch =
-        car.name.toLowerCase().includes(search.toLowerCase()) ||
-        car.brand.toLowerCase().includes(search.toLowerCase());
-      const matchesCategory = category ? car.category === category : true;
+        carName.toLowerCase().includes(search.toLowerCase()) ||
+        carBrand.toLowerCase().includes(search.toLowerCase());
+      const matchesCategory = category ? (car.category || '') === category : true;
       return matchesSearch && matchesCategory;
     });
   }, [cars, search, category]);
 
-  const categories = useMemo(() => Array.from(new Set(cars.map(car => car.category))).filter(Boolean), [cars]);
+  const categories = useMemo(() => 
+    Array.from(new Set(cars.map(car => car.category || ''))).filter(Boolean), [cars]
+  );
 
   async function handleTradeInSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -101,10 +110,10 @@ export default function VehicleCatalogue() {
       let imageUrls: string[] = [];
       for (const file of tradeInForm.car_images) {
         const ext = file.name.split('.').pop();
-        const fileName = `tradein_${Date.now()}_${Math.random().toString(36).slice(2, 8)}.${ext}`;
-        const { data: uploadData, error: uploadError } = await supabase.storage.from('trade-in-images').upload(fileName, file, { upsert: true });
+        const fileName = `trade_in_${Date.now()}_${Math.random().toString(36).slice(2, 8)}.${ext}`;
+        const { data: uploadData, error: uploadError } = await supabase.storage.from('vehicles').upload(fileName, file, { upsert: true });
         if (uploadError) throw uploadError;
-        const { data: publicUrlData } = supabase.storage.from('trade-in-images').getPublicUrl(fileName);
+        const { data: publicUrlData } = supabase.storage.from('vehicles').getPublicUrl(fileName);
         imageUrls.push(publicUrlData.publicUrl);
       }
       // Insert trade-in record
@@ -268,7 +277,11 @@ export default function VehicleCatalogue() {
               {filteredCars.length === 0 ? (
                 <div className="text-center py-12">
                   <div className="glass-panel rounded-2xl p-8 shadow-xl border border-white/20 backdrop-blur-xl inline-block">
-                    <Car className="w-16 h-16 text-white/60 mx-auto mb-4" />
+                    <div className="w-16 h-16 text-white/60 mx-auto mb-4 flex items-center justify-center">
+                      <svg className="w-full h-full" fill="currentColor" viewBox="0 0 24 24">
+                        <path d="M18.92 6.01C18.72 5.42 18.16 5 17.5 5h-11c-.66 0-1.22.42-1.42 1.01L3 12v8c0 .55.45 1 1 1h1c.55 0 1-.45 1-1v-1h12v1c0 .55.45 1 1 1h1c.55 0 1-.45 1-1v-8l-2.08-5.99zM6.5 16c-.83 0-1.5-.67-1.5-1.5S5.67 13 6.5 13s1.5.67 1.5 1.5S7.33 16 6.5 16zm11 0c-.83 0-1.5-.67-1.5-1.5s.67-1.5 1.5-1.5 1.5.67 1.5 1.5-.67 1.5-1.5 1.5zM5 11l1.5-4.5h11L19 11H5z"/>
+                      </svg>
+                    </div>
                     <p className="text-white/90 text-lg">No vehicles found matching your criteria.</p>
                   </div>
                 </div>
@@ -308,7 +321,11 @@ export default function VehicleCatalogue() {
               ) : rentals.length === 0 ? (
                 <div className="text-center py-12">
                   <div className="glass-panel rounded-2xl p-8 shadow-xl border border-white/20 backdrop-blur-xl inline-block">
-                    <Car className="w-16 h-16 text-white/60 mx-auto mb-4" />
+                    <div className="w-16 h-16 text-white/60 mx-auto mb-4 flex items-center justify-center">
+                      <svg className="w-full h-full" fill="currentColor" viewBox="0 0 24 24">
+                        <path d="M18.92 6.01C18.72 5.42 18.16 5 17.5 5h-11c-.66 0-1.22.42-1.42 1.01L3 12v8c0 .55.45 1 1 1h1c.55 0 1-.45 1-1v-1h12v1c0 .55.45 1 1 1h1c.55 0 1-.45 1-1v-8l-2.08-5.99zM6.5 16c-.83 0-1.5-.67-1.5-1.5S5.67 13 6.5 13s1.5.67 1.5 1.5S7.33 16 6.5 16zm11 0c-.83 0-1.5-.67-1.5-1.5s.67-1.5 1.5-1.5 1.5.67 1.5 1.5-.67 1.5-1.5 1.5zM5 11l1.5-4.5h11L19 11H5z"/>
+                      </svg>
+                    </div>
                     <p className="text-white/90 text-lg">No rentals found.</p>
                   </div>
                 </div>

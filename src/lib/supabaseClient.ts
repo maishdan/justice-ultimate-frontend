@@ -11,13 +11,18 @@ export const supabase = (() => {
   if (!supabaseInstance) {
     supabaseInstance = createClient(supabaseUrl, supabaseAnonKey, {
       auth: {
-        autoRefreshToken: true,
-        persistSession: true,
-        detectSessionInUrl: true
+        autoRefreshToken: false, // Disable auto refresh for faster initial connection
+        persistSession: false,   // Disable session persistence for faster startup
+        detectSessionInUrl: false // Disable URL detection for faster startup
       },
       realtime: {
         params: {
-          eventsPerSecond: 10
+          eventsPerSecond: 1 // Reduce realtime events for faster connection
+        }
+      },
+      global: {
+        headers: {
+          'X-Client-Info': 'supabase-js/2.0.0'
         }
       }
     });
