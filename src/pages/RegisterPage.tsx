@@ -8,7 +8,7 @@ import allCountries from "../data/allCountries";
 import zxcvbn from 'zxcvbn';
 import { FaGoogle, FaGithub } from 'react-icons/fa';
 import { useRef, useEffect } from 'react';
-import { API_ENDPOINTS, testBackendConnection, testRecaptchaEndpoint } from '../lib/api';
+import { testBackendConnection } from '../lib/api';
 import { motion } from 'framer-motion';
 import { User, Mail, Lock, Shield, Phone, MapPin, Car, CheckCircle } from 'lucide-react';
 
@@ -46,16 +46,8 @@ export default function RegisterPage() {
   
   // Initialize reCAPTCHA v3
   useEffect(() => {
-    // Load reCAPTCHA v3 script
-    const script = document.createElement('script');
-    script.src = `https://www.google.com/recaptcha/api.js?render=6Lf2HYgrAAAAAGLA2Pdh_EgRNFLVNtFr8wChye0T`;
-    script.async = true;
-    script.defer = true;
-    document.head.appendChild(script);
-    
     // Test backend connection for register
     console.log('🔍 Testing backend connectivity for register...');
-    console.log('Current backend URL:', API_ENDPOINTS.verifyRecaptcha);
     
     // Test general backend connection
     testBackendConnection().then(result => {
@@ -68,20 +60,8 @@ export default function RegisterPage() {
       }
     });
     
-    // Test reCAPTCHA endpoint specifically
-    testRecaptchaEndpoint().then(result => {
-      if (result.success) {
-        console.log('✅ reCAPTCHA endpoint accessible for register');
-      } else {
-        console.error('❌ reCAPTCHA endpoint failed for register:', result.error);
-        toast.error('reCAPTCHA endpoint not accessible for registration - check console for details');
-      }
-    });
-    
     return () => {
-      if (document.head.contains(script)) {
-        document.head.removeChild(script);
-      }
+      // No script to remove here
     };
   }, []);
   
@@ -102,55 +82,12 @@ export default function RegisterPage() {
   const [success, setSuccess] = useState(false);
   const [confirmPassword, setConfirmPassword] = useState("");
   const [passwordStrength, setPasswordStrength] = useState(0);
-  const [captchaVerified, setCaptchaVerified] = useState(false);
-  const [captchaLoading, setCaptchaLoading] = useState(false);
 
   const handleRegister = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
     setError("");
     setSuccess(false);
-
-    let recaptchaToken: string;
-    
-    try {
-      setCaptchaLoading(true);
-      // Execute reCAPTCHA v3
-      recaptchaToken = await new Promise<string>((resolve, reject) => {
-        if (typeof window !== 'undefined' && (window as any).grecaptcha) {
-          (window as any).grecaptcha.ready(() => {
-            (window as any).grecaptcha.execute('6Lf2HYgrAAAAAGLA2Pdh_EgRNFLVNtFr8wChye0T', { action: 'register' })
-              .then((token: string) => {
-                console.log('reCAPTCHA token before register:', token);
-                if (!token) {
-                  reject(new Error('No reCAPTCHA token received'));
-                } else {
-                  resolve(token);
-                }
-              })
-              .catch((error: any) => reject(error));
-          });
-        } else {
-          reject(new Error('reCAPTCHA not loaded'));
-        }
-      });
-      
-      setCaptchaVerified(true);
-      setCaptchaLoading(false);
-    } catch (error) {
-      setCaptchaLoading(false);
-      setError('reCAPTCHA verification failed. Please refresh and try again.');
-      toast.error('reCAPTCHA verification failed. Please refresh and try again.');
-      setLoading(false);
-      return;
-    }
-
-    // Do not proceed if token is empty/undefined
-    if (!recaptchaToken) {
-      setError('reCAPTCHA failed to load. Please refresh and try again.');
-      setLoading(false);
-      return;
-    }
 
     // Password strength check
     const strong =
@@ -171,24 +108,6 @@ export default function RegisterPage() {
     }
 
     try {
-      // Verify reCAPTCHA with backend
-      const recaptchaResponse = await fetch(API_ENDPOINTS.verifyRecaptcha, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          'g-recaptcha-response': recaptchaToken
-        }),
-      });
-
-      if (!recaptchaResponse.ok) {
-        setError('reCAPTCHA verification failed. Please try again.');
-        toast.error('reCAPTCHA verification failed. Please try again.');
-        setLoading(false);
-        return;
-      }
-
       const { data, error } = await supabase.auth.signUp({
         email,
         password,
@@ -214,7 +133,6 @@ export default function RegisterPage() {
       toast.error(err.message || "Registration failed");
     } finally {
       setLoading(false);
-      setCaptchaVerified(false);
     }
   };
 
@@ -453,55 +371,22 @@ export default function RegisterPage() {
                 </motion.div>
               )}
               
-              {/* reCAPTCHA v3 Status Indicator */}
-              <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.6, delay: 1.0 }}
-              >
-                <div className="flex items-center justify-center space-x-2 p-3 bg-white/10 rounded-xl border border-white/20 backdrop-blur-sm">
-                  {captchaLoading ? (
-                    <>
-                      <div className="animate-spin h-4 w-4 border-2 border-yellow-400 border-t-transparent rounded-full"></div>
-                      <span className="text-sm text-white/80">Verifying reCAPTCHA...</span>
-                    </>
-                  ) : captchaVerified ? (
-                    <>
-                      <div className="h-4 w-4 bg-green-500 rounded-full flex items-center justify-center">
-                        <svg className="h-3 w-3 text-white" fill="currentColor" viewBox="0 0 20 20">
-                          <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
-                        </svg>
-                      </div>
-                      <span className="text-sm text-green-400">reCAPTCHA verified ✓</span>
-                    </>
-                  ) : (
-                    <>
-                      <Shield className="w-4 h-4 text-white/60" />
-                      <span className="text-sm text-white/60">reCAPTCHA verification required</span>
-                    </>
-                  )}
-                </div>
-                <p className="text-xs text-white/50 text-center mt-2">
-                  This site is protected by reCAPTCHA v3
-                </p>
-              </motion.div>
-              
               {/* Register Button */}
               <motion.button
                 type="submit"
-                disabled={loading || captchaLoading}
+                disabled={loading}
                 className={`w-full py-3 px-4 rounded-xl font-semibold transition-all duration-300 shadow-lg flex justify-center items-center ${
-                  loading || captchaLoading 
+                  loading 
                     ? 'bg-white/20 text-white/60 cursor-not-allowed' 
                     : 'bg-gradient-to-r from-yellow-400 to-yellow-500 text-black hover:from-yellow-300 hover:to-yellow-400 transform hover:scale-105'
                 }`}
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.6, delay: 1.1 }}
-                whileHover={{ scale: loading || captchaLoading ? 1 : 1.02 }}
+                whileHover={{ scale: loading ? 1 : 1.02 }}
                 whileTap={{ scale: 0.98 }}
               >
-                {loading ? "Registering..." : captchaLoading ? "Verifying..." : "Register"}
+                {loading ? "Registering..." : "Register"}
               </motion.button>
               
               <ContinueAsGuestButton />

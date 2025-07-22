@@ -8,7 +8,6 @@ logEnvironmentInfo();
 
 // API endpoints
 export const API_ENDPOINTS = {
-  verifyRecaptcha: `${BACKEND_URL}/api/verify-recaptcha`,
   health: `${BACKEND_URL}/health`,
   login: `${BACKEND_URL}/api/login`,
   register: `${BACKEND_URL}/api/register`,
@@ -71,28 +70,5 @@ export const testBackendConnection = async () => {
   } catch (error) {
     console.error('❌ Backend connection test failed:', error);
     return { success: false, error, url: BACKEND_URL };
-  }
-};
-
-// Function to test reCAPTCHA endpoint specifically
-export const testRecaptchaEndpoint = async () => {
-  try {
-    console.log('🔍 Testing reCAPTCHA endpoint:', API_ENDPOINTS.verifyRecaptcha);
-    const response = await fetch(API_ENDPOINTS.verifyRecaptcha, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        'g-recaptcha-response': 'test-token'
-      }),
-    });
-    
-    const data = await response.json();
-    console.log('✅ reCAPTCHA endpoint test response:', data);
-    return { success: true, data, url: API_ENDPOINTS.verifyRecaptcha };
-  } catch (error) {
-    console.error('❌ reCAPTCHA endpoint test failed:', error);
-    return { success: false, error, url: API_ENDPOINTS.verifyRecaptcha };
   }
 };

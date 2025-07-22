@@ -30,6 +30,7 @@ import ProtectedRoute from '../../components/auth/ProtectedRoute';
 import SessionManager from '../../components/dashboard/widgets/SessionManager';
 import RoleTestPanel from '../../components/RoleTestPanel';
 import RightSidebarMenu from '../../components/dashboard/RightSidebarMenu';
+import { supabase } from '../../lib/supabaseClient';
 
 // Enhanced accessibility and performance hooks
 const useKeyboardNavigation = () => {
@@ -179,6 +180,30 @@ export default function AdminDashboard() {
   const { focusedPanel, setFocusedPanel } = useKeyboardNavigation();
   const { isLoading, loadingProgress } = useLoadingState();
   const adminUser = { name: 'Daniwest', role: t('administrator') };
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    async function fetchAdmin() {
+      setLoading(true);
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) {
+        setLoading(false);
+        return;
+      }
+      const { data, error } = await supabase
+        .from('admin_profiles')
+        .select('*')
+        .eq('id', user.id)
+        .single();
+      if (error) {
+        // setAdminUser(null); // This line is removed
+      } else {
+        // setAdminUser(data); // This line is removed
+      }
+      setLoading(false);
+    }
+    fetchAdmin();
+  }, []);
 
   // Sync focused panel with active panel
   useEffect(() => {

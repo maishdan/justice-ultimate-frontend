@@ -7,7 +7,7 @@ import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import { FaGoogle, FaGithub } from 'react-icons/fa';
 import { useRef, useEffect } from 'react';
-import { API_ENDPOINTS, testBackendConnection, testRecaptchaEndpoint } from '../lib/api';
+import { testBackendConnection } from '../lib/api';
 import { motion } from 'framer-motion';
 
 function ContinueAsGuestButton() {
@@ -33,26 +33,9 @@ function ContinueAsGuestButton() {
 const Login = () => {
   const audioRef = useRef<HTMLAudioElement | null>(null);
   
-  // Initialize reCAPTCHA v3
-  useEffect(() => {
-    // Load reCAPTCHA v3 script
-    const script = document.createElement('script');
-    script.src = `https://www.google.com/recaptcha/api.js?render=6Lf2HYgrAAAAAGLA2Pdh_EgRNFLVNtFr8wChye0T`;
-    script.async = true;
-    script.defer = true;
-    document.head.appendChild(script);
-    
-    return () => {
-      if (document.head.contains(script)) {
-        document.head.removeChild(script);
-      }
-    };
-  }, []);
-  
   // Test backend connection on component mount
   useEffect(() => {
     console.log('🔍 Testing backend connectivity for login...');
-    console.log('Current backend URL:', API_ENDPOINTS.verifyRecaptcha);
     
     // Test general backend connection
     testBackendConnection().then(result => {
@@ -65,15 +48,6 @@ const Login = () => {
       }
     });
     
-    // Test reCAPTCHA endpoint specifically
-    testRecaptchaEndpoint().then(result => {
-      if (result.success) {
-        console.log('✅ reCAPTCHA endpoint accessible');
-      } else {
-        console.error('❌ reCAPTCHA endpoint failed:', result.error);
-        toast.error('reCAPTCHA endpoint not accessible - check console for details');
-      }
-    });
   }, []);
   
   const playCling = () => {
@@ -94,14 +68,11 @@ const Login = () => {
   const [showPass, setShowPass] = useState(false);
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
-  const [captchaVerified, setCaptchaVerified] = useState(false);
-  const [captchaLoading, setCaptchaLoading] = useState(false);
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
     setLoading(true);
-    setCaptchaLoading(true);
 
     try {
       // First, check if backend is accessible
@@ -121,238 +92,171 @@ const Login = () => {
         // Continue with login even if health check fails
       }
 
-      // Get reCAPTCHA token
-      let recaptchaToken: string;
-      try {
-        recaptchaToken = await new Promise<string>((resolve, reject) => {
-          if (typeof window !== 'undefined' && (window as any).grecaptcha) {
-            (window as any).grecaptcha.ready(() => {
-              (window as any).grecaptcha.execute('6Lf2HYgrAAAAAGLA2Pdh_EgRNFLVNtFr8wChye0T', { action: 'login' })
-                .then((token: string) => {
-                  console.log('reCAPTCHA token before login:', token);
-                  if (!token) {
-                    reject(new Error('No reCAPTCHA token received'));
-                  } else {
-                    resolve(token);
-                  }
-                })
-                .catch((error: any) => reject(error));
-            });
-          } else {
-            reject(new Error('reCAPTCHA not loaded'));
-          }
-        });
-      } catch (recaptchaError) {
-        console.error('reCAPTCHA error:', recaptchaError);
-        setCaptchaLoading(false);
-        setError('reCAPTCHA verification failed. Please refresh and try again.');
-        toast.error('reCAPTCHA verification failed. Please refresh and try again.');
+      // Clear any stale session data first
+      localStorage.removeItem("token");
+      localStorage.removeItem("authToken");
+      localStorage.removeItem("sessionId");
+      localStorage.removeItem("userRole");
+      sessionStorage.removeItem("userRole");
+      sessionStorage.removeItem("sessionId");
+      
+      const { data, error } = await supabase.auth.signInWithPassword({
+        email,
+        password,
+      });
+      
+      if (error) {
+        setError(error.message);
+        toast.error(error.message);
         setLoading(false);
         return;
       }
       
-      // Do not proceed if token is empty/undefined
-      if (!recaptchaToken) {
-        setError('reCAPTCHA failed to load. Please refresh and try again.');
-        setLoading(false);
-        return;
-      }
-      
-      setCaptchaVerified(true);
-      setCaptchaLoading(false);
-      
-      // Send token to backend as { 'g-recaptcha-response': token }
-      const timeoutId = setTimeout(() => {
-        setError('Login timeout. Please try again.');
-        setLoading(false);
-      }, 10000); // 10 second timeout
-      
-      try {
-        // Verify reCAPTCHA with backend
-        const recaptchaResponse = await fetch(API_ENDPOINTS.verifyRecaptcha, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            'g-recaptcha-response': recaptchaToken
-          }),
-        });
-
-        if (!recaptchaResponse.ok) {
-          clearTimeout(timeoutId);
-          setError('reCAPTCHA verification failed. Please try again.');
-          toast.error('reCAPTCHA verification failed. Please try again.');
-          setLoading(false);
-          return;
-        }
-
-        // Clear any stale session data first
-        localStorage.removeItem("token");
-        localStorage.removeItem("authToken");
-        localStorage.removeItem("sessionId");
-        localStorage.removeItem("userRole");
-        sessionStorage.removeItem("userRole");
-        sessionStorage.removeItem("sessionId");
-        
-        const { data, error } = await supabase.auth.signInWithPassword({
-          email,
-          password,
-        });
-        
-        clearTimeout(timeoutId);
-        
-        if (error) {
-          setError(error.message);
-          toast.error(error.message);
-          setLoading(false);
-          return;
+      if (data.session) {
+        try {
+          playCling();
+        } catch (audioError) {
+          console.warn('Audio play failed:', audioError);
         }
         
-        if (data.session) {
-          try {
-            playCling();
-          } catch (audioError) {
-            console.warn('Audio play failed:', audioError);
+        // Set tokens immediately
+        localStorage.setItem("token", data.session.access_token);
+        localStorage.setItem("authToken", data.session.access_token);
+        localStorage.removeItem("guestSession");
+        
+        // Get user info and determine role
+        try {
+          const { data: { user }, error: userError } = await supabase.auth.getUser();
+          
+          if (userError || !user) {
+            setError('Could not fetch user info.');
+            toast.error('Could not fetch user info.');
+            setLoading(false);
+            return;
           }
           
-          // Set tokens immediately
-          localStorage.setItem("token", data.session.access_token);
-          localStorage.setItem("authToken", data.session.access_token);
-          localStorage.removeItem("guestSession");
+          console.log('User authenticated:', user.email);
           
-          // Get user info and determine role
+          // Determine user role - NO DEFAULTS
+          let role: string | null = null;
+          let dashboardPath: string | null = null;
+
+          // --- FIX: Always treat Daniwest and Justice as admin ---
+          if (user && (user.email === 'daniwesttechnologies@gmail.com' || user.email === 'justicevincentt@gmail.com')) {
+            role = 'admin';
+            dashboardPath = '/secure-admin-dashboard';
+            localStorage.setItem("userRole", role);
+            sessionStorage.setItem("userRole", role);
+            navigate(dashboardPath, { replace: true });
+            return;
+          }
+          
           try {
-            const { data: { user }, error: userError } = await supabase.auth.getUser();
-            
-            if (userError || !user) {
-              setError('Could not fetch user info.');
-              toast.error('Could not fetch user info.');
-              setLoading(false);
-              return;
-            }
-            
-            console.log('User authenticated:', user.email);
-            
-            // Determine user role - NO DEFAULTS
-            let role: string | null = null;
-            let dashboardPath: string | null = null;
-            
-            try {
-              // First, try to get role from profiles table
-              if (user && user.id) {
-                role = await getUserRole(user.id);
-                console.log('Role determined:', role);
-                
-                if (role) {
-                  // Set role in storage
-                  localStorage.setItem("userRole", role);
-                  sessionStorage.setItem("userRole", role);
-                  
-                  // Determine dashboard path based on role
-                  switch (role.toLowerCase()) {
-                    case 'admin':
-                      dashboardPath = '/dashboard/admin';
-                      break;
-                    case 'staff':
-                      dashboardPath = '/dashboard/staff';
-                      break;
-                    case 'mechanic':
-                      dashboardPath = '/dashboard/mechanic';
-                      break;
-                    case 'customer':
-                      dashboardPath = '/dashboard/customer';
-                      break;
-                    default:
-                      dashboardPath = '/dashboard/guest';
-                  }
-                  
-                  // Navigate to appropriate dashboard
-                  if (dashboardPath) {
-                    navigate(dashboardPath, { replace: true });
-                    return;
-                  }
-                }
-              }
-              
-              // If no role found, redirect to role selection
-              if (user && user.email) {
-                console.log('No role found, redirecting to role selection');
-                navigate('/select-role', { replace: true });
-                return;
-              }
-            } catch (roleError) {
-              console.error('Role determination error:', roleError);
-              setError('Could not determine user role.');
-              toast.error('Could not determine user role.');
-              setLoading(false);
-              return;
-            }
-            
-            // Fallback to auth metadata
-            const authRole = user.app_metadata?.role || user.user_metadata?.role;
-            if (authRole && ['admin', 'staff', 'mechanic', 'customer'].includes(authRole)) {
-              role = authRole;
-              console.log('Using role from auth metadata:', role);
+            // First, try to get role from profiles table
+            if (user && user.id) {
+              role = await getUserRole(user.id);
+              console.log('Role determined:', role);
               
               if (role) {
-                dashboardPath = getDashboardPath(role);
+                // Set role in storage
+                localStorage.setItem("userRole", role);
+                sessionStorage.setItem("userRole", role);
+                
+                // Determine dashboard path based on role
+                switch (role.toLowerCase()) {
+                  case 'admin':
+                    dashboardPath = '/dashboard/admin';
+                    break;
+                  case 'staff':
+                    dashboardPath = '/dashboard/staff';
+                    break;
+                  case 'mechanic':
+                    dashboardPath = '/dashboard/mechanic';
+                    break;
+                  case 'customer':
+                    dashboardPath = '/dashboard/customer';
+                    break;
+                  default:
+                    dashboardPath = '/dashboard/guest';
+                }
+                
+                // Navigate to appropriate dashboard
                 if (dashboardPath) {
-                  // Store user role
-                  localStorage.setItem("userRole", role);
-                  sessionStorage.setItem("userRole", role);
-                  
-                  // Set session values
-                  const sessionId = `session_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
-                  const userId = user.id || `user_${Date.now()}`;
-                  localStorage.setItem("sessionId", sessionId);
-                  localStorage.setItem("lastSessionId", sessionId);
-                  localStorage.setItem("sessionTimestamp", Date.now().toString());
-                  localStorage.setItem("userId", userId);
-                  sessionStorage.setItem("sessionId", sessionId);
-                  sessionStorage.setItem("userId", userId);
-                  
-                  toast.success(`Login successful! Welcome ${authRole}!`);
                   navigate(dashboardPath, { replace: true });
                   return;
                 }
               }
             }
             
-            // No valid role found - redirect to role selection
-            localStorage.setItem("tempUserId", user.id || '');
-            localStorage.setItem("tempUserEmail", user.email || '');
-            
-            toast.info('Please select your user role to continue.');
-            navigate('/select-role', { replace: true });
-            return;
-          } catch (userFetchError) {
-            console.error('User fetch error:', userFetchError);
-            setError('Could not fetch user information.');
-            toast.error('Could not fetch user information.');
+            // If no role found, redirect to role selection
+            if (user && user.email) {
+              console.log('No role found, redirecting to role selection');
+              navigate('/select-role', { replace: true });
+              return;
+            }
+          } catch (roleError) {
+            console.error('Role determination error:', roleError);
+            setError('Could not determine user role.');
+            toast.error('Could not determine user role.');
             setLoading(false);
             return;
           }
-        } else {
-          setError('Login failed. No session created.');
-          toast.error('Login failed. No session created.');
+          
+          // Fallback to auth metadata
+          const authRole = user.app_metadata?.role || user.user_metadata?.role;
+          if (authRole && ['admin', 'staff', 'mechanic', 'customer'].includes(authRole)) {
+            role = authRole;
+            console.log('Using role from auth metadata:', role);
+            
+            if (role) {
+              dashboardPath = getDashboardPath(role);
+              if (dashboardPath) {
+                // Store user role
+                localStorage.setItem("userRole", role);
+                sessionStorage.setItem("userRole", role);
+                
+                // Set session values
+                const sessionId = `session_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+                const userId = user.id || `user_${Date.now()}`;
+                localStorage.setItem("sessionId", sessionId);
+                localStorage.setItem("lastSessionId", sessionId);
+                localStorage.setItem("sessionTimestamp", Date.now().toString());
+                localStorage.setItem("userId", userId);
+                sessionStorage.setItem("sessionId", sessionId);
+                sessionStorage.setItem("userId", userId);
+                
+                toast.success(`Login successful! Welcome ${authRole}!`);
+                navigate(dashboardPath, { replace: true });
+                return;
+              }
+            }
+          }
+          
+          // No valid role found - redirect to role selection
+          localStorage.setItem("tempUserId", user.id || '');
+          localStorage.setItem("tempUserEmail", user.email || '');
+          
+          toast.info('Please select your user role to continue.');
+          navigate('/select-role', { replace: true });
+          return;
+        } catch (userFetchError) {
+          console.error('User fetch error:', userFetchError);
+          setError('Could not fetch user information.');
+          toast.error('Could not fetch user information.');
           setLoading(false);
+          return;
         }
-        
-      } catch (loginError) {
-        clearTimeout(timeoutId);
-        console.error('Login error:', loginError);
-        setError('Login failed. Please try again.');
-        toast.error('Login failed. Please try again.');
+      } else {
+        setError('Login failed. No session created.');
+        toast.error('Login failed. No session created.');
         setLoading(false);
       }
       
-    } catch (outerError) {
-      console.error('Outer login error:', outerError);
+    } catch (loginError) {
+      console.error('Login error:', loginError);
       setError('Login failed. Please try again.');
       toast.error('Login failed. Please try again.');
       setLoading(false);
-      setCaptchaLoading(false);
     }
   };
 
@@ -484,53 +388,19 @@ const Login = () => {
               </span>
             </motion.div>
             
-            {/* reCAPTCHA v3 Status Indicator */}
-            <motion.div 
-              className="mb-6"
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6, delay: 0.5 }}
-            >
-              <div className="flex items-center justify-center space-x-2 p-3 bg-white/10 rounded-xl border border-white/20 backdrop-blur-sm">
-                {captchaLoading ? (
-                  <>
-                    <div className="animate-spin h-4 w-4 border-2 border-yellow-400 border-t-transparent rounded-full"></div>
-                    <span className="text-sm text-white/80">Verifying reCAPTCHA...</span>
-                  </>
-                ) : captchaVerified ? (
-                  <>
-                    <div className="h-4 w-4 bg-green-500 rounded-full flex items-center justify-center">
-                      <svg className="h-3 w-3 text-white" fill="currentColor" viewBox="0 0 20 20">
-                        <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
-                      </svg>
-                    </div>
-                    <span className="text-sm text-green-400">reCAPTCHA verified ✓</span>
-                  </>
-                ) : (
-                  <>
-                    <Shield className="w-4 h-4 text-white/60" />
-                    <span className="text-sm text-white/60">reCAPTCHA verification required</span>
-                  </>
-                )}
-              </div>
-              <p className="text-xs text-white/50 text-center mt-2">
-                This site is protected by reCAPTCHA v3
-              </p>
-            </motion.div>
-            
             {/* Login Button */}
             <motion.button
               type="submit"
-              disabled={loading || captchaLoading}
+              disabled={loading}
               className={`w-full py-3 mt-2 text-white rounded-xl font-semibold transition-all duration-300 shadow-lg flex justify-center items-center ${
-                loading || captchaLoading 
+                loading 
                   ? 'bg-white/20 cursor-not-allowed' 
                   : 'bg-gradient-to-r from-yellow-400 to-yellow-500 hover:from-yellow-300 hover:to-yellow-400 transform hover:scale-105'
               }`}
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6, delay: 0.6 }}
-              whileHover={{ scale: loading || captchaLoading ? 1 : 1.02 }}
+              whileHover={{ scale: loading ? 1 : 1.02 }}
               whileTap={{ scale: 0.98 }}
             >
               {loading && (
@@ -555,7 +425,7 @@ const Login = () => {
                   ></path>
                 </svg>
               )}
-              {loading ? 'Logging in...' : captchaLoading ? 'Verifying...' : 'Login'}
+              {loading ? 'Logging in...' : 'Login'}
             </motion.button>
             
             <ContinueAsGuestButton />
