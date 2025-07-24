@@ -1,14 +1,15 @@
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '../lib/supabaseClient';
-import { getUserRole, getDashboardPath, createUserProfile } from '../lib/userRoleUtils';
-import { Eye, EyeOff, Mail, Lock, Shield, User, Car } from 'lucide-react';
+import { getUserRole, getDashboardPath } from '../lib/userRoleUtils';
+import { Eye, EyeOff, Mail, Lock, Car } from 'lucide-react';
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import { FaGoogle, FaGithub } from 'react-icons/fa';
-import { useRef, useEffect } from 'react';
+import { useEffect } from 'react';
 import { testBackendConnection } from '../lib/api';
 import { motion } from 'framer-motion';
+import ReCAPTCHA from 'react-google-recaptcha';
 
 function ContinueAsGuestButton() {
   const navigate = useNavigate();
@@ -68,11 +69,51 @@ const Login = () => {
   const [showPass, setShowPass] = useState(false);
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
+  const [recaptchaToken, setRecaptchaToken] = useState<string | null>(null);
+  const [recaptchaError, setRecaptchaError] = useState<string | null>(null);
+  const recaptchaRef = useRef<any>(null);
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
-    setError('');
     setLoading(true);
+    setError("");
+    setRecaptchaError(null);
+
+    // Trigger invisible reCAPTCHA and get token
+    let token = recaptchaToken;
+    if (recaptchaRef.current) {
+      token = await recaptchaRef.current.executeAsync();
+      setRecaptchaToken(token);
+    }
+
+    if (!token) {
+      setRecaptchaError('Please complete the reCAPTCHA.');
+      setLoading(false);
+      return;
+    }
+    // Setup backend URL based on environment
+    const backendUrl =
+      window.location.hostname === 'localhost'
+        ? 'http://localhost:5001'
+        : import.meta.env.VITE_BACKEND_URL;
+    // Verify reCAPTCHA with backend
+    try {
+      const verifyRes = await fetch(`${backendUrl}/api/verify-recaptcha`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ token })
+      });
+      const verifyData = await verifyRes.json();
+      if (!verifyData.success) {
+        setRecaptchaError('reCAPTCHA verification failed. Please try again.');
+        setLoading(false);
+        return;
+      }
+    } catch (err) {
+      setRecaptchaError('reCAPTCHA verification failed. Please try again.');
+      setLoading(false);
+      return;
+    }
 
     try {
       // First, check if backend is accessible
@@ -278,12 +319,7 @@ const Login = () => {
     setLoading(false);
   };
 
-  const handleGuestLogin = () => {
-    localStorage.setItem('role', 'guest');
-    localStorage.removeItem('token');
-    localStorage.removeItem('authToken');
-    navigate('/dashboard/guest', { replace: true });
-  };
+  const RECAPTCHA_SITE_KEY = '6Lf2HYgrAAAAAGLA2Pdh_EgRNFLVNtFr8wChye0T';
 
   return (
     <>
@@ -343,6 +379,8 @@ const Login = () => {
                 {error}
               </motion.p>
             )}
+
+            {recaptchaError && <div className="text-red-400 text-sm p-2">{recaptchaError}</div>}
 
             {/* Email Input */}
             <motion.div 
@@ -483,6 +521,15 @@ const Login = () => {
         </div>
         <ToastContainer position="top-center" autoClose={3000} hideProgressBar />
       </div>
+      <ReCAPTCHA
+        ref={recaptchaRef}
+        sitekey={RECAPTCHA_SITE_KEY}
+        size="invisible"
+        badge="bottomright"
+        onChange={(token: string | null) => setRecaptchaToken(token)}
+        onErrored={() => setRecaptchaError('reCAPTCHA error. Please reload the page.')}
+        style={{ display: 'none' }}
+      />
     </>
   );
 };

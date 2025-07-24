@@ -28,7 +28,7 @@ export const uploadConfig = {
   
   // Supabase settings
   supabase: {
-    bucket: 'vehicles', // Use vehicles bucket for all car-related images
+    bucket: 'cars', // Use cars bucket for all car-related images
     cacheControl: '3600', // 1 hour cache
     upsert: true, // Overwrite existing files
   },

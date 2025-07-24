@@ -4,13 +4,15 @@ import { useNavigate } from "react-router-dom";
 import { supabase } from '../lib/supabaseClient';
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
-import allCountries from "../data/allCountries";
 import zxcvbn from 'zxcvbn';
 import { FaGoogle, FaGithub } from 'react-icons/fa';
 import { useRef, useEffect } from 'react';
 import { testBackendConnection } from '../lib/api';
 import { motion } from 'framer-motion';
-import { User, Mail, Lock, Shield, Phone, MapPin, Car, CheckCircle } from 'lucide-react';
+import { User, Mail, Lock, Phone, MapPin, Car, CheckCircle } from 'lucide-react';
+import ReCAPTCHA from 'react-google-recaptcha';
+
+const RECAPTCHA_SITE_KEY = '6Lf2HYgrAAAAAGLA2Pdh_EgRNFLVNtFr8wChye0T';
 
 const countries = [
   { code: "KE", name: "Kenya", dial: "+254" },
@@ -65,12 +67,6 @@ export default function RegisterPage() {
     };
   }, []);
   
-  const playCling = () => {
-    if (audioRef.current) {
-      audioRef.current.currentTime = 0;
-      audioRef.current.play();
-    }
-  };
   const navigate = useNavigate();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -82,12 +78,16 @@ export default function RegisterPage() {
   const [success, setSuccess] = useState(false);
   const [confirmPassword, setConfirmPassword] = useState("");
   const [passwordStrength, setPasswordStrength] = useState(0);
+  const [recaptchaToken, setRecaptchaToken] = useState<string | null>(null);
+  const [recaptchaError, setRecaptchaError] = useState<string | null>(null);
+  const recaptchaRef = useRef<any>(null);
 
   const handleRegister = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
     setError("");
     setSuccess(false);
+    setRecaptchaError(null);
 
     // Password strength check
     const strong =
@@ -103,6 +103,42 @@ export default function RegisterPage() {
     }
     if (password !== confirmPassword) {
       setError("Passwords do not match.");
+      setLoading(false);
+      return;
+    }
+
+    // Trigger invisible reCAPTCHA and get token
+    let token = recaptchaToken;
+    if (recaptchaRef.current) {
+      token = await recaptchaRef.current.executeAsync();
+      setRecaptchaToken(token);
+    }
+
+    if (!token) {
+      setRecaptchaError('Please complete the reCAPTCHA.');
+      setLoading(false);
+      return;
+    }
+
+    // Verify reCAPTCHA with backend
+    try {
+      const backendUrl =
+        window.location.hostname === 'localhost'
+          ? 'http://localhost:5001'
+          : import.meta.env.VITE_BACKEND_URL;
+      const verifyRes = await fetch(`${backendUrl}/api/verify-recaptcha`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ token: token })
+      });
+      const verifyData = await verifyRes.json();
+      if (!verifyData.success) {
+        setRecaptchaError('reCAPTCHA verification failed. Please try again.');
+        setLoading(false);
+        return;
+      }
+    } catch (err) {
+      setRecaptchaError('reCAPTCHA verification failed. Please try again.');
       setLoading(false);
       return;
     }
@@ -435,6 +471,16 @@ export default function RegisterPage() {
                   Login
                 </span>
               </motion.div>
+              <ReCAPTCHA
+                ref={recaptchaRef}
+                sitekey={RECAPTCHA_SITE_KEY}
+                size="invisible"
+                badge="bottomright"
+                onChange={(token: string | null) => setRecaptchaToken(token)}
+                onErrored={() => setRecaptchaError('reCAPTCHA error. Please reload the page.')}
+                style={{ display: 'none' }}
+              />
+              {recaptchaError && <div className="text-red-400 text-sm p-2">{recaptchaError}</div>}
             </motion.form>
           )}
         </motion.div>

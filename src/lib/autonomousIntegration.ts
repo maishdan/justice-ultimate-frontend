@@ -241,7 +241,7 @@ export class AutonomousIntegration {
       
       // Update vehicle price in database
       await supabase
-        .from('vehicles')
+        .from('cars')
         .update({ price: optimizedPrice })
         .eq('id', vehicle_id);
 
@@ -344,7 +344,7 @@ export class AutonomousIntegration {
     
     if (vehicle_id && status) {
       await supabase
-        .from('vehicles')
+        .from('cars')
         .update({ status })
         .eq('id', vehicle_id);
 

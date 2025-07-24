@@ -107,7 +107,7 @@ export default function SimpleConnectionTest() {
   };
 
   const testStorageAccess = async (): Promise<string> => {
-    const { data, error } = await supabase.storage.from('vehicles').list('', { limit: 1 });
+    const { data, error } = await supabase.storage.from('cars').list('', { limit: 1 });
     if (error) throw new Error(`Storage access failed: ${error.message}`);
     return `Storage access successful. Bucket contains files.`;
   };
@@ -120,7 +120,7 @@ export default function SimpleConnectionTest() {
       
       const fileName = `test_${Date.now()}.txt`;
       
-      const { data, error } = await supabase.storage.from('vehicles').upload(fileName, testFile, {
+      const { data, error } = await supabase.storage.from('cars').upload(fileName, testFile, {
         upsert: true,
         cacheControl: '3600'
       });
@@ -131,7 +131,7 @@ export default function SimpleConnectionTest() {
       }
       
       // Clean up test file
-      await supabase.storage.from('vehicles').remove([fileName]);
+      await supabase.storage.from('cars').remove([fileName]);
       
       return 'Storage upload and delete test successful.';
     } catch (err) {

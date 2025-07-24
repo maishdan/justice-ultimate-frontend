@@ -17,7 +17,7 @@ const LoadingScreen: React.FC<LoadingScreenProps> = ({ text = 'Loading...', prog
     let animationFrame: number;
     const update = () => {
       const elapsed = (Date.now() - start) / 1000;
-      const percent = Math.min(100, Math.round((elapsed / 174) * 100));
+      const percent = Math.min(100, Math.round((elapsed / 30) * 100));
       setInternalProgress(percent);
       if (percent < 100) {
         animationFrame = requestAnimationFrame(update);
@@ -120,18 +120,12 @@ const LoadingScreen: React.FC<LoadingScreenProps> = ({ text = 'Loading...', prog
         >
           <div 
             className="w-2 h-2 bg-yellow-400 rounded-full"
-            animate={{ scale: [1, 1.5, 1] }}
-            transition={{ duration: 1, repeat: Infinity, delay: 0 }}
           />
           <div 
             className="w-2 h-2 bg-green-400 rounded-full"
-            animate={{ scale: [1, 1.5, 1] }}
-            transition={{ duration: 1, repeat: Infinity, delay: 0.2 }}
           />
           <div 
             className="w-2 h-2 bg-blue-400 rounded-full"
-            animate={{ scale: [1, 1.5, 1] }}
-            transition={{ duration: 1, repeat: Infinity, delay: 0.4 }}
           />
         </div>
 

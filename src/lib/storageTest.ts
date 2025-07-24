@@ -2,7 +2,7 @@ import { supabase } from './supabaseClient';
 
 export async function testStorageConfiguration() {
   try {
-    const { data, error } = await supabase.storage.from('vehicles').list('', { limit: 1 });
+    const { data, error } = await supabase.storage.from('cars').list('', { limit: 1 });
     if (error && typeof window !== 'undefined' && window.SHOW_PRIVATE_LOGS) {
       console.error('❌ Storage test failed:', error.message);
     }

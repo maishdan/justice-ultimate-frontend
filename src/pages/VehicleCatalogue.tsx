@@ -111,9 +111,9 @@ export default function VehicleCatalogue() {
       for (const file of tradeInForm.car_images) {
         const ext = file.name.split('.').pop();
         const fileName = `trade_in_${Date.now()}_${Math.random().toString(36).slice(2, 8)}.${ext}`;
-        const { data: uploadData, error: uploadError } = await supabase.storage.from('vehicles').upload(fileName, file, { upsert: true });
+        const { data: uploadData, error: uploadError } = await supabase.storage.from('cars').upload(fileName, file, { upsert: true });
         if (uploadError) throw uploadError;
-        const { data: publicUrlData } = supabase.storage.from('vehicles').getPublicUrl(fileName);
+        const { data: publicUrlData } = supabase.storage.from('cars').getPublicUrl(fileName);
         imageUrls.push(publicUrlData.publicUrl);
       }
       // Insert trade-in record
@@ -452,14 +452,14 @@ export default function VehicleCatalogue() {
               <form onSubmit={handleTradeInSubmit} className="glass-panel rounded-2xl p-8 shadow-2xl border border-white/20 backdrop-blur-xl max-w-lg w-full relative animate-fadein">
                 <button type="button" className="absolute top-4 right-4 text-2xl text-gray-500 hover:text-yellow-500" onClick={() => setShowTradeIn(false)}>&times;</button>
                 <h2 className="text-2xl font-bold text-yellow-500 mb-4">Trade-In Your Car</h2>
-                <input name="user_name" placeholder="Your Name" value={tradeInForm.user_name} onChange={handleTradeInInput} className="input bg-white/10 border border-yellow-400/30 text-white placeholder-yellow-200 mb-2 w-full" required />
-                <input name="user_email" placeholder="Email" value={tradeInForm.user_email} onChange={handleTradeInInput} className="input bg-white/10 border border-yellow-400/30 text-white placeholder-yellow-200 mb-2 w-full" required />
-                <input name="user_phone" placeholder="Phone" value={tradeInForm.user_phone} onChange={handleTradeInInput} className="input bg-white/10 border border-yellow-400/30 text-white placeholder-yellow-200 mb-2 w-full" required />
-                <input name="car_make" placeholder="Car Make" value={tradeInForm.car_make} onChange={handleTradeInInput} className="input bg-white/10 border border-yellow-400/30 text-white placeholder-yellow-200 mb-2 w-full" required />
-                <input name="car_model" placeholder="Car Model" value={tradeInForm.car_model} onChange={handleTradeInInput} className="input bg-white/10 border border-yellow-400/30 text-white placeholder-yellow-200 mb-2 w-full" required />
-                <input name="car_year" placeholder="Year" value={tradeInForm.car_year} onChange={handleTradeInInput} className="input bg-white/10 border border-yellow-400/30 text-white placeholder-yellow-200 mb-2 w-full" required />
-                <input name="car_mileage" placeholder="Mileage" value={tradeInForm.car_mileage} onChange={handleTradeInInput} className="input bg-white/10 border border-yellow-400/30 text-white placeholder-yellow-200 mb-2 w-full" required />
-                <input name="car_condition" placeholder="Condition" value={tradeInForm.car_condition} onChange={handleTradeInInput} className="input bg-white/10 border border-yellow-400/30 text-white placeholder-yellow-200 mb-2 w-full" required />
+                <input name="user_name" placeholder="Your Name" value={tradeInForm.user_name} onChange={handleTradeInInput} className="input bg-white/10 border border-yellow-400/30 text-white placeholder-yellow-200 mb-2 w-full" />
+                <input name="user_email" placeholder="Email" value={tradeInForm.user_email} onChange={handleTradeInInput} className="input bg-white/10 border border-yellow-400/30 text-white placeholder-yellow-200 mb-2 w-full" />
+                <input name="user_phone" placeholder="Phone" value={tradeInForm.user_phone} onChange={handleTradeInInput} className="input bg-white/10 border border-yellow-400/30 text-white placeholder-yellow-200 mb-2 w-full" />
+                <input name="car_make" placeholder="Car Make" value={tradeInForm.car_make} onChange={handleTradeInInput} className="input bg-white/10 border border-yellow-400/30 text-white placeholder-yellow-200 mb-2 w-full" />
+                <input name="car_model" placeholder="Car Model" value={tradeInForm.car_model} onChange={handleTradeInInput} className="input bg-white/10 border border-yellow-400/30 text-white placeholder-yellow-200 mb-2 w-full" />
+                <input name="car_year" placeholder="Year" value={tradeInForm.car_year} onChange={handleTradeInInput} className="input bg-white/10 border border-yellow-400/30 text-white placeholder-yellow-200 mb-2 w-full" />
+                <input name="car_mileage" placeholder="Mileage" value={tradeInForm.car_mileage} onChange={handleTradeInInput} className="input bg-white/10 border border-yellow-400/30 text-white placeholder-yellow-200 mb-2 w-full" />
+                <input name="car_condition" placeholder="Condition" value={tradeInForm.car_condition} onChange={handleTradeInInput} className="input bg-white/10 border border-yellow-400/30 text-white placeholder-yellow-200 mb-2 w-full" />
                 <textarea name="notes" placeholder="Additional Notes" value={tradeInForm.notes} onChange={handleTradeInInput} className="input bg-white/10 border border-yellow-400/30 text-white placeholder-yellow-200 mb-2 w-full" rows={2} />
                 <label className="block font-semibold mb-1 text-yellow-200">Upload Car Images</label>
                 <input type="file" accept="image/*" multiple onChange={handleTradeInFile} ref={fileInputRef} className="input bg-white/10 border border-yellow-400/30 text-white placeholder-yellow-200 mb-4 w-full" />

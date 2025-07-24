@@ -6,7 +6,7 @@ export async function finalStorageTest() {
   try {
     // Test 1: File listing
     console.log('1️⃣ Testing file listing...');
-    const { data: files, error: listError } = await supabase.storage.from('vehicles').list('', { limit: 5 });
+    const { data: files, error: listError } = await supabase.storage.from('cars').list('', { limit: 5 });
     
     if (listError) {
       console.error('❌ File listing failed:', listError.message);
@@ -21,7 +21,7 @@ export async function finalStorageTest() {
     const testFile = new File([testContent], 'final_test.txt', { type: 'text/plain' });
     const fileName = `final_test_${Date.now()}.txt`;
     
-    const { data: uploadData, error: uploadError } = await supabase.storage.from('vehicles').upload(fileName, testFile, {
+    const { data: uploadData, error: uploadError } = await supabase.storage.from('cars').upload(fileName, testFile, {
       upsert: true
     });
     
@@ -34,7 +34,7 @@ export async function finalStorageTest() {
     
     // Test 3: File deletion
     console.log('3️⃣ Testing file deletion...');
-    const { error: deleteError } = await supabase.storage.from('vehicles').remove([fileName]);
+    const { error: deleteError } = await supabase.storage.from('cars').remove([fileName]);
     
     if (deleteError) {
       console.error('❌ File deletion failed:', deleteError.message);
@@ -44,7 +44,7 @@ export async function finalStorageTest() {
     
     // Test 4: Public URL
     console.log('4️⃣ Testing public URL...');
-    const { data: urlData } = supabase.storage.from('vehicles').getPublicUrl('test.jpg');
+    const { data: urlData } = supabase.storage.from('cars').getPublicUrl('test.jpg');
     console.log('✅ Public URL works:', urlData.publicUrl);
     
     console.log('🎉 All storage tests passed!');

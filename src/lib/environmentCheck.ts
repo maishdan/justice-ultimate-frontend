@@ -35,7 +35,7 @@ export interface EnvironmentStatus {
 export async function checkEnvironment(): Promise<EnvironmentStatus> {
   const status: EnvironmentStatus = {
     supabase: {
-      url: import.meta.env.VITE_SUPABASE_URL || "https://tyypdmhxuehzddudeuww.supabase.co",
+      url: 'https://gzmgfgcgytafngvliqqj.supabase.co',
       connected: false,
     },
     storage: {

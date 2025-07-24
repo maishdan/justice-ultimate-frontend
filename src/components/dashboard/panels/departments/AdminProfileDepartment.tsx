@@ -36,9 +36,10 @@ const AdminProfileDepartment: React.FC = () => {
         email: String(data.email),
         phone: String(data.phone),
         role: String(data.role),
-        avatar: String(data.avatar),
-        created_at: String(data.created_at),
-        updated_at: String(data.updated_at)
+        photo_url: String(data.photo_url),
+        last_login: String(data.last_login),
+        timezone: String(data.timezone),
+        language: String(data.language),
       };
       setAdmin(adminObj);
     } else {

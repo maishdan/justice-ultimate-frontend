@@ -12,8 +12,8 @@ export const config = {
   
   // Supabase configuration
   supabase: {
-    url: import.meta.env.VITE_SUPABASE_URL || "https://tyypdmhxuehzddudeuww.supabase.co",
-    anonKey: import.meta.env.VITE_SUPABASE_ANON_KEY || "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InR5eXBkbWh4dWVoemRkdWRldXd3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTI2MDg1MTMsImV4cCI6MjA2ODE4NDUxM30.eFoatxJAJrIxMGvs4FVTnzDpOUsL-pdKM8VAsw7E10Y"
+    url: 'https://gzmgfgcgytafngvliqqj.supabase.co',
+    anonKey: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imd6bWdmZ2NneXRhZm5ndmxpcXFqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTMyNTQzODEsImV4cCI6MjA2ODgzMDM4MX0.8xGAFdz9I4q-FOMjSBLMSqGpPL-_7hHh-5gjzt3uvwM',
   },
   
   // reCAPTCHA configuration

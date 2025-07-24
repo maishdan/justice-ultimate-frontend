@@ -225,7 +225,7 @@ function AddCarFormV2({ onCarAdded }: { onCarAdded: () => void }) {
           console.error('Main image upload error:', uploadError);
           throw uploadError;
         }
-        const { data: publicUrlData } = supabase.storage.from('vehicles').getPublicUrl(fileName);
+        const { data: publicUrlData } = supabase.storage.from('cars').getPublicUrl(fileName);
         mainImageUrl = publicUrlData.publicUrl;
         console.log('Main image uploaded successfully:', mainImageUrl);
       }
@@ -257,7 +257,7 @@ function AddCarFormV2({ onCarAdded }: { onCarAdded: () => void }) {
               throw uploadError;
             }
             
-            const { data: publicUrlData } = supabase.storage.from('vehicles').getPublicUrl(fileName);
+            const { data: publicUrlData } = supabase.storage.from('cars').getPublicUrl(fileName);
             console.log(`Additional image ${i + index + 1} uploaded successfully`);
             return publicUrlData.publicUrl;
           });
@@ -428,10 +428,11 @@ const BulkUpload = () => {
     const reader = new FileReader();
     reader.onload = async (e) => {
       const text = e.target?.result as string;
-      Papa.parse(text as string, {
+      // Fix Papa.parse usage: ensure first argument is a string, second is config object
+      Papa.parse(text, {
         header: true,
         skipEmptyLines: true,
-        complete: async (results: Papa.ParseResult<any>) => {
+        complete: async (results) => {
           setParsing(false);
           const rows = results.data as any[];
           if (!Array.isArray(rows) || rows.length === 0) {
@@ -466,7 +467,7 @@ const BulkUpload = () => {
           setUploading(false);
           setResults(`Upload complete: ${successCount} cars added, ${failCount} failed.`);
         },
-        error: (err: Papa.ParseError) => {
+        error: (err: any) => {
           setParsing(false);
           setError('CSV parsing error: ' + err.message);
         },
@@ -677,7 +678,7 @@ function RentalsPanel() {
         const ext = addMainImage.name.split('.').pop();
         const fileName = `rental_main_${Date.now()}.${ext}`;
         
-        const uploadPromise = supabase.storage.from('vehicles').upload(fileName, addMainImage, { 
+        const uploadPromise = supabase.storage.from('rent').upload(fileName, addMainImage, { 
           upsert: true,
           cacheControl: '3600'
         });
@@ -692,7 +693,7 @@ function RentalsPanel() {
           console.error('Rental main image upload error:', uploadError);
           throw uploadError;
         }
-        const { data: publicUrlData } = supabase.storage.from('vehicles').getPublicUrl(fileName);
+        const { data: publicUrlData } = supabase.storage.from('rent').getPublicUrl(fileName);
         mainImageUrl = publicUrlData.publicUrl;
         console.log('Rental main image uploaded successfully:', mainImageUrl);
       }
@@ -708,7 +709,7 @@ function RentalsPanel() {
             const ext = img.name.split('.').pop();
             const fileName = `rental_additional_${Date.now()}_${i + index}_${Math.random().toString(36).slice(2, 8)}.${ext}`;
             
-            const uploadPromise = supabase.storage.from('vehicles').upload(fileName, img, { 
+            const uploadPromise = supabase.storage.from('rent').upload(fileName, img, { 
               upsert: true,
               cacheControl: '3600'
             });
@@ -724,7 +725,7 @@ function RentalsPanel() {
               throw uploadError;
             }
             
-            const { data: publicUrlData } = supabase.storage.from('vehicles').getPublicUrl(fileName);
+            const { data: publicUrlData } = supabase.storage.from('rent').getPublicUrl(fileName);
             console.log(`Rental additional image ${i + index + 1} uploaded successfully`);
             return publicUrlData.publicUrl;
           });

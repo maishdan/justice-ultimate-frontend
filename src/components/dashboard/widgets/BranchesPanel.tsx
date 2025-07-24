@@ -652,10 +652,10 @@ export default function BranchesPanel() {
     try {
       if (showTransfer && showTransfer.id) {
         // Fetch available vehicles from fromBranch
-        const { data: vehicles } = await supabase.from('vehicles').select('id').eq('branch_id', showTransfer.id).eq('status', 'available').limit(count);
+        const { data: vehicles } = await supabase.from('cars').select('id').eq('branch_id', showTransfer.id).eq('status', 'available').limit(count);
         if (vehicles) {
           for (const v of vehicles) {
-            await supabase.from('vehicles').update({ branch_id: toBranchId }).eq('id', v.id);
+            await supabase.from('cars').update({ branch_id: toBranchId }).eq('id', v.id);
           }
         }
       }

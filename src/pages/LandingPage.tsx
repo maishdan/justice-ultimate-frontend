@@ -10,23 +10,15 @@ import { FaEnvelope, FaPhoneAlt, FaWhatsapp } from "react-icons/fa";
 
 export default function LandingPage() {
   // All hooks at the top, always called in the same order
-  const [loading, setLoading] = useState(true);
-  const [progress, setProgress] = useState(0);
+  const [loading, setLoading] = useState(false);
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const location = useLocation();
 
+  // Optionally, show loader for a minimal 300ms to avoid flicker
   useEffect(() => {
-    let interval = setInterval(() => {
-      setProgress((prev) => {
-        if (prev >= 100) {
-          clearInterval(interval);
-          setLoading(false);
-          return 100;
-        }
-        return prev + 10;
-      });
-    }, 150);
-    return () => clearInterval(interval);
+    setLoading(true);
+    const timer = setTimeout(() => setLoading(false), 300);
+    return () => clearTimeout(timer);
   }, []);
 
   // ✅ Car Start Sound: Play only on initial homepage load with debug log
@@ -59,7 +51,7 @@ export default function LandingPage() {
   };
 
   if (loading) {
-    return <LoadingScreen text="Loading Justice Ultimate Automobiles..." progress={progress} />;
+    return <LoadingScreen text="Loading Justice Ultimate Automobiles..." progress={100} />;
   }
 
   return (

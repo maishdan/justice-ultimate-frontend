@@ -93,29 +93,6 @@ const useKeyboardNavigation = () => {
   return { focusedPanel, setFocusedPanel };
 };
 
-// Enhanced loading state management
-const useLoadingState = () => {
-  const [isLoading, setIsLoading] = useState(true);
-  const [loadingProgress, setLoadingProgress] = useState(0);
-  
-  useEffect(() => {
-    const timer = setInterval(() => {
-      setLoadingProgress(prev => {
-        if (prev >= 100) {
-          setIsLoading(false);
-          clearInterval(timer);
-          return 100;
-        }
-        return prev + 10;
-      });
-    }, 100);
-    
-    return () => clearInterval(timer);
-  }, []);
-  
-  return { isLoading, loadingProgress };
-};
-
 // Stubs for main panels (to be implemented)
 // DashboardOverview is now a real component
 const AdminProfile = () => <AdminProfilePanel />;
@@ -178,8 +155,7 @@ export default function AdminDashboard() {
   const [activePanel, setActivePanel] = useState('dashboard');
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const { focusedPanel, setFocusedPanel } = useKeyboardNavigation();
-  const { isLoading, loadingProgress } = useLoadingState();
-  const adminUser = { name: 'Daniwest', role: t('administrator') };
+  const [adminUser, setAdminUser] = useState<{ name: string; role: string; photo?: string } | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -190,15 +166,32 @@ export default function AdminDashboard() {
         setLoading(false);
         return;
       }
-      const { data, error } = await supabase
+      // Try to fetch from admin_profiles, fallback to profiles
+      let { data, error } = await supabase
         .from('admin_profiles')
         .select('*')
         .eq('id', user.id)
         .single();
-      if (error) {
-        // setAdminUser(null); // This line is removed
+      if (error || !data) {
+        // fallback to profiles
+        const { data: profile } = await supabase
+          .from('profiles')
+          .select('*')
+          .eq('id', user.id)
+          .single();
+        if (profile) {
+          setAdminUser({
+            name: profile.full_name || profile.first_name || user.email,
+            role: profile.role || 'admin',
+            photo: profile.avatar_url || undefined,
+          });
+        }
       } else {
-        // setAdminUser(data); // This line is removed
+        setAdminUser({
+          name: data.name || data.full_name || user.email,
+          role: data.role || 'admin',
+          photo: data.photo_url || data.avatar_url || undefined,
+        });
       }
       setLoading(false);
     }
@@ -268,8 +261,8 @@ export default function AdminDashboard() {
   };
 
   // Loading screen
-  if (isLoading) {
-    return <LoadingScreen text="Loading Justice Admin Dashboard..." progress={loadingProgress} />;
+  if (loading || !adminUser) {
+    return <LoadingScreen text="Loading Justice Admin Dashboard..." progress={100} />;
   }
 
   return (

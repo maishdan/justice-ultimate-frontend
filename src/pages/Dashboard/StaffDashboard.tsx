@@ -57,9 +57,9 @@ export default function StaffDashboard() {
           setLoading(false);
           return 100;
         }
-        return prev + 10;
+        return prev + 1;
       });
-    }, 150);
+    }, 100);
     return () => clearInterval(interval);
   }, []);
 

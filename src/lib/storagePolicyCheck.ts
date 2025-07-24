@@ -6,7 +6,7 @@ export async function checkStoragePolicies() {
   try {
     // Test 1: Try to list files (should work if bucket is public)
     console.log('Testing file listing...');
-    const { data: files, error: listError } = await supabase.storage.from('vehicles').list('', { limit: 1 });
+    const { data: files, error: listError } = await supabase.storage.from('cars').list('', { limit: 1 });
     
     if (listError) {
       console.error('❌ File listing failed:', listError.message);
@@ -22,7 +22,7 @@ export async function checkStoragePolicies() {
     const testFile = new File([testContent], 'policy_test.txt', { type: 'text/plain' });
     const fileName = `policy_test_${Date.now()}.txt`;
     
-    const { data: uploadData, error: uploadError } = await supabase.storage.from('vehicles').upload(fileName, testFile, {
+    const { data: uploadData, error: uploadError } = await supabase.storage.from('cars').upload(fileName, testFile, {
       upsert: true
     });
     
@@ -42,7 +42,7 @@ export async function checkStoragePolicies() {
       console.log('✅ File upload works');
       
       // Clean up test file
-      const { error: deleteError } = await supabase.storage.from('vehicles').remove([fileName]);
+      const { error: deleteError } = await supabase.storage.from('cars').remove([fileName]);
       if (deleteError) {
         console.error('⚠️ File cleanup failed:', deleteError.message);
       } else {
@@ -52,7 +52,7 @@ export async function checkStoragePolicies() {
     
     // Test 3: Try to get public URL
     console.log('Testing public URL access...');
-    const { data: urlData } = supabase.storage.from('vehicles').getPublicUrl('test.jpg');
+    const { data: urlData } = supabase.storage.from('cars').getPublicUrl('test.jpg');
     console.log('Public URL format:', urlData.publicUrl);
     
     console.log('📋 Storage Policy Summary:');
