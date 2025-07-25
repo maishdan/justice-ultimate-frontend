@@ -10,9 +10,6 @@ import { useRef, useEffect } from 'react';
 import { testBackendConnection } from '../lib/api';
 import { motion } from 'framer-motion';
 import { User, Mail, Lock, Phone, MapPin, Car, CheckCircle } from 'lucide-react';
-import ReCAPTCHA from 'react-google-recaptcha';
-
-const RECAPTCHA_SITE_KEY = '6Lf2HYgrAAAAAGLA2Pdh_EgRNFLVNtFr8wChye0T';
 
 const countries = [
   { code: "KE", name: "Kenya", dial: "+254" },
@@ -46,26 +43,7 @@ function ContinueAsGuestButton() {
 export default function RegisterPage() {
   const audioRef = useRef<HTMLAudioElement | null>(null);
   
-  // Initialize reCAPTCHA v3
-  useEffect(() => {
-    // Test backend connection for register
-    console.log('🔍 Testing backend connectivity for register...');
-    
-    // Test general backend connection
-    testBackendConnection().then(result => {
-      if (result.success) {
-        console.log('✅ Backend connection successful for register');
-        toast.success('Backend connected successfully for registration');
-      } else {
-        console.error('❌ Backend connection failed for register:', result.error);
-        toast.error('Backend connection failed for registration - check console for details');
-      }
-    });
-    
-    return () => {
-      // No script to remove here
-    };
-  }, []);
+  // No backend health check for fast registration
   
   const navigate = useNavigate();
   const [email, setEmail] = useState("");
@@ -78,16 +56,12 @@ export default function RegisterPage() {
   const [success, setSuccess] = useState(false);
   const [confirmPassword, setConfirmPassword] = useState("");
   const [passwordStrength, setPasswordStrength] = useState(0);
-  const [recaptchaToken, setRecaptchaToken] = useState<string | null>(null);
-  const [recaptchaError, setRecaptchaError] = useState<string | null>(null);
-  const recaptchaRef = useRef<any>(null);
 
   const handleRegister = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
     setError("");
     setSuccess(false);
-    setRecaptchaError(null);
 
     // Password strength check
     const strong =
@@ -103,42 +77,6 @@ export default function RegisterPage() {
     }
     if (password !== confirmPassword) {
       setError("Passwords do not match.");
-      setLoading(false);
-      return;
-    }
-
-    // Trigger invisible reCAPTCHA and get token
-    let token = recaptchaToken;
-    if (recaptchaRef.current) {
-      token = await recaptchaRef.current.executeAsync();
-      setRecaptchaToken(token);
-    }
-
-    if (!token) {
-      setRecaptchaError('Please complete the reCAPTCHA.');
-      setLoading(false);
-      return;
-    }
-
-    // Verify reCAPTCHA with backend
-    try {
-      const backendUrl =
-        window.location.hostname === 'localhost'
-          ? 'http://localhost:5001'
-          : import.meta.env.VITE_BACKEND_URL;
-      const verifyRes = await fetch(`${backendUrl}/api/verify-recaptcha`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ token: token })
-      });
-      const verifyData = await verifyRes.json();
-      if (!verifyData.success) {
-        setRecaptchaError('reCAPTCHA verification failed. Please try again.');
-        setLoading(false);
-        return;
-      }
-    } catch (err) {
-      setRecaptchaError('reCAPTCHA verification failed. Please try again.');
       setLoading(false);
       return;
     }
@@ -471,16 +409,6 @@ export default function RegisterPage() {
                   Login
                 </span>
               </motion.div>
-              <ReCAPTCHA
-                ref={recaptchaRef}
-                sitekey={RECAPTCHA_SITE_KEY}
-                size="invisible"
-                badge="bottomright"
-                onChange={(token: string | null) => setRecaptchaToken(token)}
-                onErrored={() => setRecaptchaError('reCAPTCHA error. Please reload the page.')}
-                style={{ display: 'none' }}
-              />
-              {recaptchaError && <div className="text-red-400 text-sm p-2">{recaptchaError}</div>}
             </motion.form>
           )}
         </motion.div>
