@@ -107,7 +107,8 @@ const Login = () => {
           sessionStorage.setItem("userRole", "admin");
           setLoading(false);
           setError("");
-          navigate('/secure-admin-dashboard', { replace: true });
+          console.log("[Login] Redirecting to dashboard:", '/dashboard/admin');
+          navigate('/dashboard/admin', { replace: true });
           return;
         }
       }
@@ -180,6 +181,7 @@ const Login = () => {
           }
           setLoading(false);
           setError("");
+          console.log("[Login] Redirecting to dashboard:", dashboardPath);
           navigate(dashboardPath, { replace: true });
           return;
         }
@@ -187,6 +189,7 @@ const Login = () => {
         if (user && user.email) {
           setLoading(false);
           setError("");
+          console.log("[Login] Redirecting to /select-role");
           navigate('/select-role', { replace: true });
           return;
         }
