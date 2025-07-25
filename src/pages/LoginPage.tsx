@@ -75,7 +75,6 @@ const Login = () => {
     setError("");
     let timeoutId: NodeJS.Timeout | null = null;
     let timedOut = false;
-    // Show a message if login is taking too long
     timeoutId = setTimeout(() => {
       setError('Login is taking longer than expected. Please check your connection or try again.');
       setLoading(false);
@@ -97,7 +96,6 @@ const Login = () => {
           setError(error.message);
           toast.error(error.message);
           setLoading(false);
-          if (timeoutId) clearTimeout(timeoutId);
           return;
         }
         if (data.session) {
@@ -107,7 +105,6 @@ const Login = () => {
           localStorage.removeItem("guestSession");
           localStorage.setItem("userRole", "admin");
           sessionStorage.setItem("userRole", "admin");
-          if (timeoutId) clearTimeout(timeoutId);
           setLoading(false);
           setError("");
           navigate('/secure-admin-dashboard', { replace: true });
@@ -121,7 +118,6 @@ const Login = () => {
         setError(error.message);
         toast.error(error.message);
         setLoading(false);
-        if (timeoutId) clearTimeout(timeoutId);
         return;
       }
       if (data.session) {
@@ -143,14 +139,12 @@ const Login = () => {
           setError('Could not fetch user info.');
           toast.error('Could not fetch user info.');
           setLoading(false);
-          if (timeoutId) clearTimeout(timeoutId);
           return;
         }
         if (userError || !user) {
           setError('Could not fetch user info.');
           toast.error('Could not fetch user info.');
           setLoading(false);
-          if (timeoutId) clearTimeout(timeoutId);
           return;
         }
         // Fetch user role (with timeout)
@@ -164,7 +158,6 @@ const Login = () => {
           setError('Could not determine user role.');
           toast.error('Could not determine user role.');
           setLoading(false);
-          if (timeoutId) clearTimeout(timeoutId);
           return;
         }
         if (role) {
@@ -185,7 +178,6 @@ const Login = () => {
               dashboardPath = '/dashboard/customer';
               break;
           }
-          if (timeoutId) clearTimeout(timeoutId);
           setLoading(false);
           setError("");
           navigate(dashboardPath, { replace: true });
@@ -193,7 +185,6 @@ const Login = () => {
         }
         // Fallback to role selection
         if (user && user.email) {
-          if (timeoutId) clearTimeout(timeoutId);
           setLoading(false);
           setError("");
           navigate('/select-role', { replace: true });
@@ -203,15 +194,14 @@ const Login = () => {
         setError('Login failed. No session created.');
         toast.error('Login failed. No session created.');
         setLoading(false);
-        if (timeoutId) clearTimeout(timeoutId);
       }
     } catch (loginError) {
       setError('Login failed. Please try again.');
       toast.error('Login failed. Please try again.');
       setLoading(false);
+    } finally {
       if (timeoutId) clearTimeout(timeoutId);
     }
-    if (timeoutId) clearTimeout(timeoutId);
   };
 
   const loginWithProvider = async (provider: 'google' | 'github') => {
