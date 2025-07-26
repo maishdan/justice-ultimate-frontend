@@ -46,20 +46,31 @@ export default function Header() {
     const handleBeforeInstallPrompt = (e: Event) => {
       e.preventDefault();
       setCanInstall(true);
-      // Expose a global installJUA function for the button
-      (window as any).installJUA = () => {
-        window.dispatchEvent(new CustomEvent('triggerInstall'));
-      };
     };
-    window.addEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
-    // Hide button if app is installed
-    if (window.matchMedia('(display-mode: standalone)').matches) {
+
+    // Check if app is already installed
+    const checkIfInstalled = () => {
+      return window.matchMedia('(display-mode: standalone)').matches;
+    };
+
+    // Show install button if not already installed
+    if (!checkIfInstalled()) {
+      window.addEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
+      
+      // Also show button after a delay if beforeinstallprompt hasn't fired
+      const timer = setTimeout(() => {
+        if (!checkIfInstalled()) {
+          setCanInstall(true);
+        }
+      }, 2000);
+
+      return () => {
+        window.removeEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
+        clearTimeout(timer);
+      };
+    } else {
       setCanInstall(false);
     }
-    return () => {
-      window.removeEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
-      delete (window as any).installJUA;
-    };
   }, []);
 
   const navLinks = [
@@ -108,6 +119,20 @@ export default function Header() {
       navigate('/secure-customer-dashboard');
     } else {
       navigate('/secure-guest-dashboard');
+    }
+  };
+
+  const handleInstallClick = () => {
+    if ((window as any).installJUA) {
+      (window as any).installJUA();
+    } else {
+      // Fallback for browsers that don't support beforeinstallprompt
+      const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+      if (isMobile) {
+        alert('To install the app:\n\n1. Tap the share button\n2. Select "Add to Home Screen"\n3. Tap "Add"');
+      } else {
+        alert('To install the app:\n\n1. Click the install icon in your browser\'s address bar\n2. Click "Install"');
+      }
     }
   };
 
@@ -328,9 +353,7 @@ export default function Header() {
               {canInstall && (
                 <button
                   className="px-3 py-1.5 bg-gradient-to-r from-yellow-400/90 to-yellow-500/90 hover:from-yellow-500 hover:to-yellow-600 text-black rounded-md text-sm font-medium transition-all duration-300 shadow-sm backdrop-blur-sm border border-yellow-300/30"
-                  onClick={() => {
-                    if ((window as any).installJUA) (window as any).installJUA();
-                  }}
+                  onClick={handleInstallClick}
                 >
                   Install JUA
                 </button>
@@ -438,16 +461,17 @@ export default function Header() {
               )}
               
               {/* Install JUA Button */}
-              <button
-                className="w-full px-3 py-2 bg-yellow-500/90 hover:bg-yellow-600/90 text-black rounded-xl font-medium transition-all duration-300 text-sm shadow-lg"
-                onClick={() => {
-                  if ((window as any).installJUA) (window as any).installJUA();
-                  else alert('To install, use your browser\'s install option.');
-                  setMenuOpen(false);
-                }}
-              >
-                Install JUA
-              </button>
+              {canInstall && (
+                <button
+                  className="w-full px-3 py-2 bg-yellow-500/90 hover:bg-yellow-600/90 text-black rounded-xl font-medium transition-all duration-300 text-sm shadow-lg"
+                  onClick={() => {
+                    handleInstallClick();
+                    setMenuOpen(false);
+                  }}
+                >
+                  Install JUA
+                </button>
+              )}
               
               {/* Navigation Links */}
               <div className="space-y-1">

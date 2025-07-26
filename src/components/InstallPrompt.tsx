@@ -17,75 +17,63 @@ export default function InstallPrompt() {
   const [waitingWorker, setWaitingWorker] = useState<ServiceWorker | null>(null);
   const [showInstallStart, setShowInstallStart] = useState(false);
   const [showInstallSuccess, setShowInstallSuccess] = useState(false);
+  const [updateShown, setUpdateShown] = useState(false);
 
   useEffect(() => {
+    // Check if app is already installed
+    const isStandalone = window.matchMedia('(display-mode: standalone)').matches;
+    setIsInstalled(isStandalone);
+
     // Detect device type
     const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
     setDeviceType(isMobile ? 'mobile' : 'desktop');
 
-    // Check if app is already installed
-    const checkIfInstalled = () => {
-      if (window.matchMedia('(display-mode: standalone)').matches) {
-        setIsInstalled(true);
-        setShowPrompt(false);
-        return true;
-      }
-      return false;
-    };
-
-    // Listen for beforeinstallprompt event
+    // Listen for beforeinstallprompt
     const handleBeforeInstallPrompt = (e: Event) => {
       e.preventDefault();
       setDeferredPrompt(e as BeforeInstallPromptEvent);
-      if (!checkIfInstalled()) {
-        setShowPrompt(true);
-      }
+      setShowPrompt(true);
     };
 
-    // Listen for appinstalled event
+    // Listen for app installed
     const handleAppInstalled = () => {
-      console.log('PWA was installed');
       setIsInstalled(true);
       setShowPrompt(false);
-      setDeferredPrompt(null);
+      setShowInstallStart(false);
+      setShowInstallSuccess(true);
+      setTimeout(() => {
+        setShowInstallSuccess(false);
+        window.location.reload();
+      }, 2000);
     };
 
-    // Listen for custom trigger install event from header
+    // Listen for custom install trigger
     const handleTriggerInstall = () => {
-      if (deferredPrompt && !isInstalled) {
+      if (deferredPrompt) {
         handleInstall();
-      } else if (!deferredPrompt && !isInstalled) {
-        setShowPrompt(true);
+      } else {
+        // Fallback for browsers that don't support beforeinstallprompt
+        if (deviceType === 'mobile') {
+          alert('To install the app:\n\n1. Tap the share button\n2. Select "Add to Home Screen"\n3. Tap "Add"');
+        } else {
+          alert('To install the app:\n\n1. Click the install icon in your browser\'s address bar\n2. Click "Install"');
+        }
       }
     };
 
-    // Check if already installed on load
-    if (!checkIfInstalled()) {
-      // Show prompt after a delay if not installed
-      const timer = setTimeout(() => {
-        if (deferredPrompt && !isInstalled) {
-          setShowPrompt(true);
-        }
-      }, 3000);
-
-      return () => clearTimeout(timer);
-    }
-
-    window.addEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
-    window.addEventListener('appinstalled', handleAppInstalled);
-    window.addEventListener('triggerInstall', handleTriggerInstall);
-
-    // Listen for service worker update
+    // Check for service worker updates
     if ('serviceWorker' in navigator) {
-      navigator.serviceWorker.getRegistration().then((reg) => {
-        if (!reg) return;
-        reg.addEventListener('updatefound', () => {
-          const newWorker = reg.installing;
+      navigator.serviceWorker.ready.then((registration) => {
+        registration.addEventListener('updatefound', () => {
+          const newWorker = registration.installing;
           if (newWorker) {
             newWorker.addEventListener('statechange', () => {
               if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
-                setUpdateAvailable(true);
                 setWaitingWorker(newWorker);
+                if (!updateShown) {
+                  setUpdateAvailable(true);
+                  setUpdateShown(true);
+                }
               }
             });
           }
@@ -93,12 +81,29 @@ export default function InstallPrompt() {
       });
     }
 
+    // Check if install prompt was dismissed recently
+    const lastDismissed = localStorage.getItem('installPromptDismissed');
+    const shouldShowPrompt = !lastDismissed || (Date.now() - parseInt(lastDismissed)) > 24 * 60 * 60 * 1000;
+
+    if (shouldShowPrompt && !isStandalone) {
+      window.addEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
+    }
+
+    window.addEventListener('appinstalled', handleAppInstalled);
+    window.addEventListener('triggerInstall', handleTriggerInstall);
+
+    // Expose a global installJUA function for the button
+    (window as any).installJUA = () => {
+      handleTriggerInstall();
+    };
+
     return () => {
       window.removeEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
       window.removeEventListener('appinstalled', handleAppInstalled);
       window.removeEventListener('triggerInstall', handleTriggerInstall);
+      delete (window as any).installJUA;
     };
-  }, [deferredPrompt, isInstalled]);
+  }, [deferredPrompt, isInstalled, deviceType, updateShown]);
 
   const handleInstall = async () => {
     if (!deferredPrompt) {
@@ -138,31 +143,18 @@ export default function InstallPrompt() {
   const handleUpdate = () => {
     if (waitingWorker) {
       waitingWorker.postMessage({ type: 'SKIP_WAITING' });
+      setUpdateAvailable(false);
       window.location.reload();
     }
   };
 
   const handleDismiss = () => {
     setShowPrompt(false);
-    // Hide for 24 hours
     localStorage.setItem('installPromptDismissed', Date.now().toString());
   };
 
-  // Check if prompt was recently dismissed
-  useEffect(() => {
-    const dismissed = localStorage.getItem('installPromptDismissed');
-    if (dismissed) {
-      const dismissedTime = parseInt(dismissed);
-      const hoursSinceDismissed = (Date.now() - dismissedTime) / (1000 * 60 * 60);
-      if (hoursSinceDismissed < 24) {
-        setShowPrompt(false);
-      } else {
-        localStorage.removeItem('installPromptDismissed');
-      }
-    }
-  }, []);
-
-  if (updateAvailable) {
+  // Professional update popup - shows only once
+  if (updateAvailable && !updateShown) {
     return (
       <AnimatePresence>
         <motion.div
@@ -198,10 +190,6 @@ export default function InstallPrompt() {
         </motion.div>
       </AnimatePresence>
     );
-  }
-
-  if (isInstalled || !showPrompt) {
-    return null;
   }
 
   // Left-side install start popup
@@ -250,6 +238,10 @@ export default function InstallPrompt() {
     );
   }
 
+  if (isInstalled || !showPrompt) {
+    return null;
+  }
+
   return (
     <AnimatePresence>
       <motion.div
@@ -260,55 +252,37 @@ export default function InstallPrompt() {
         className="fixed top-4 left-1/2 transform -translate-x-1/2 z-50"
       >
         <div className="glass-panel backdrop-blur-xl bg-gradient-to-r from-yellow-400/20 to-yellow-500/20 border border-yellow-300/30 rounded-2xl shadow-2xl p-4 max-w-sm w-[95vw] md:w-[400px]">
-          <div className="flex items-start justify-between mb-3">
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 bg-gradient-to-r from-yellow-400 to-yellow-500 rounded-xl flex items-center justify-center">
-                {deviceType === 'mobile' ? (
-                  <Smartphone className="w-5 h-5 text-black" />
-                ) : (
-                  <Monitor className="w-5 h-5 text-black" />
-                )}
-              </div>
-              <div>
-                <h3 className="text-white font-bold text-sm">Install Justice Ultimate</h3>
-                <p className="text-white/70 text-xs">
-                  {deviceType === 'mobile' 
-                    ? 'Get quick access on your phone' 
-                    : 'Install as a desktop app'
-                  }
-                </p>
-              </div>
+          <div className="flex items-center gap-3 mb-3">
+            <div className="w-10 h-10 bg-gradient-to-r from-yellow-400 to-yellow-500 rounded-xl flex items-center justify-center">
+              {deviceType === 'mobile' ? (
+                <Smartphone className="w-5 h-5 text-black" />
+              ) : (
+                <Monitor className="w-5 h-5 text-black" />
+              )}
             </div>
-            <button
-              onClick={handleDismiss}
-              className="text-white/60 hover:text-white transition-colors"
-            >
-              <X className="w-4 h-4" />
-            </button>
+            <div>
+              <h3 className="text-white font-bold text-sm">Install Justice Ultimate</h3>
+              <p className="text-white/70 text-xs">Get the full app experience with offline access and instant updates.</p>
+            </div>
           </div>
-          
           <div className="flex gap-2">
             <button
               onClick={handleInstall}
               disabled={isInstalling}
-              className="flex-1 bg-gradient-to-r from-yellow-400 to-yellow-500 hover:from-yellow-300 hover:to-yellow-400 text-black font-bold py-2 px-4 rounded-xl text-sm transition-all duration-300 shadow-lg hover:shadow-xl flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+              className="flex-1 bg-gradient-to-r from-yellow-400 to-yellow-500 hover:from-yellow-300 hover:to-yellow-400 text-black font-bold py-2 px-4 rounded-xl text-sm transition-all duration-300 shadow-lg hover:shadow-xl flex items-center justify-center gap-2 disabled:opacity-50"
             >
-              {isInstalling ? (
-                <>
-                  <div className="w-4 h-4 border-2 border-black border-t-transparent rounded-full animate-spin"></div>
-                  Installing...
-                </>
-              ) : (
-                <>
-                  <Download className="w-4 h-4" />
-                  Install App
-                </>
-              )}
+              <Download className="w-4 h-4" />
+              {isInstalling ? 'Installing...' : 'Install Now'}
+            </button>
+            <button
+              onClick={handleDismiss}
+              className="px-3 py-2 text-white/70 hover:text-white transition-colors duration-300"
+            >
+              <X className="w-4 h-4" />
             </button>
           </div>
-          
           <div className="mt-3 text-xs text-white/60">
-            <p>✨ Works offline • Auto-updates • Fast loading</p>
+            <p>✨ Fast & secure • Works offline • Auto-updates</p>
           </div>
         </div>
       </motion.div>
