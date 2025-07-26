@@ -62,17 +62,16 @@ function App() {
       navigator.serviceWorker.register('/service-worker.js')
         .then((registration) => {
           console.log('SW registered: ', registration);
-          
           // Check for updates
           registration.addEventListener('updatefound', () => {
             const newWorker = registration.installing;
             if (newWorker) {
               newWorker.addEventListener('statechange', () => {
                 if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
-                  // New content is available, show update prompt
-                  if (confirm('New version available! Reload to update?')) {
-                    window.location.reload();
-                  }
+                  // Silently update: skip waiting and activate new SW without popup
+                  newWorker.postMessage({ type: 'SKIP_WAITING' });
+                  // Optionally, reload automatically (or just do nothing for silent update)
+                  // window.location.reload();
                 }
               });
             }
