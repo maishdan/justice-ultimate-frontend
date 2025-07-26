@@ -15,6 +15,7 @@ import ImpersonatorTool from '../widgets/ImpersonatorTool';
 import axios from 'axios';
 import { createContext, useContext } from 'react';
 import { BarChart as ReBarChart, PieChart as RePieChart, LineChart as ReLineChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Pie, Cell, Line, Legend } from 'recharts';
+import { RealtimeChannel } from '@supabase/supabase-js';
 
 // Notifications Context for global admin notifications
 const NotificationsContext = createContext({
@@ -665,7 +666,9 @@ export default function UserManagementPanel() {
   const [search, setSearch] = useState('');
   const [roleFilter, setRoleFilter] = useState('all');
   const [statusFilter, setStatusFilter] = useState('all');
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
+  const [channel, setChannel] = useState<RealtimeChannel | null>(null);
   const [selected, setSelected] = useState<string[]>([]);
   const [profileModalUser, setProfileModalUser] = useState<any>(null);
   const [profileModalOpen, setProfileModalOpen] = useState(false);
@@ -684,63 +687,42 @@ export default function UserManagementPanel() {
 
   useEffect(() => {
     fetchUsers();
+    // Set up real-time subscription
+    const ch = supabase.channel('realtime-users-admin')
+      .on(
+        'postgres_changes',
+        { event: '*', schema: 'public', table: 'profiles' }, // Changed table to 'profiles'
+        (payload) => {
+          if (payload.eventType === 'INSERT') {
+            setUsers(prev => [payload.new, ...prev]);
+          } else if (payload.eventType === 'UPDATE') {
+            setUsers(prev => prev.map(user => user.id === payload.new.id ? payload.new : user));
+          } else if (payload.eventType === 'DELETE') {
+            setUsers(prev => prev.filter(user => user.id !== payload.old.id));
+          }
+        }
+      )
+      .subscribe();
+    setChannel(ch);
+    return () => {
+      if (channel) {
+        supabase.removeChannel(channel);
+      }
+      supabase.removeChannel(ch);
+    };
   }, []);
 
   async function fetchUsers() {
     setLoading(true);
+    setError('');
     try {
-      // Add timeout to prevent hanging
-      const timeoutPromise = new Promise((_, reject) => 
-        setTimeout(() => reject(new Error('Request timeout')), 5000)
-      );
-
-      const queryPromise = supabase.from('profiles').select('*').limit(50);
-      const { data, error } = await Promise.race([queryPromise, timeoutPromise]) as any;
-      
-      if (error) {
-        toast.error(error.message);
-        // Fallback to mock data
-        setUsers([
-          {
-            id: 'demo-user-1',
-            email: 'admin@justice.com',
-            full_name: 'Admin User',
-            role: 'admin',
-            created_at: new Date().toISOString()
-          },
-          {
-            id: 'demo-user-2',
-            email: 'staff@justice.com', 
-            full_name: 'Staff User',
-            role: 'staff',
-            created_at: new Date(Date.now() - 86400000).toISOString()
-          }
-        ]);
-      } else {
-        setUsers(data || []);
-      }
-    } catch (err: any) {
-      toast.error('Failed to fetch users. Using demo data.');
-      // Fallback to mock data
-      setUsers([
-        {
-          id: 'demo-user-1',
-          email: 'admin@justice.com',
-          full_name: 'Admin User',
-          role: 'admin',
-          created_at: new Date().toISOString()
-        },
-        {
-          id: 'demo-user-2',
-          email: 'staff@justice.com',
-          full_name: 'Staff User', 
-          role: 'staff',
-          created_at: new Date(Date.now() - 86400000).toISOString()
-        }
-      ]);
-    } finally {
-      setLoading(false);
+      const { data, error } = await supabase.from('profiles').select('*').order('created_at', { ascending: false });
+      if (data) setUsers(data);
+      if (error) setError(error.message);
+    } catch (error) {
+      setError('Failed to fetch users');
     }
+    setLoading(false);
   }
 
   // Only show sync button to admins (assume current user is admin for now)

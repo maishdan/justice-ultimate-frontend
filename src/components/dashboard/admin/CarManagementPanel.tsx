@@ -8,6 +8,7 @@ import { uploadConfig, getOptimizedTimeout, createTimeoutPromise, validateFile, 
 import SimpleConnectionTest from '../../SimpleConnectionTest';
 import Papa from 'papaparse';
 import { useNavigate } from 'react-router-dom';
+import { RealtimeChannel } from '@supabase/supabase-js';
 
 const STATUS_COLORS: Record<string, string> = {
   draft: 'bg-gray-400',
@@ -568,7 +569,7 @@ function TradeInsPanel() {
 // Add RentalsPanel component
 function RentalsPanel() {
   const [rentals, setRentals] = useState<any[]>([]);
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [showAdd, setShowAdd] = useState(false);
   const [editingRental, setEditingRental] = useState<any>(null);
@@ -588,6 +589,7 @@ function RentalsPanel() {
   const [addSuccess, setAddSuccess] = useState('');
   const [addError, setAddError] = useState('');
   const [editError, setEditError] = useState('');
+  const [channel, setChannel] = useState<RealtimeChannel | null>(null);
 
   useEffect(() => {
     fetchRentals();
@@ -595,11 +597,43 @@ function RentalsPanel() {
 
   async function fetchRentals() {
     setLoading(true);
-    const { data, error } = await supabase.from('rentals').select('*').order('created_at', { ascending: false });
-    if (error) setError(error.message);
-    else setRentals(data || []);
+    setError('');
+    try {
+      const { data, error } = await supabase.from('rentals').select('*').order('created_at', { ascending: false });
+      if (data) setRentals(data);
+      if (error) setError(error.message);
+    } catch (error) {
+      setError('Failed to fetch rentals');
+    }
     setLoading(false);
   }
+
+  useEffect(() => {
+    fetchRentals();
+    // Set up real-time subscription
+    const ch = supabase.channel('realtime-rentals-admin')
+      .on(
+        'postgres_changes',
+        { event: '*', schema: 'public', table: 'rentals' },
+        (payload) => {
+          if (payload.eventType === 'INSERT') {
+            setRentals(prev => [payload.new, ...prev]);
+          } else if (payload.eventType === 'UPDATE') {
+            setRentals(prev => prev.map(rental => rental.id === payload.new.id ? payload.new : rental));
+          } else if (payload.eventType === 'DELETE') {
+            setRentals(prev => prev.filter(rental => rental.id !== payload.old.id));
+          }
+        }
+      )
+      .subscribe();
+    setChannel(ch);
+    return () => {
+      if (channel) {
+        supabase.removeChannel(channel);
+      }
+      supabase.removeChannel(ch);
+    };
+  }, []);
 
   function openEdit(rental: any) {
     setEditingRental(rental);
@@ -1040,6 +1074,7 @@ const AllCarsPanel = ({ fetchCars }: { fetchCars: () => Promise<void> }) => {
   const [incrementView, setIncrementView] = useState(0);
   const [editingCar, setEditingCar] = useState<any | null>(null);
   const navigate = useNavigate();
+  const [channel, setChannel] = useState<RealtimeChannel | null>(null);
 
   useEffect(() => {
     async function fetchAll() {
@@ -1068,6 +1103,33 @@ const AllCarsPanel = ({ fetchCars }: { fetchCars: () => Promise<void> }) => {
       supabase.removeChannel(carCh);
       supabase.removeChannel(rentalCh);
       supabase.removeChannel(tradeInCh);
+    };
+  }, []);
+
+  useEffect(() => {
+    fetchCars();
+    // Set up real-time subscription
+    const ch = supabase.channel('realtime-cars-admin')
+      .on(
+        'postgres_changes',
+        { event: '*', schema: 'public', table: 'cars' },
+        (payload) => {
+          if (payload.eventType === 'INSERT') {
+            setCars(prev => [payload.new, ...prev]);
+          } else if (payload.eventType === 'UPDATE') {
+            setCars(prev => prev.map(car => car.id === payload.new.id ? payload.new : car));
+          } else if (payload.eventType === 'DELETE') {
+            setCars(prev => prev.filter(car => car.id !== payload.old.id));
+          }
+        }
+      )
+      .subscribe();
+    setChannel(ch);
+    return () => {
+      if (channel) {
+        supabase.removeChannel(channel);
+      }
+      supabase.removeChannel(ch);
     };
   }, []);
 
@@ -1210,7 +1272,8 @@ export default function CarManagementPanel() {
   const [cars, setCars] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
-  const [activeTab, setActiveTab] = useState('test'); // Changed from 'all' to 'test'
+  const [activeTab, setActiveTab] = useState('test');
+  const [channel, setChannel] = useState<RealtimeChannel | null>(null);
 
   // Optimized connection testing - only test once on mount with timeout
   useEffect(() => {
@@ -1248,6 +1311,29 @@ export default function CarManagementPanel() {
 
   useEffect(() => {
     fetchCars();
+    // Set up real-time subscription
+    const ch = supabase.channel('realtime-cars-admin')
+      .on(
+        'postgres_changes',
+        { event: '*', schema: 'public', table: 'cars' },
+        (payload) => {
+          if (payload.eventType === 'INSERT') {
+            setCars(prev => [payload.new, ...prev]);
+          } else if (payload.eventType === 'UPDATE') {
+            setCars(prev => prev.map(car => car.id === payload.new.id ? payload.new : car));
+          } else if (payload.eventType === 'DELETE') {
+            setCars(prev => prev.filter(car => car.id !== payload.old.id));
+          }
+        }
+      )
+      .subscribe();
+    setChannel(ch);
+    return () => {
+      if (channel) {
+        supabase.removeChannel(channel);
+      }
+      supabase.removeChannel(ch);
+    };
   }, []);
 
   return (

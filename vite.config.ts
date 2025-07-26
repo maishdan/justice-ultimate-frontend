@@ -1,59 +1,39 @@
-import { defineConfig } from 'vite';
-import react from '@vitejs/plugin-react';
+import { defineConfig } from 'vite'
+import react from '@vitejs/plugin-react'
+import { VitePWA } from 'vite-plugin-pwa'
 
+// https://vitejs.dev/config/
 export default defineConfig({
-  plugins: [react()],
+  plugins: [
+    react(),
+    VitePWA({
+      registerType: 'autoUpdate',
+      includeAssets: ['logo.png'],
+      manifest: {
+        name: 'Justice Ultimate Automobiles',
+        short_name: 'JUA',
+        description: 'Premium vehicle dealership and rental services',
+        theme_color: '#facc15',
+        background_color: '#ffffff',
+        display: 'standalone',
+        start_url: '/',
+        icons: [
+          {
+            src: '/logo.png',
+            sizes: '192x192',
+            type: 'image/png'
+          },
+          {
+            src: '/logo.png',
+            sizes: '512x512',
+            type: 'image/png'
+          }
+        ]
+      }
+    })
+  ],
   server: {
-    // Correct: enable SPA fallback via middleware, automatically handled by Vite
-    // No need for 'historyApiFallback'
-  },
-  build: {
-    // Optimize chunk splitting for better performance
-    rollupOptions: {
-      output: {
-        manualChunks: {
-          // Vendor chunks
-          'react-vendor': ['react', 'react-dom', 'react-router-dom'],
-          'ui-vendor': ['framer-motion', 'lucide-react', 'react-icons'],
-          'utils-vendor': ['date-fns', 'dayjs', 'clsx'],
-          'charts-vendor': ['recharts'],
-          'pdf-vendor': ['jspdf', 'jspdf-autotable', 'html2canvas'],
-          'supabase-vendor': ['@supabase/supabase-js', '@supabase/auth-helpers-react'],
-          'i18n-vendor': ['i18next', 'react-i18next', 'i18next-browser-languagedetector'],
-        },
-      },
-    },
-    // Optimize chunk size warnings
-    chunkSizeWarningLimit: 1000,
-    // Enable source maps for production debugging
-    sourcemap: false,
-    // Optimize CSS
-    cssCodeSplit: true,
-    // Minify options
-    minify: 'terser',
-    terserOptions: {
-      compress: {
-        drop_console: true,
-        drop_debugger: true,
-      },
-    },
-  },
-  // Optimize dependencies
-  optimizeDeps: {
-    include: [
-      'react',
-      'react-dom',
-      'react-router-dom',
-      'framer-motion',
-      'lucide-react',
-      'react-icons',
-      '@supabase/supabase-js',
-      'i18next',
-      'react-i18next',
-    ],
-  },
-  // Define global constants
-  define: {
-    __DEV__: JSON.stringify(process.env.NODE_ENV === 'development'),
-  },
-});
+    port: 5173,
+    host: true
+  }
+})

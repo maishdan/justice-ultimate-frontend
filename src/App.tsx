@@ -6,6 +6,7 @@ import ProtectedRoute from "./routes/ProtectedRoute";
 import PrivateRoute from "./routes/PrivateRoute";
 import AllCarsShowcase from "./pages/AllCarsShowcase";
 import ErrorBoundary from "./components/ErrorBoundary";
+import InstallPrompt from "./components/InstallPrompt";
 
 import Header from "./components/ui/Header";
 import LandingPage from "./pages/LandingPage";
@@ -55,6 +56,34 @@ function App() {
   const location = useLocation();
   const { i18n } = useTranslation();
 
+  // Register service worker for PWA
+  useEffect(() => {
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.register('/service-worker.js')
+        .then((registration) => {
+          console.log('SW registered: ', registration);
+          
+          // Check for updates
+          registration.addEventListener('updatefound', () => {
+            const newWorker = registration.installing;
+            if (newWorker) {
+              newWorker.addEventListener('statechange', () => {
+                if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
+                  // New content is available, show update prompt
+                  if (confirm('New version available! Reload to update?')) {
+                    window.location.reload();
+                  }
+                }
+              });
+            }
+          });
+        })
+        .catch((registrationError) => {
+          console.log('SW registration failed: ', registrationError);
+        });
+    }
+  }, []);
+
   // ✅ Car Start Sound: Play only on initial homepage load with debug log
   useEffect(() => {
     if (location.pathname === "/") {
@@ -80,6 +109,7 @@ function App() {
 
   return (
     <UserProfileProvider>
+      <InstallPrompt />
       <Header />
       <div className="app-background min-h-screen transition-colors duration-300 clean-container" style={{ paddingTop: '64px' }}>
         <ErrorBoundary>

@@ -26,6 +26,7 @@ export default function Header() {
   const { t } = useTranslation();
   const { i18n } = useTranslation();
   const [menuOpen, setMenuOpen] = useState(false);
+  const [canInstall, setCanInstall] = useState(false);
   
   // Debug menu state
   useEffect(() => {
@@ -39,6 +40,27 @@ export default function Header() {
     const systemPrefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
     setDarkMode(systemPrefersDark);
   }, [setDarkMode]);
+
+  useEffect(() => {
+    // Listen for beforeinstallprompt to show the button
+    const handleBeforeInstallPrompt = (e: Event) => {
+      e.preventDefault();
+      setCanInstall(true);
+      // Expose a global installJUA function for the button
+      (window as any).installJUA = () => {
+        window.dispatchEvent(new CustomEvent('triggerInstall'));
+      };
+    };
+    window.addEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
+    // Hide button if app is installed
+    if (window.matchMedia('(display-mode: standalone)').matches) {
+      setCanInstall(false);
+    }
+    return () => {
+      window.removeEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
+      delete (window as any).installJUA;
+    };
+  }, []);
 
   const navLinks = [
     { label: t('home'), path: '/' },
@@ -303,15 +325,16 @@ export default function Header() {
 
             {/* Install JUA Button */}
             <div className="flex items-center">
-              <button
-                className="px-3 py-1.5 bg-gradient-to-r from-yellow-400/90 to-yellow-500/90 hover:from-yellow-500 hover:to-yellow-600 text-black rounded-md text-sm font-medium transition-all duration-300 shadow-sm backdrop-blur-sm border border-yellow-300/30"
-                onClick={() => {
-                  if ((window as any).installJUA) (window as any).installJUA();
-                  else alert('To install, use your browser\'s install option.');
-                }}
-              >
-                Install JUA
-              </button>
+              {canInstall && (
+                <button
+                  className="px-3 py-1.5 bg-gradient-to-r from-yellow-400/90 to-yellow-500/90 hover:from-yellow-500 hover:to-yellow-600 text-black rounded-md text-sm font-medium transition-all duration-300 shadow-sm backdrop-blur-sm border border-yellow-300/30"
+                  onClick={() => {
+                    if ((window as any).installJUA) (window as any).installJUA();
+                  }}
+                >
+                  Install JUA
+                </button>
+              )}
               <div className="w-px h-6 bg-white/20 mx-2"></div>
             </div>
 

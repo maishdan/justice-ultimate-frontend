@@ -3,7 +3,7 @@ export const uploadConfig = {
   // Timeout settings
   timeouts: {
     upload: 60000, // 60 seconds for image uploads
-    database: 15000, // 15 seconds for database operations
+    database: 30000, // 30 seconds for database operations
     connection: 10000, // 10 seconds for connection tests
   },
   
@@ -46,16 +46,14 @@ export const uploadConfig = {
 export function getOptimizedTimeout(type: 'upload' | 'database' | 'connection'): number {
   const baseTimeout = uploadConfig.timeouts[type];
   
-  // Use shorter timeouts in development for faster feedback
+  // Always use 30 seconds for database operations in all environments
+  if (type === 'database') {
+    return 30000;
+  }
+  // Use shorter timeouts in development for uploads/connections
   if (uploadConfig.environment.isDevelopment) {
-    return baseTimeout * 0.3; // 70% faster in development
+    return baseTimeout * 0.3;
   }
-  
-  // Use base timeouts in production for reliability
-  if (uploadConfig.environment.isProduction) {
-    return baseTimeout; // Use full timeout in production
-  }
-  
   return baseTimeout;
 }
 

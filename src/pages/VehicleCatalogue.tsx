@@ -45,6 +45,7 @@ export default function VehicleCatalogue() {
   useEffect(() => {
     async function fetchCars() {
       setLoading(true);
+      setError("");
       const { data, error } = await supabase.from('cars').select('*').order('created_at', { ascending: false });
       if (error) setError(error.message);
       else setCars(data || []);
