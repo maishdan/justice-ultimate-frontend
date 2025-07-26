@@ -58,27 +58,6 @@ export default function InstallPrompt() {
       }
     };
 
-    // Auto-update service worker in background
-    if ('serviceWorker' in navigator) {
-      navigator.serviceWorker.ready.then((registration) => {
-        registration.addEventListener('updatefound', () => {
-          const newWorker = registration.installing;
-          if (newWorker) {
-            newWorker.addEventListener('statechange', () => {
-              if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
-                // Auto-update without showing popup
-                newWorker.postMessage({ type: 'SKIP_WAITING' });
-                // Reload after a short delay to apply update
-                setTimeout(() => {
-                  window.location.reload();
-                }, 1000);
-              }
-            });
-          }
-        });
-      });
-    }
-
     // Check if install prompt was dismissed recently
     const lastDismissed = localStorage.getItem('installPromptDismissed');
     const shouldShowPrompt = !lastDismissed || (Date.now() - parseInt(lastDismissed)) > 24 * 60 * 60 * 1000;
