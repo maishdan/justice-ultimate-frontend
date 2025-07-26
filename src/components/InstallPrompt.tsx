@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Download, X, Smartphone, Monitor, RefreshCw } from 'lucide-react';
+import { Download, X, Smartphone, Monitor } from 'lucide-react';
 
 interface BeforeInstallPromptEvent extends Event {
   prompt(): Promise<void>;
@@ -13,11 +13,8 @@ export default function InstallPrompt() {
   const [showPrompt, setShowPrompt] = useState(false);
   const [isInstalling, setIsInstalling] = useState(false);
   const [deviceType, setDeviceType] = useState<'mobile' | 'desktop'>('desktop');
-  const [updateAvailable, setUpdateAvailable] = useState(false);
-  const [waitingWorker, setWaitingWorker] = useState<ServiceWorker | null>(null);
   const [showInstallStart, setShowInstallStart] = useState(false);
   const [showInstallSuccess, setShowInstallSuccess] = useState(false);
-  const [updateShown, setUpdateShown] = useState(false);
 
   useEffect(() => {
     // Check if app is already installed
@@ -61,7 +58,7 @@ export default function InstallPrompt() {
       }
     };
 
-    // Check for service worker updates
+    // Auto-update service worker in background
     if ('serviceWorker' in navigator) {
       navigator.serviceWorker.ready.then((registration) => {
         registration.addEventListener('updatefound', () => {
@@ -69,11 +66,12 @@ export default function InstallPrompt() {
           if (newWorker) {
             newWorker.addEventListener('statechange', () => {
               if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
-                setWaitingWorker(newWorker);
-                if (!updateShown) {
-                  setUpdateAvailable(true);
-                  setUpdateShown(true);
-                }
+                // Auto-update without showing popup
+                newWorker.postMessage({ type: 'SKIP_WAITING' });
+                // Reload after a short delay to apply update
+                setTimeout(() => {
+                  window.location.reload();
+                }, 1000);
               }
             });
           }
@@ -103,7 +101,7 @@ export default function InstallPrompt() {
       window.removeEventListener('triggerInstall', handleTriggerInstall);
       delete (window as any).installJUA;
     };
-  }, [deferredPrompt, isInstalled, deviceType, updateShown]);
+  }, [deferredPrompt, isInstalled, deviceType]);
 
   const handleInstall = async () => {
     if (!deferredPrompt) {
@@ -140,57 +138,10 @@ export default function InstallPrompt() {
     }
   };
 
-  const handleUpdate = () => {
-    if (waitingWorker) {
-      waitingWorker.postMessage({ type: 'SKIP_WAITING' });
-      setUpdateAvailable(false);
-      window.location.reload();
-    }
-  };
-
   const handleDismiss = () => {
     setShowPrompt(false);
     localStorage.setItem('installPromptDismissed', Date.now().toString());
   };
-
-  // Professional update popup - shows only once
-  if (updateAvailable && !updateShown) {
-    return (
-      <AnimatePresence>
-        <motion.div
-          initial={{ opacity: 0, y: -50, scale: 0.9 }}
-          animate={{ opacity: 1, y: 0, scale: 1 }}
-          exit={{ opacity: 0, y: -50, scale: 0.9 }}
-          transition={{ duration: 0.3, ease: "easeOut" }}
-          className="fixed top-4 left-1/2 transform -translate-x-1/2 z-50"
-        >
-          <div className="glass-panel backdrop-blur-xl bg-gradient-to-r from-yellow-400/20 to-yellow-500/20 border border-yellow-300/30 rounded-2xl shadow-2xl p-4 max-w-sm w-[95vw] md:w-[400px]">
-            <div className="flex items-center gap-3 mb-3">
-              <div className="w-10 h-10 bg-gradient-to-r from-yellow-400 to-yellow-500 rounded-xl flex items-center justify-center">
-                <RefreshCw className="w-5 h-5 text-black animate-spin" />
-              </div>
-              <div>
-                <h3 className="text-white font-bold text-sm">New Update Available</h3>
-                <p className="text-white/70 text-xs">A new version of Justice Ultimate Automobiles is ready. Please update to get the latest features and improvements.</p>
-              </div>
-            </div>
-            <div className="flex gap-2">
-              <button
-                onClick={handleUpdate}
-                className="flex-1 bg-gradient-to-r from-yellow-400 to-yellow-500 hover:from-yellow-300 hover:to-yellow-400 text-black font-bold py-2 px-4 rounded-xl text-sm transition-all duration-300 shadow-lg hover:shadow-xl flex items-center justify-center gap-2"
-              >
-                <RefreshCw className="w-4 h-4" />
-                Update Now
-              </button>
-            </div>
-            <div className="mt-3 text-xs text-white/60">
-              <p>✨ Fast updates • Seamless experience</p>
-            </div>
-          </div>
-        </motion.div>
-      </AnimatePresence>
-    );
-  }
 
   // Left-side install start popup
   if (showInstallStart) {
@@ -249,7 +200,7 @@ export default function InstallPrompt() {
         animate={{ opacity: 1, y: 0, scale: 1 }}
         exit={{ opacity: 0, y: -50, scale: 0.9 }}
         transition={{ duration: 0.3, ease: "easeOut" }}
-        className="fixed top-4 left-1/2 transform -translate-x-1/2 z-50"
+        className="fixed top-4 left-1/2 transform -translate-x-1/2 z-[99999]"
       >
         <div className="glass-panel backdrop-blur-xl bg-gradient-to-r from-yellow-400/20 to-yellow-500/20 border border-yellow-300/30 rounded-2xl shadow-2xl p-4 max-w-sm w-[95vw] md:w-[400px]">
           <div className="flex items-center gap-3 mb-3">
