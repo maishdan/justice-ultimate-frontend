@@ -1,0 +1,3 @@
+User-agent: *
+Allow: /
+Sitemap: https://justicefrontend-syst.vercel.app/sitemap.xml
