@@ -1580,5 +1580,5 @@ export const carsData: Car[] = [
      featured: true,
      availability: "Available",
      ratings: 5.0,
-   },
+  },
 ];
