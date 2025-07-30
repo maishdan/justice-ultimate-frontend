@@ -10,6 +10,7 @@ import { RealtimeChannel } from '@supabase/supabase-js';
 import { CarCard } from '../components/CarCard';
 import type { Car } from '../types/Car';
 import RentalsPage from './RentalsPage';
+import { carsData } from '../data/carData';
 
 export default function VehicleCatalogue() {
   const [cars, setCars] = useState<any[]>([]);
@@ -46,9 +47,46 @@ export default function VehicleCatalogue() {
     async function fetchCars() {
       setLoading(true);
       setError("");
-      const { data, error } = await supabase.from('cars').select('*').order('created_at', { ascending: false });
-      if (error) setError(error.message);
-      else setCars(data || []);
+      try {
+        // Fetch cars from database
+        const { data: dbCars, error } = await supabase.from('cars').select('*').order('created_at', { ascending: false });
+        if (error) setError(error.message);
+        
+        // Convert database cars to match CarCard format
+        const formattedDbCars = (dbCars || []).map(dbCar => ({
+          id: dbCar.id,
+          slug: dbCar.name?.toLowerCase().replace(/\s+/g, '-') || dbCar.id,
+          name: dbCar.name,
+          tagline: dbCar.description || `${dbCar.brand} ${dbCar.model}`,
+          stockId: dbCar.id,
+          tags: dbCar.tags || [dbCar.brand, dbCar.fuel_type].filter(Boolean),
+          price: dbCar.price,
+          currency: "KES",
+          specs: {
+            fuel: dbCar.fuel_type,
+            transmission: dbCar.transmission,
+            drivetrain: dbCar.drive_type,
+            color: dbCar.colors?.[0] || 'White',
+            mileage: 0,
+            year: parseInt(dbCar.year) || 2023,
+          },
+          location: dbCar.location || 'Nairobi, Kenya',
+          image: dbCar.main_image ? [dbCar.main_image] : ['/images/default-car.jpg'],
+          description: dbCar.description || `${dbCar.brand} ${dbCar.model} ${dbCar.year}`,
+          featured: dbCar.status === 'published',
+          availability: dbCar.is_sold ? 'Sold' : 'Available',
+          ratings: dbCar.reputation_score || 4.5,
+          // Add database source flag
+          source: 'database'
+        }));
+
+        // Combine database cars with static cars from AllCarsShowcase
+        const allCars = [...formattedDbCars, ...carsData];
+        setCars(allCars);
+      } catch (err) {
+        console.error('Error fetching cars:', err);
+        setError('Failed to fetch cars');
+      }
       setLoading(false);
     }
     fetchCars();
@@ -88,10 +126,12 @@ export default function VehicleCatalogue() {
       // Add null checks to prevent toLowerCase errors
       const carName = car.name || car.title || '';
       const carBrand = car.brand || car.make || '';
+      const carModel = car.model || '';
       
       const matchesSearch =
         carName.toLowerCase().includes(search.toLowerCase()) ||
-        carBrand.toLowerCase().includes(search.toLowerCase());
+        carBrand.toLowerCase().includes(search.toLowerCase()) ||
+        carModel.toLowerCase().includes(search.toLowerCase());
       const matchesCategory = category ? (car.category || '') === category : true;
       return matchesSearch && matchesCategory;
     });
@@ -194,23 +234,24 @@ export default function VehicleCatalogue() {
                 </Button>
               </div>
             </div>
-            <motion.p 
-              className="text-lg text-white/90 leading-relaxed max-w-2xl mx-auto mt-6"
-              initial={{ opacity: 0, y: 30 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.8, delay: 0.4 }}
-            >
-              🚗 Discover our premium collection of vehicles from luxury cars to commercial vehicles, all available for rent or purchase.
-            </motion.p>
+                         <motion.p 
+               className="text-lg text-white/90 leading-relaxed max-w-2xl mx-auto mt-6"
+               initial={{ opacity: 0, y: 30 }}
+               animate={{ opacity: 1, y: 0 }}
+               transition={{ duration: 0.8, delay: 0.4 }}
+             >
+               🚗 Discover our premium collection of vehicles from luxury cars to commercial vehicles, all available for rent or purchase.
+             </motion.p>
           </motion.section>
 
-          {/* Search and Filter Section with Enhanced Glass Morphism */}
-          <motion.section
-            className="mb-12"
-            initial={{ opacity: 0, y: 40 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8, delay: 0.6 }}
-          >
+                     {/* Search and Filter Section with Enhanced Glass Morphism */}
+           <motion.section
+             className="mb-12"
+             initial={{ opacity: 0, y: 40 }}
+             animate={{ opacity: 1, y: 0 }}
+             transition={{ duration: 0.8, delay: 0.6 }}
+           >
+             
             <div className="glass-panel rounded-2xl p-6 shadow-xl border border-white/20 backdrop-blur-xl">
               <div className="flex flex-col md:flex-row gap-4 justify-center items-center">
                 <div className="relative w-full md:w-1/3">
@@ -287,15 +328,16 @@ export default function VehicleCatalogue() {
                   </div>
                 </div>
               ) : (
-                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-0 p-0 m-0">
-                  {filteredCars.map((car: any, index: number) => (
-                    <CarCard
-                      key={car.id}
-                      car={car}
-                      onSelect={() => setSelectedCar(car)}
-                    />
-                  ))}
-                </div>
+                                 <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6 p-6">
+                   {filteredCars.map((car: any, index: number) => (
+                     <div key={car.id} className="relative transform transition-all duration-300 hover:scale-105 hover:shadow-2xl">
+                       <CarCard
+                         car={car}
+                         onSelect={() => setSelectedCar(car)}
+                       />
+                     </div>
+                   ))}
+                 </div>
               )}
             </motion.section>
           )}

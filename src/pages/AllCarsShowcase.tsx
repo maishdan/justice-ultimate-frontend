@@ -33,7 +33,7 @@ const AllCarsShowcase: React.FC = () => {
 
   const handleSearch = (query: string) => {
     const filtered = carsData.filter(car =>
-      car.name.toLowerCase().includes(query.toLowerCase())
+      (car.name || '').toLowerCase().includes(query.toLowerCase())
     );
     setSearchResults(filtered);
   };

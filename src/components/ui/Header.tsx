@@ -76,7 +76,7 @@ export default function Header() {
   const navLinks = [
     { label: t('home'), path: '/' },
     { label: t('services'), path: '/services' },
-    { label: t('showroom'), path: '/vehicle-catalogue' },
+    { label: t('Cars'), path: '/vehicle-catalogue' },
     {
       label: t('company'), path: '#', subMenu: [
         { label: t('news'), path: '/news' },
