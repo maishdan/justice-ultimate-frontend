@@ -29,13 +29,16 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
   try {
     // 1. Get user from auth
-    const { data: users, error: listError } = await supabase.auth.admin.listUsers({ email });
+    const { data: users, error: listError } = await supabase.auth.admin.listUsers();
 
     if (listError || !users || users.users.length === 0) {
       return res.status(404).json({ error: 'User not found' });
     }
 
-    const user = users.users[0];
+    const user = users.users.find((u: any) => u.email === email);
+    if (!user) {
+      return res.status(404).json({ error: 'User not found' });
+    }
     const userId = user.id;
 
     // 2. Update user metadata with role

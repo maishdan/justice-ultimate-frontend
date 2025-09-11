@@ -3,6 +3,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import LoadingScreen from '../components/ui/LoadingScreen';
 import { motion } from "framer-motion";
 import { Button } from "../components/ui/button";
+import { Github } from "lucide-react";
 import { Link, useLocation } from "react-router-dom";
 import { FaHome, FaTachometerAlt, FaEnvelopeOpenText } from "react-icons/fa";
 import { FaEnvelope, FaPhoneAlt, FaWhatsapp } from "react-icons/fa";
@@ -367,8 +368,18 @@ export default function LandingPage() {
               </div>
             </div>
             <div className="text-center text-xs mt-8 pt-6 border-t border-white/20 text-white/60">
-              &copy; 2025 Justice Ultimate Automobiles. All rights reserved.
-            </div>
+      &copy; 2025 Justice Ultimate Automobiles. All rights reserved.  
+      @ Developed by Daniwest Tech Sol.
+      <a
+        href="https://www.github.com/maishdan"
+        target="_blank"
+        rel="noopener noreferrer"
+        className="inline-flex items-center gap-1 ml-2 px-2 py-1 bg-white/10 hover:bg-yellow-400 hover:text-black text-white/80 rounded-full transition-all duration-300 shadow-sm"
+      >
+        <Github className="w-3 h-3" />
+        <span className="text-xs">Daniwest Maina</span>
+      </a>
+    </div>
           </motion.div>
         </footer>
       </div>

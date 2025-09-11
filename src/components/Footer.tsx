@@ -2,6 +2,7 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
+import { Github } from "lucide-react";
 import { FaHome, FaTachometerAlt, FaEnvelope, FaPhone, FaWhatsapp, FaFileAlt, FaLock, FaCookieBite } from 'react-icons/fa';
 
 export default function Footer() {
@@ -123,9 +124,18 @@ export default function Footer() {
 
         {/* Copyright */}
         <div className="border-t border-white/20 pt-6">
-          <p className="text-center text-white/60 text-sm">@ Developed by  Daniwest Tech Sol.
-            © 2025 Justice Ultimate Automobiles. All rights reserved.<a href="https://www.github.com/maishdan" className="text-white/80 hover:text-yellow-400 transition-colors duration-300">Daniwest Maina</a>
-          </p>
+           <p className="text-center text-white/60 text-sm">
+      @ Developed by Daniwest Tech Sol. © 2025 Justice Ultimate Automobiles. All rights reserved.
+      <a
+        href="https://www.github.com/maishdan"
+        target="_blank"
+        rel="noopener noreferrer"
+        className="inline-flex items-center gap-2 ml-2 px-3 py-1 bg-white/10 hover:bg-yellow-400 hover:text-black text-white/80 rounded-full transition-all duration-300 shadow-md"
+      >
+        <Github className="w-4 h-4" />
+        Daniwest Maina
+      </a>
+    </p>
         </div>
       </motion.div>
     </footer>
