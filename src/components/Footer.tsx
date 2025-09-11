@@ -125,7 +125,7 @@ export default function Footer() {
         {/* Copyright */}
         <div className="border-t border-white/20 pt-6">
            <p className="text-center text-white/60 text-sm">
-      @ Developed by Daniwest Tech Sol. © 2025 Justice Ultimate Automobiles. All rights reserved.
+      © 2025 Justice Ultimate Automobiles. All rights reserved.     @ Developed by Daniwest Tech Sol. 
       <a
         href="https://www.github.com/maishdan"
         target="_blank"
