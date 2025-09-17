@@ -3,9 +3,9 @@ import Footer from "../components/Footer";
 
 export default function Videos() {
   const templates = [
-    { title: 'Showroom Highlights', src: 'https://www.w3schools.com/html/mov_bbb.mp4' },
-    { title: 'Customer Testimonials', src: 'https://www.w3schools.com/html/movie.mp4' },
-    { title: 'Behind the Scenes', src: 'https://www.w3schools.com/html/mov_bbb.mp4' },
+    { title: 'Showroom Highlights', src: '/videos/drive 3.mp4' },
+    { title: 'Customer Testimonials', src: '/videos/drive .mp4' },
+    { title: 'Behind the Scenes', src: '/videos/drive 1.mp4' },
   ];
   return (
     <div className="min-h-screen w-full pt-0">

@@ -183,7 +183,7 @@ export default function About() {
               <div className="bg-white/10 p-6 rounded-xl shadow-md border border-white/20 backdrop-blur-sm max-w-xl mx-auto">
                 <div className="flex flex-col items-center">
                   <div className="h-28 w-28 rounded-full overflow-hidden border-4 border-yellow-400/60 shadow-[0_0_20px_rgba(250,204,21,0.4)]">
-                    <img src="/images/jane.jpg" alt="C.E.O" className="h-full w-full object-cover" />
+                    <img src="/images/CEO.jpg" alt="C.E.O" className="h-full w-full object-cover" />
                   </div>
                   <h3 className="mt-3 font-extrabold text-2xl text-yellow-300">Justice Vincent</h3>
                   <p className="text-white/80">Chief Executive Officer (C.E.O)</p>
@@ -192,7 +192,7 @@ export default function About() {
               </div>
             </div>
             <div className="grid sm:grid-cols-2 md:grid-cols-3 gap-8">
-              {[{ name: "Daniel Maina W.", role: "System Administrator", flag: "🇰🇪" }, { name: "Jane Doe", role: "Head of Exports", flag: "🇺🇸" }, { name: "Ali Zain", role: "Logistics Lead", flag: "🇦🇪" }, { name: "Grace Achieng", role: "Sales Rep", flag: "🇰🇪" }, { name: "Mike Andrews", role: "UK Agent", flag: "🇬🇧" }].map((person, idx) => (
+              {[{ name: "Daniel Maina W.", role: "System Administrator", flag: "🇰🇪" }, { name: "******", role: "Head of Exports", flag: "🇺🇸" }, { name: "******", role: "Logistics Lead", flag: "🇦🇪" }, { name: "******", role: "Sales Rep", flag: "🇰🇪" }, { name: "******", role: "UK Agent", flag: "🇬🇧" }].map((person, idx) => (
                 <motion.div
                   key={idx}
                   initial={{ opacity: 0, y: 30 }}
