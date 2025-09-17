@@ -6,7 +6,7 @@ import type { Car } from "../types/Car";
 import { motion } from "framer-motion";
 import { Button } from "./ui/button";
 import { Badge } from "./ui/badge";
-import { Star, Phone, Mail, MessageCircle } from "lucide-react";
+import { Star, Phone, Mail, MessageCircle, Heart } from "lucide-react";
 import { cn } from "../lib/utils";
 import { useState } from "react";
 import type { MouseEvent } from "react";
@@ -17,8 +17,18 @@ interface CarCardProps {
   onSelect?: () => void;
 }
 
-export const CarCard: FC<CarCardProps> = ({ car }) => {
+export const CarCard: FC<CarCardProps> = ({ car, onSelect }) => {
   const [showModal, setShowModal] = useState(false);
+  const addToWhitelist = (e: any) => {
+    e.stopPropagation();
+    try {
+      const list = JSON.parse(localStorage.getItem('whitelist') || '[]');
+      const exists = list.some((c: any) => c.id === (car as any).id);
+      const newList = exists ? list : [...list, car];
+      localStorage.setItem('whitelist', JSON.stringify(newList));
+      window.dispatchEvent(new Event('whitelistUpdated'));
+    } catch {}
+  };
   return (
     <>
       <motion.div
@@ -27,7 +37,13 @@ export const CarCard: FC<CarCardProps> = ({ car }) => {
           "relative rounded-xl overflow-hidden shadow-xl border border-blue-400/30 bg-gradient-to-br from-blue-900/80 via-blue-800/80 to-blue-950/90 backdrop-blur-lg transition-all flex flex-col min-w-[180px] max-w-[220px] w-full",
         )}
         style={{ minHeight: '340px', maxHeight: '370px' }}
-        onClick={() => setShowModal(true)}
+        onClick={() => {
+          if (onSelect) {
+            onSelect();
+            return;
+          }
+          setShowModal(true);
+        }}
       >
         <div className="relative w-full h-32 sm:h-36 md:h-36 lg:h-32 xl:h-32">
           <img
@@ -35,6 +51,13 @@ export const CarCard: FC<CarCardProps> = ({ car }) => {
             alt={car.name || car.title || 'Car'}
             className="w-full h-full object-cover hover:scale-105 transition-transform"
           />
+          <button
+            onClick={addToWhitelist}
+            className="absolute bottom-2 right-2 p-1.5 rounded-full bg-white/90 hover:bg-white text-red-600 shadow-md"
+            aria-label="Add to whitelist"
+          >
+            <Heart className="w-4 h-4" />
+          </button>
           {car.featured && (
             <Badge
               variant="default"

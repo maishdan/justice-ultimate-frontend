@@ -2,14 +2,13 @@
 import { useEffect, useState, useMemo, useRef } from 'react';
 import { motion } from "framer-motion";
 import { Button } from "../components/ui/button";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { supabase } from '../lib/supabaseClient';
 import { Search, Filter } from 'lucide-react';
 import Footer from "../components/Footer";
 import { RealtimeChannel } from '@supabase/supabase-js';
 import { CarCard } from '../components/CarCard';
-import type { Car } from '../types/Car';
-import RentalsPage from './RentalsPage';
+// removed unused type import and page import
 import { carsData } from '../data/carData';
 
 export default function VehicleCatalogue() {
@@ -18,6 +17,8 @@ export default function VehicleCatalogue() {
   const [error, setError] = useState('');
   const [search, setSearch] = useState('');
   const [category, setCategory] = useState('');
+  const [searchParams, setSearchParams] = useSearchParams();
+  const [page, setPage] = useState<number>(parseInt(searchParams.get('page') || '1'));
   const [channel, setChannel] = useState<RealtimeChannel | null>(null);
   const [selectedCar, setSelectedCar] = useState<any | null>(null);
   const [showTradeIn, setShowTradeIn] = useState(false);
@@ -29,7 +30,7 @@ export default function VehicleCatalogue() {
   const [tradeInError, setTradeInError] = useState('');
   const fileInputRef = useRef<HTMLInputElement>(null);
   const navigate = useNavigate();
-  const [showRentals, setShowRentals] = useState(false);
+  const [showRentals] = useState(false);
   const [rentals, setRentals] = useState<any[]>([]);
   const [rentalsLoading, setRentalsLoading] = useState(false);
   const [rentalsError, setRentalsError] = useState('');
@@ -137,6 +138,22 @@ export default function VehicleCatalogue() {
     });
   }, [cars, search, category]);
 
+  const carsPerPage = 10;
+  const totalPages = Math.max(1, Math.ceil(filteredCars.length / carsPerPage));
+  const currentPage = Math.min(Math.max(1, page), totalPages);
+  const paginatedCars = useMemo(() => {
+    const start = (currentPage - 1) * carsPerPage;
+    return filteredCars.slice(start, start + carsPerPage);
+  }, [filteredCars, currentPage]);
+
+  useEffect(() => {
+    setSearchParams(prev => {
+      const params = new URLSearchParams(prev);
+      params.set('page', String(currentPage));
+      return params;
+    }, { replace: true });
+  }, [currentPage, setSearchParams]);
+
   const categories = useMemo(() => 
     Array.from(new Set(cars.map(car => car.category || ''))).filter(Boolean), [cars]
   );
@@ -152,7 +169,7 @@ export default function VehicleCatalogue() {
       for (const file of tradeInForm.car_images) {
         const ext = file.name.split('.').pop();
         const fileName = `trade_in_${Date.now()}_${Math.random().toString(36).slice(2, 8)}.${ext}`;
-        const { data: uploadData, error: uploadError } = await supabase.storage.from('cars').upload(fileName, file, { upsert: true });
+        const { error: uploadError } = await supabase.storage.from('cars').upload(fileName, file, { upsert: true });
         if (uploadError) throw uploadError;
         const { data: publicUrlData } = supabase.storage.from('cars').getPublicUrl(fileName);
         imageUrls.push(publicUrlData.publicUrl);
@@ -190,6 +207,10 @@ export default function VehicleCatalogue() {
         backgroundAttachment: 'fixed',
       }}
     >
+      <style>{`
+        @keyframes fadecycle { 0%{opacity:0} 4%{opacity:1} 96%{opacity:1} 100%{opacity:0} }
+        ${Array.from({length:12}).map((_,i)=>`.fade-slide-${i}{animation:fadecycle 720s infinite; animation-delay:${i*60}s}`).join('\n')}
+      `}</style>
       {/* Enhanced Background Overlay with Gradient */}
       <div className="absolute inset-0 bg-gradient-to-br from-black/40 via-black/20 to-black/50 pointer-events-none z-10"></div>
       
@@ -206,7 +227,7 @@ export default function VehicleCatalogue() {
       {/* Main Content Container with Enhanced Glass Morphism */}
       <div className="relative z-10 min-h-screen w-full flex flex-col py-8">
         <div className="container mx-auto px-4">
-          {/* Hero Section with Premium Glass Morphism */}
+          {/* Hero Section with Premium Glass Morphism and Slideshow */}
           <motion.section
             className="text-center mb-12 relative"
             initial={{ opacity: 0, y: 60 }}
@@ -221,8 +242,7 @@ export default function VehicleCatalogue() {
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ duration: 0.8, delay: 0.2 }}
                 >
-                  <span className="text-white">Vehicle </span>
-                  <span className="text-yellow-400 drop-shadow-[0_0_20px_rgba(250,204,21,0.5)]">Catalogue</span>
+                  <span className="text-white">CATALOGUE</span>
                 </motion.h1>
               </div>
               <div className="flex gap-4 items-center justify-end">
@@ -234,7 +254,21 @@ export default function VehicleCatalogue() {
                 </Button>
               </div>
             </div>
-                         <motion.p 
+            {/* slow single-image fade slideshow */}
+            <div className="mt-6 relative h-36 flex items-center justify-center">
+              {filteredCars.slice(0, 12).map((c: any, idx: number) => {
+                const img = (c.image || c.additional_images || [c.main_image])?.[0];
+                return (
+                  <img
+                    key={idx}
+                    src={img}
+                    className={`absolute h-36 w-64 object-cover rounded-xl border border-white/20 shadow fade-slide-${idx}`}
+                    style={{ opacity: 0 }}
+                  />
+                );
+              })}
+            </div>
+                        <motion.p 
                className="text-lg text-white/90 leading-relaxed max-w-2xl mx-auto mt-6"
                initial={{ opacity: 0, y: 30 }}
                animate={{ opacity: 1, y: 0 }}
@@ -328,18 +362,49 @@ export default function VehicleCatalogue() {
                   </div>
                 </div>
               ) : (
-                                 <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6 p-6">
-                   {filteredCars.map((car: any, index: number) => (
+                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6 p-6">
+                  {paginatedCars.map((car: any) => (
                      <div key={car.id} className="relative transform transition-all duration-300 hover:scale-105 hover:shadow-2xl">
-                       <CarCard
-                         car={car}
-                         onSelect={() => setSelectedCar(car)}
-                       />
+                       <div onClick={() => navigate(`/car/${car.id}`)}>
+                         <CarCard
+                           car={car}
+                           onSelect={() => navigate(`/car/${car.id}`)}
+                         />
+                       </div>
                      </div>
                    ))}
                  </div>
               )}
             </motion.section>
+          )}
+
+          {/* Pagination Controls */}
+          {!loading && !error && filteredCars.length > 0 && (
+            <div className="flex items-center justify-center gap-2 mt-4">
+              <button
+                className="px-3 py-1.5 rounded-md bg-white/10 text-white border border-white/20 disabled:opacity-40"
+                onClick={() => setPage(p => Math.max(1, p - 1))}
+                disabled={currentPage === 1}
+              >
+                Prev
+              </button>
+              {Array.from({ length: totalPages }, (_, i) => i + 1).map(p => (
+                <button
+                  key={p}
+                  className={`px-3 py-1.5 rounded-md border ${p === currentPage ? 'bg-yellow-400 text-black border-yellow-300' : 'bg-white/10 text-white border-white/20'}`}
+                  onClick={() => setPage(p)}
+                >
+                  {p}
+                </button>
+              ))}
+              <button
+                className="px-3 py-1.5 rounded-md bg-white/10 text-white border border-white/20 disabled:opacity-40"
+                onClick={() => setPage(p => Math.min(totalPages, p + 1))}
+                disabled={currentPage === totalPages}
+              >
+                Next
+              </button>
+            </div>
           )}
           {/* Rentals Grid */}
           {showRentals && (
@@ -374,7 +439,7 @@ export default function VehicleCatalogue() {
                 </div>
               ) : (
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-                  {rentals.map((rental: any, index: number) => (
+                  {rentals.map((rental: any) => (
                     <CarCard
                       key={rental.id}
                       car={rental}

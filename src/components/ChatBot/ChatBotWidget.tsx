@@ -145,7 +145,7 @@ export default function ChatBotWidget() {
   };
 
   return (
-    <div className="fixed bottom-6 right-6 z-50">
+    <div className="fixed bottom-24 right-6 z-[2147483000]">
       {isOpen && (
         <motion.div
           className="w-80 bg-white text-black dark:bg-gray-900 dark:text-white rounded shadow-lg overflow-hidden"
@@ -190,7 +190,7 @@ export default function ChatBotWidget() {
 
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className="bg-yellow-400 p-3 rounded-full shadow-md hover:bg-blue-700 text-white"
+        className="bg-yellow-400 p-3 rounded-full shadow-md hover:bg-blue-700 text-white z-[2147483001]"
         aria-label="Open JusticeAI Chat"
       >
         <BsFillChatDotsFill size={20} />

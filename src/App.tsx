@@ -1,9 +1,9 @@
 import { BrowserRouter as Router, Routes, Route, useLocation, Navigate } from "react-router-dom";
 import { useEffect } from "react";
-import React from 'react';
+// React import preserved by tooling; leaving as is
 
 import ProtectedRoute from "./routes/ProtectedRoute";
-import PrivateRoute from "./routes/PrivateRoute";
+// removed unused PrivateRoute import
 import AllCarsShowcase from "./pages/AllCarsShowcase";
 import ErrorBoundary from "./components/ErrorBoundary";
 import InstallPrompt from "./components/InstallPrompt";
@@ -17,6 +17,8 @@ import Services from "./pages/Services";
 import About from "./pages/About";
 import Contact from "./pages/Contact";
 import News from "./pages/News";
+import Videos from "./pages/Videos";
+import Whitelist from "./pages/Whitelist";
 import Terms from "./pages/Terms";
 import PrivacyPolicy from "./pages/PrivacyPolicy";
 import Cookies from "./pages/Cookies";
@@ -106,6 +108,21 @@ function App() {
     }
   }, [i18n.language]);
 
+  // WhatsApp tip show every minute
+  useEffect(() => {
+    const tip = document.getElementById('wa-tip');
+    const showTip = () => {
+      if (!tip) return;
+      tip.classList.remove('hidden');
+      tip.classList.add('flex');
+      setTimeout(() => { tip.classList.add('hidden'); tip.classList.remove('flex'); }, 4000);
+    };
+    const interval = setInterval(showTip, 60000);
+    // initial slight delay
+    setTimeout(showTip, 3000);
+    return () => clearInterval(interval);
+  }, []);
+
   return (
     <UserProfileProvider>
       <InstallPrompt />
@@ -113,9 +130,25 @@ function App() {
       <div className="app-background min-h-screen transition-colors duration-300 clean-container" style={{ paddingTop: '64px' }}>
         <ErrorBoundary>
           <main className="main-content-responsive smooth-scroll">
+            {/* Floating WhatsApp Button + plain text Tip (front-most) */}
+            <div className="fixed z-[2147483646] bottom-6 right-6 flex flex-col items-end gap-2 pointer-events-none">
+              <div id="wa-tip" className="hidden text-white bg-black/90 px-3 py-2 rounded-md shadow-lg pointer-events-auto">
+                we are online — talk to us via whatsapp
+              </div>
+              <a
+                href="https://wa.me/254722827458?text=Which%20car%20are%20you%20interested%20in%3F"
+                target="_blank"
+                className="pointer-events-auto flex items-center justify-center h-14 w-14 rounded-full bg-[#25D366] shadow-2xl hover:scale-105 transition transform z-[2147483647]"
+                aria-label="WhatsApp"
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" fill="white" className="h-8 w-8"><path d="M19.11 17.59c-.27-.14-1.59-.79-1.83-.88-.24-.09-.42-.14-.6.14-.18.27-.69.88-.84 1.06-.15.18-.31.2-.58.07-.27-.14-1.16-.43-2.2-1.36-.81-.72-1.36-1.61-1.52-1.88-.15-.27-.02-.41.11-.55.11-.11.27-.29.4-.43.13-.15.18-.25.27-.43.09-.18.05-.32-.02-.45-.07-.14-.6-1.45-.82-1.98-.22-.53-.44-.45-.6-.46-.15-.01-.32-.01-.49-.01-.18 0-.45.07-.68.32-.24.27-.9.88-.9 2.15 0 1.27.92 2.5 1.05 2.67.13.18 1.81 2.75 4.4 3.86.62.27 1.1.43 1.48.55.62.2 1.18.17 1.62.1.49-.07 1.59-.65 1.82-1.28.22-.63.22-1.16.15-1.28-.07-.11-.24-.18-.51-.32z"/><path d="M26.07 5.93C23.56 3.42 20.37 2 17 2 9.83 2 4 7.83 4 15c0 2.29.61 4.52 1.77 6.48L4 30l8.69-1.69C14.61 28.39 15.8 28.6 17 28.6c7.17 0 13-5.83 13-13 0-3.37-1.42-6.56-3.93-9.07zM17 26.6c-1.05 0-2.09-.18-3.09-.54l-.22-.08-5.14 1 1-5.02-.1-.23C8.5 20.03 8 17.55 8 15 8 8.93 12.93 4 19 4c3.09 0 6 1.2 8.21 3.4C29.41 9.6 30.6 12.51 30.6 15.6c0 6.07-4.93 11-11 11z"/></svg>
+              </a>
+            </div>
             <Routes>
               <Route path="/" element={<LandingPage />} />
               <Route path="/services" element={<Services />} />
+              <Route path="/videos" element={<Videos />} />
+              <Route path="/whitelist" element={<Whitelist />} />
               <Route path="/about" element={<About />} />
               <Route path="/news" element={<News />} />
               <Route path="/success-stories" element={<SuccessStories />} />
@@ -129,6 +162,7 @@ function App() {
               <Route path="/cookies" element={<Cookies />} />
               <Route path="/book-test-drive" element={<BookTestDrive />} />
               <Route path="/vehicle-catalogue" element={<VehicleCatalogue />} />
+              <Route path="/catalogue" element={<VehicleCatalogue />} />
               <Route path="/reset-password" element={<ResetPassword />} />
               <Route path="/profile" element={<ProfilePage />} />
               <Route path="/car/:id" element={<CarDetailPage />} />

@@ -1,11 +1,10 @@
-import { useState } from "react";
+import { } from "react";
 import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
-import { Globe, Target, Users, Award, MapPin, Phone, Mail } from "lucide-react";
+import { Globe, Target, Users } from "lucide-react";
 import Footer from "../components/Footer";
 
 export default function About() {
-  const [darkMode] = useState(true);
 
   return (
     <div 
@@ -180,8 +179,20 @@ export default function About() {
             <h2 className="text-3xl font-bold mb-6 text-yellow-400 flex items-center justify-center gap-2">
               <Users className="w-8 h-8" /> Meet the Team
             </h2>
+            <div className="mb-10">
+              <div className="bg-white/10 p-6 rounded-xl shadow-md border border-white/20 backdrop-blur-sm max-w-xl mx-auto">
+                <div className="flex flex-col items-center">
+                  <div className="h-28 w-28 rounded-full overflow-hidden border-4 border-yellow-400/60 shadow-[0_0_20px_rgba(250,204,21,0.4)]">
+                    <img src="/images/jane.jpg" alt="C.E.O" className="h-full w-full object-cover" />
+                  </div>
+                  <h3 className="mt-3 font-extrabold text-2xl text-yellow-300">Justice Vincent</h3>
+                  <p className="text-white/80">Chief Executive Officer (C.E.O)</p>
+                </div>
+                <p className="text-sm text-white/70 mt-4">Justice Ultimate Automobiles was built from a relentless drive to deliver world-class vehicles with honesty, excellence, and a customer-first culture. We are proud to serve clients across continents, one successful handover at a time.</p>
+              </div>
+            </div>
             <div className="grid sm:grid-cols-2 md:grid-cols-3 gap-8">
-              {[{ name: "Daniel Maina Wangui", role: "General Manager", flag: "🇰🇪" }, { name: "Jane Doe", role: "Head of Exports", flag: "🇺🇸" }, { name: "Ali Zain", role: "Logistics Lead", flag: "🇦🇪" }, { name: "Grace Achieng", role: "Sales Rep", flag: "🇰🇪" }, { name: "Mike Andrews", role: "UK Agent", flag: "🇬🇧" }].map((person, idx) => (
+              {[{ name: "Daniel Maina W.", role: "System Administrator", flag: "🇰🇪" }, { name: "Jane Doe", role: "Head of Exports", flag: "🇺🇸" }, { name: "Ali Zain", role: "Logistics Lead", flag: "🇦🇪" }, { name: "Grace Achieng", role: "Sales Rep", flag: "🇰🇪" }, { name: "Mike Andrews", role: "UK Agent", flag: "🇬🇧" }].map((person, idx) => (
                 <motion.div
                   key={idx}
                   initial={{ opacity: 0, y: 30 }}

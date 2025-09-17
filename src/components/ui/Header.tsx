@@ -4,8 +4,8 @@
 // 📁 File: src/components/ui/Header.tsx
 import { useEffect, useState } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
-import { Sun, Moon, LogOut, ArrowLeft, User, Shield } from "lucide-react";
-import { AnimatePresence, motion } from "framer-motion";
+import { Sun, Moon, LogOut, ArrowLeft, Heart } from "lucide-react";
+// removed unused framer-motion imports
 import logo from "../../assets/logo.png";
 import { useTheme } from '../../context/ThemeContext';
 import { useTranslation } from 'react-i18next';
@@ -26,7 +26,8 @@ export default function Header() {
   const { t } = useTranslation();
   const { i18n } = useTranslation();
   const [menuOpen, setMenuOpen] = useState(false);
-  const [canInstall, setCanInstall] = useState(false);
+  // removed install prompt state per request
+  const [whitelistCount, setWhitelistCount] = useState<number>(0);
   
   // Debug menu state
   useEffect(() => {
@@ -42,42 +43,30 @@ export default function Header() {
   }, [setDarkMode]);
 
   useEffect(() => {
-    // Listen for beforeinstallprompt to show the button
-    const handleBeforeInstallPrompt = (e: Event) => {
-      e.preventDefault();
-      setCanInstall(true);
+    // Whitelist count init and listeners
+    const readCount = () => {
+      try {
+        const list = JSON.parse(localStorage.getItem('whitelist') || '[]');
+        setWhitelistCount(Array.isArray(list) ? list.length : 0);
+      } catch { setWhitelistCount(0); }
     };
-
-    // Check if app is already installed
-    const checkIfInstalled = () => {
-      return window.matchMedia('(display-mode: standalone)').matches;
+    readCount();
+    const storageListener = (e: StorageEvent) => { if (e.key === 'whitelist') readCount(); };
+    const customListener = () => readCount();
+    window.addEventListener('storage', storageListener);
+    window.addEventListener('whitelistUpdated', customListener as any);
+    return () => {
+      window.removeEventListener('storage', storageListener);
+      window.removeEventListener('whitelistUpdated', customListener as any);
     };
-
-    // Show install button if not already installed
-    if (!checkIfInstalled()) {
-      window.addEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
-      
-      // Also show button after a delay if beforeinstallprompt hasn't fired
-      const timer = setTimeout(() => {
-        if (!checkIfInstalled()) {
-          setCanInstall(true);
-        }
-      }, 2000);
-
-      return () => {
-        window.removeEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
-        clearTimeout(timer);
-      };
-    } else {
-      setCanInstall(false);
-    }
   }, []);
 
   const navLinks = [
     { label: 'Home', path: '/' },
-    { label: 'services', path: '/services' },
-    { label: 'CATALOGUE', path: '/vehicle-catalogue' },
+    { label: 'Services', path: '/services' },
+    { label: 'CATALOGUE', path: '/catalogue' },
     { label: 'Videos', path: '/videos' },
+    { label: 'About', path: '/about' },
     { label: 'Contact', path: '/contact' },
   ];
 
@@ -116,19 +105,7 @@ export default function Header() {
     }
   };
 
-  const handleInstallClick = () => {
-    if ((window as any).installJUA) {
-      (window as any).installJUA();
-    } else {
-      // Fallback for browsers that don't support beforeinstallprompt
-      const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
-      if (isMobile) {
-        alert('To install the app:\n\n1. Tap the share button\n2. Select "Add to Home Screen"\n3. Tap "Add"');
-      } else {
-        alert('To install the app:\n\n1. Click the install icon in your browser\'s address bar\n2. Click "Install"');
-      }
-    }
-  };
+  // install flow removed per request
 
   // ULTIMATE FIXED HEADER STYLES - Cannot be overridden
   useEffect(() => {
@@ -289,35 +266,15 @@ export default function Header() {
           <nav className="hidden lg:flex items-center gap-1 xl:gap-2">
             {navLinks.map((link, index) => (
               <div key={`nav-${index}`} className="flex items-center">
-                {link.subMenu ? (
-                  <select
-                    className="px-3 py-1.5 rounded-md bg-white/20 hover:bg-white/30 transition-all duration-300 text-sm border border-white/20 backdrop-blur-sm cursor-pointer text-white appearance-none flex items-center gap-1 font-medium"
-                    style={{
-                      background: 'rgba(255, 255, 255, 0.1)',
-                      backdropFilter: 'blur(10px)',
-                      WebkitBackdropFilter: 'blur(10px)'
-                    }}
-                    onChange={e => { if (e.target.value) navigate(e.target.value); }}
-                    onClick={e => e.stopPropagation()}
-                    value={location.pathname.startsWith('/news') ? '/news' : location.pathname.startsWith('/success-stories') ? '/success-stories' : location.pathname.startsWith('/about') ? '/about' : ''}
-                  >
-                    <option value="" disabled>{link.label}</option>
-                    {link.subMenu.map((sub) => (
-                      <option key={sub.path} value={sub.path}>{sub.label}</option>
-                    ))}
-                  </select>
-                ) : (
                   <Link
                     key={link.path}
                     to={link.path}
-                    className={`px-3 py-1.5 rounded-md text-sm font-medium transition-all duration-300 hover:bg-white/20 hover:text-yellow-400 backdrop-blur-sm border border-white/10 ${
-                      location.pathname === link.path ? "bg-gradient-to-r from-green-500/30 to-yellow-500/30 text-yellow-400 font-bold border-yellow-400/30" : ""
+                  className={`px-3 py-1.5 rounded-md text-sm font-medium transition-all duration-300 backdrop-blur-sm border border-white/10 bg-white/10 hover:bg-white/20 hover:text-yellow-300 hover:shadow-[0_0_14px_rgba(250,204,21,0.5)] ${
+                    location.pathname === link.path ? "bg-gradient-to-r from-green-500/30 to-yellow-500/30 text-yellow-300 font-bold border-yellow-400/30 shadow-[0_0_14px_rgba(250,204,21,0.5)]" : "text-white"
                     }`}
                   >
                     {link.label}
                   </Link>
-                )}
-                {/* Vertical Separator */}
                 {index < navLinks.length - 1 && (
                   <div className="w-px h-6 bg-white/20 mx-2"></div>
                 )}
@@ -342,40 +299,20 @@ export default function Header() {
               </div>
             )}
 
-            {/* Install JUA Button */}
+            {/* Whitelist Button */}
             <div className="flex items-center">
-              {canInstall && (
-                <button
-                  className="px-3 py-1.5 bg-gradient-to-r from-yellow-400/90 to-yellow-500/90 hover:from-yellow-500 hover:to-yellow-600 text-black rounded-md text-sm font-medium transition-all duration-300 shadow-sm backdrop-blur-sm border border-yellow-300/30"
-                  onClick={handleInstallClick}
-                >
-                  Install JUA
-                </button>
-              )}
+              <Link
+                to="/whitelist"
+                className="flex items-center gap-1 px-3 py-1.5 bg-white/15 hover:bg-white/25 text-white rounded-md text-sm font-medium transition-all duration-300 shadow-sm backdrop-blur-sm border border-white/20"
+              >
+                <Heart className="w-4 h-4 text-yellow-400" />
+                <span className="hidden sm:inline">Whitelist</span>
+                <span className="ml-1 px-1.5 rounded bg-yellow-400 text-black text-xs font-bold">{whitelistCount}</span>
+              </Link>
               <div className="w-px h-6 bg-white/20 mx-2"></div>
             </div>
 
-            {/* Auth Buttons for Non-Authenticated Users */}
-            {!isAuthenticated && (
-              <div className="flex items-center">
-                <Link 
-                  to="/register" 
-                  className="flex items-center gap-1 px-3 py-1.5 border border-green-400/70 text-green-400 hover:bg-green-400/20 hover:text-white rounded-md text-sm font-medium transition-all duration-300 backdrop-blur-sm"
-                >
-                  <User className="w-3 h-3" />
-                  <span className="hidden sm:inline">{t('register')}</span>
-                </Link>
-                <div className="w-px h-6 bg-white/20 mx-2"></div>
-                <Link 
-                  to="/login" 
-                  className="flex items-center gap-1 px-3 py-1.5 bg-gradient-to-r from-green-500/90 to-green-600/90 hover:from-green-600 hover:to-green-700 text-white rounded-md text-sm font-medium transition-all duration-300 shadow-sm backdrop-blur-sm border border-green-400/30"
-                >
-                  <Shield className="w-3 h-3" />
-                  <span className="hidden sm:inline">{t('login')}</span>
-                </Link>
-                <div className="w-px h-6 bg-white/20 mx-2"></div>
-              </div>
-            )}
+            {/* Auth Buttons removed per request */}
 
             {/* Logout Button for Authenticated Users */}
             {isAuthenticated && (
@@ -454,38 +391,12 @@ export default function Header() {
                 </button>
               )}
               
-              {/* Install JUA Button */}
-              {canInstall && (
-                <button
-                  className="w-full px-3 py-2 bg-yellow-500/90 hover:bg-yellow-600/90 text-black rounded-xl font-medium transition-all duration-300 text-sm shadow-lg"
-                  onClick={() => {
-                    handleInstallClick();
-                    setMenuOpen(false);
-                  }}
-                >
-                  Install JUA
-                </button>
-              )}
+              {/* Install removed per request */}
               
               {/* Navigation Links */}
               <div className="space-y-1">
                 <div className="text-xs font-semibold text-blue-200 px-2 py-1 uppercase tracking-wider">Navigation</div>
-                {navLinks.map((link) =>
-                  link.subMenu ? (
-                    <div key={link.label} className="space-y-1">
-                      <div className="font-medium text-yellow-400 px-2 py-1 text-sm">{link.label}</div>
-                      {link.subMenu.map((sub) => (
-                        <Link
-                          key={sub.path}
-                          to={sub.path}
-                          className="block ml-3 px-2 py-1 text-blue-100 hover:text-yellow-400 hover:bg-blue-800/50 transition-all duration-300 rounded-lg text-sm"
-                          onClick={() => setMenuOpen(false)}
-                        >
-                          {sub.label}
-                        </Link>
-                      ))}
-                    </div>
-                  ) : (
+                {navLinks.map((link) => (
                     <Link
                       key={link.path}
                       to={link.path}
@@ -494,30 +405,11 @@ export default function Header() {
                     >
                       {link.label}
                     </Link>
-                  )
-                )}
+                ))}
               </div>
               
-              {/* Auth Buttons */}
-              {!isAuthenticated ? (
-                <div className="space-y-2 pt-3 border-t border-blue-400/20">
-                  <div className="text-xs font-semibold text-blue-200 px-2 py-1 uppercase tracking-wider">Account</div>
-                  <Link 
-                    to="/register" 
-                    className="block w-full px-3 py-2 border border-green-400/70 text-green-400 hover:bg-green-400/20 hover:text-white rounded-xl font-medium transition-all duration-300 text-center text-sm shadow-lg"
-                    onClick={() => setMenuOpen(false)}
-                  >
-                    Register
-                  </Link>
-                  <Link 
-                    to="/login" 
-                    className="block w-full px-3 py-2 bg-green-600/90 hover:bg-green-700/90 text-white rounded-xl font-medium transition-all duration-300 text-center text-sm shadow-lg"
-                    onClick={() => setMenuOpen(false)}
-                  >
-                    Login
-                  </Link>
-                </div>
-              ) : (
+              {/* Auth Buttons removed per request */}
+              {isAuthenticated ? (
                 <div className="pt-3 border-t border-blue-400/20">
                   <div className="text-xs font-semibold text-blue-200 px-2 py-1 uppercase tracking-wider">Account</div>
                   <button 
@@ -530,7 +422,7 @@ export default function Header() {
                     Logout
                   </button>
                 </div>
-              )}
+              ) : null}
               
               {/* Settings */}
               <div className="pt-3 border-t border-blue-400/20">

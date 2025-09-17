@@ -1,5 +1,5 @@
 // src/pages/LandingPage.tsx
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect } from 'react';
 import LoadingScreen from '../components/ui/LoadingScreen';
 import { motion } from "framer-motion";
 import { Button } from "../components/ui/button";
@@ -12,7 +12,6 @@ import { FaEnvelope, FaPhoneAlt, FaWhatsapp } from "react-icons/fa";
 export default function LandingPage() {
   // All hooks at the top, always called in the same order
   const [loading, setLoading] = useState(false);
-  const audioRef = useRef<HTMLAudioElement | null>(null);
   const location = useLocation();
 
   // Optionally, show loader for a minimal 300ms to avoid flicker
@@ -39,17 +38,7 @@ export default function LandingPage() {
     }
   }, [location.pathname]);
 
-  // Function to play car start sound on button clicks
-  const playCarStart = () => {
-    try {
-      const audio = new Audio("/car-start.mp3");
-      audio.play().catch((e) => {
-        console.warn("🚫 Button sound blocked:", e);
-      });
-    } catch (error) {
-      console.warn("🚫 Sound play failed:", error);
-    }
-  };
+  // Removed manual sound trigger
 
   if (loading) {
     return <LoadingScreen text="Loading Justice Ultimate Automobiles..." progress={100} />;
@@ -110,15 +99,7 @@ export default function LandingPage() {
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.8, delay: 0.6 }}
             >
-              <Link to="/register">
-                <Button 
-                  size="lg" 
-                  className="bg-gradient-to-r from-yellow-400 to-yellow-500 text-black hover:from-yellow-300 hover:to-yellow-400 shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105 font-semibold px-8 py-3 rounded-xl border-0" 
-                  onClick={playCarStart}
-                >
-                  Get Started
-                </Button>
-              </Link>
+              {/* Removed Get Started per request */}
               <Link to="/vehicle-catalogue">
                 <Button 
                   variant="outline" 
@@ -131,6 +112,25 @@ export default function LandingPage() {
             </motion.div>
           </div>
         </motion.section>
+
+        {/* Featured Cars of the Day - Slideshow */}
+        <section className="px-6 md:px-20 mb-8">
+          <div className="glass-panel mx-auto max-w-6xl rounded-2xl p-6 shadow-2xl border border-white/20 backdrop-blur-xl">
+            <h3 className="text-2xl font-bold text-yellow-400 mb-4">Featured Today</h3>
+            <div className="relative h-48 flex items-center justify-center">
+              <style>{`
+                @keyframes fadeDaily { 0%{opacity:0} 8%{opacity:1} 28%{opacity:1} 36%{opacity:0} 100%{opacity:0} }
+              `}</style>
+              {[
+                '/images/mercedes-benz-s-class.png',
+                '/images/tesla-model-x.png',
+                '/images/1967-ford-mustang.png',
+              ].map((src, i) => (
+                <img key={i} src={src} className="absolute h-48 w-80 object-cover rounded-xl border border-white/20 shadow" style={{ animation: `fadeDaily 24s infinite`, animationDelay: `${i*8}s` }} />
+              ))}
+            </div>
+          </div>
+        </section>
 
         {/* Features Section with Enhanced Glass Cards */}
         <section className="px-2 sm:px-4 md:px-8 lg:px-20 py-8 sm:py-12 md:py-16 text-center">

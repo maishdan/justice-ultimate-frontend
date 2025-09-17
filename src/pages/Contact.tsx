@@ -338,12 +338,7 @@ export default function Contact() {
                       <Car className="w-4 h-4" /> View Cars
                     </Link>
 
-                    <Link
-                      to="/book-test-drive"
-                      className="bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-400 hover:to-blue-500 text-white font-semibold py-2 px-4 rounded-xl transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-xl flex items-center justify-center gap-2"
-                    >
-                      <FileText className="w-4 h-4" /> Test Drive
-                    </Link>
+                    {/* Removed Book a Test Drive per request */}
 
                     <Link
                       to="/apply-financing"
