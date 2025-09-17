@@ -74,7 +74,7 @@ export default function DashboardHome() {
       title: "Book a Car",
       description: "Rent a vehicle for your next trip",
       icon: <AiFillCar className="text-2xl" />,
-      action: () => navigate('/vehicle-catalogue'),
+      action: () => navigate('/catalogue'),
       color: "bg-blue-500 hover:bg-blue-600"
     },
     {
@@ -142,7 +142,7 @@ export default function DashboardHome() {
                 <div className="flex gap-4">
                   <Button 
                     variant="secondary" 
-                    onClick={() => navigate('/vehicle-catalogue')}
+                    onClick={() => navigate('/catalogue')}
                     className="bg-white text-blue-600 hover:bg-gray-100"
                   >
                     <AiFillCar className="mr-2" />

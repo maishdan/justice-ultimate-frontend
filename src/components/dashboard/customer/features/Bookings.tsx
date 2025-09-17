@@ -88,7 +88,7 @@ export default function Bookings() {
           <p className="text-blue-100 mt-2">Manage your car rentals, test drives, and appointments.</p>
         </div>
         <div className="flex gap-4 ml-auto">
-          <Button onClick={() => window.location.href = '/vehicle-catalogue'}>
+          <Button onClick={() => window.location.href = '/catalogue'}>
             <AiFillCar className="mr-2" />Book New Car
           </Button>
           <Button variant="outline" onClick={() => window.location.href = '/book-test-drive'}>

@@ -22,7 +22,7 @@ import PrivacyPolicy from "./pages/PrivacyPolicy";
 import Cookies from "./pages/Cookies";
 import SuccessStories from "./pages/SuccessStories";
 import BookTestDrive from "./pages/BookTestDrive";
-import VehicleCatalogue from "./pages/VehicleCatalogue";
+import Catalogue from "./pages/Catalogue";
 import ChatBotWidget from "./components/ChatBot/ChatBotWidget";
 import ApplyForFinancing from "./pages/ApplyForFinancing";
 import AdminDashboard from './pages/Dashboard/AdminDashboard';
@@ -42,6 +42,7 @@ import { LanguageProvider } from './context/LanguageContext';
 import { useTranslation } from 'react-i18next';
 import RentalsPage from './pages/RentalsPage';
 import TestHeaderFixed from "./pages/TestHeaderFixed";
+import Videos from './pages/Videos';
 
 // ✅ Import the dynamic CarDetails page
 
@@ -120,6 +121,7 @@ function App() {
               <Route path="/news" element={<News />} />
               <Route path="/success-stories" element={<SuccessStories />} />
               <Route path="/contact" element={<Contact />} />
+              <Route path="/videos" element={<Videos />} />
               <Route path="/login" element={<LoginPage />} />
               <Route path="/apply-financing" element={<ApplyForFinancing />} />
               <Route path="/register" element={<RegisterPage />} />
@@ -128,7 +130,7 @@ function App() {
               <Route path="/privacy" element={<PrivacyPolicy />} />
               <Route path="/cookies" element={<Cookies />} />
               <Route path="/book-test-drive" element={<BookTestDrive />} />
-              <Route path="/vehicle-catalogue" element={<VehicleCatalogue />} />
+              <Route path="/catalogue" element={<Catalogue />} />
               <Route path="/reset-password" element={<ResetPassword />} />
               <Route path="/profile" element={<ProfilePage />} />
               <Route path="/car/:id" element={<CarDetailPage />} />

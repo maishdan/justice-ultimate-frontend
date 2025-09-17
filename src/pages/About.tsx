@@ -231,7 +231,7 @@ export default function About() {
               <Link to="/contact" className="bg-gradient-to-r from-green-500 to-green-600 px-6 py-3 rounded-xl hover:from-green-400 hover:to-green-500 transition-all duration-300 transform hover:scale-105 font-semibold">
                 Contact Our Global Sales Team
               </Link>
-              <Link to="/vehicle-catalogue" className="border-2 border-white/50 px-6 py-3 rounded-xl hover:bg-white/10 hover:border-white transition-all duration-300 transform hover:scale-105 font-semibold text-white">
+              <Link to="/catalogue" className="border-2 border-white/50 px-6 py-3 rounded-xl hover:bg-white/10 hover:border-white transition-all duration-300 transform hover:scale-105 font-semibold text-white">
                 View International Stock
               </Link>
               <Link to="/quote" className="bg-gradient-to-r from-yellow-400 to-yellow-500 px-6 py-3 rounded-xl hover:from-yellow-300 hover:to-yellow-400 transition-all duration-300 transform hover:scale-105 font-semibold text-black">

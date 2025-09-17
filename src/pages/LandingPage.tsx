@@ -119,7 +119,7 @@ export default function LandingPage() {
                   Get Started
                 </Button>
               </Link>
-              <Link to="/vehicle-catalogue">
+              <Link to="/catalogue">
                 <Button 
                   variant="outline" 
                   size="lg" 
@@ -313,7 +313,7 @@ export default function LandingPage() {
               <div>
                 <h5 className="font-semibold text-white mb-4 text-yellow-400">Our Services</h5>
                 <ul className="space-y-3 text-white/80">
-                  <li><Link to="/vehicle-catalogue" className="hover:text-yellow-400 transition-all duration-300 hover:translate-x-1 transform inline-block">Vehicle Catalogue</Link></li>
+                  <li><Link to="/catalogue" className="hover:text-yellow-400 transition-all duration-300 hover:translate-x-1 transform inline-block">Vehicle Catalogue</Link></li>
                   <li><Link to="/book-test-drive" className="hover:text-yellow-400 transition-all duration-300 hover:translate-x-1 transform inline-block">Car Booking</Link></li>
                   <li><Link to="/vehicle-insurance" className="hover:text-yellow-400 transition-all duration-300 hover:translate-x-1 transform inline-block">Vehicle Insurance (Coming Soon)</Link></li>
                   <li><Link to="/auto-consultations" className="hover:text-yellow-400 transition-all duration-300 hover:translate-x-1 transform inline-block">Auto Consultations (Coming Soon)</Link></li>

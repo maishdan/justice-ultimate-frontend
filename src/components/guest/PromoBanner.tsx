@@ -18,7 +18,7 @@ export default function PromoBanner() {
         <p className="text-gray-800 text-lg mb-4 max-w-xl">
           Discover exclusive deals, luxury rides, and a seamless booking experience. Join thousands of happy drivers worldwide!
         </p>
-        <Link to="/vehicle-catalogue">
+        <Link to="/catalogue">
           <button className="bg-blue-900 text-white px-6 py-2 rounded-lg font-semibold shadow hover:bg-blue-800 transition">
             Explore Cars
           </button>

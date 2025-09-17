@@ -6,19 +6,19 @@ const featuredCars = [
     id: 1,
     name: "2024 Mercedes-Benz S-Class",
     image: "/images/cars/mercedes-sclass.png",
-    link: "/vehicle-catalogue/mercedes-sclass"
+    link: "/catalogue/mercedes-sclass"
   },
   {
     id: 2,
     name: "2024 Tesla Model X",
     image: "/images/cars/tesla-modelx.png",
-    link: "/vehicle-catalogue/tesla-modelx"
+    link: "/catalogue/tesla-modelx"
   },
   {
     id: 3,
     name: "2023 Range Rover Vogue",
     image: "/images/cars/range-rover.png",
-    link: "/vehicle-catalogue/range-rover"
+    link: "/catalogue/range-rover"
   }
 ];
 

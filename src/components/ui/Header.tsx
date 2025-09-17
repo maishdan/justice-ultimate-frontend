@@ -75,8 +75,8 @@ export default function Header() {
 
   const navLinks = [
     { label: 'Home', path: '/' },
-    { label: 'services', path: '/services' },
-    { label: 'CATALOGUE', path: '/vehicle-catalogue' },
+    { label: 'Services', path: '/services' },
+    { label: 'CATALOGUE', path: '/catalogue' },
     { label: 'Videos', path: '/videos' },
     { label: 'Contact', path: '/contact' },
   ];
@@ -371,7 +371,15 @@ export default function Header() {
                   className="flex items-center gap-1 px-3 py-1.5 bg-gradient-to-r from-green-500/90 to-green-600/90 hover:from-green-600 hover:to-green-700 text-white rounded-md text-sm font-medium transition-all duration-300 shadow-sm backdrop-blur-sm border border-green-400/30"
                 >
                   <Shield className="w-3 h-3" />
-                  <span className="hidden sm:inline">{t('login')}</span>
+                  <span className="hidden sm:inline">Login</span>
+                </Link>
+                <div className="w-px h-6 bg-white/20 mx-2"></div>
+                <Link 
+                  to="/login?admin=true" 
+                  className="flex items-center gap-1 px-3 py-1.5 bg-gradient-to-r from-red-500/90 to-red-600/90 hover:from-red-600 hover:to-red-700 text-white rounded-md text-sm font-medium transition-all duration-300 shadow-sm backdrop-blur-sm border border-red-400/30"
+                >
+                  <Shield className="w-3 h-3" />
+                  <span className="hidden sm:inline">Admin</span>
                 </Link>
                 <div className="w-px h-6 bg-white/20 mx-2"></div>
               </div>
@@ -515,6 +523,13 @@ export default function Header() {
                     onClick={() => setMenuOpen(false)}
                   >
                     Login
+                  </Link>
+                  <Link 
+                    to="/login?admin=true" 
+                    className="block w-full px-3 py-2 bg-red-600/90 hover:bg-red-700/90 text-white rounded-xl font-medium transition-all duration-300 text-center text-sm shadow-lg"
+                    onClick={() => setMenuOpen(false)}
+                  >
+                    Admin Login
                   </Link>
                 </div>
               ) : (

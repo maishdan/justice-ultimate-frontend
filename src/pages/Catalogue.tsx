@@ -1,10 +1,10 @@
-// src/pages/VehicleCatalogue.tsx
+// src/pages/Catalogue.tsx
 import { useEffect, useState, useMemo, useRef } from 'react';
 import { motion } from "framer-motion";
 import { Button } from "../components/ui/button";
 import { Link, useNavigate } from "react-router-dom";
 import { supabase } from '../lib/supabaseClient';
-import { Search, Filter } from 'lucide-react';
+import { Search, Filter, ChevronLeft, ChevronRight } from 'lucide-react';
 import Footer from "../components/Footer";
 import { RealtimeChannel } from '@supabase/supabase-js';
 import { CarCard } from '../components/CarCard';
@@ -12,7 +12,7 @@ import type { Car } from '../types/Car';
 import RentalsPage from './RentalsPage';
 import { carsData } from '../data/carData';
 
-export default function VehicleCatalogue() {
+export default function Catalogue() {
   const [cars, setCars] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
@@ -33,6 +33,10 @@ export default function VehicleCatalogue() {
   const [rentals, setRentals] = useState<any[]>([]);
   const [rentalsLoading, setRentalsLoading] = useState(false);
   const [rentalsError, setRentalsError] = useState('');
+  
+  // Pagination state
+  const [currentPage, setCurrentPage] = useState(1);
+  const carsPerPage = 10;
 
   async function fetchRentals() {
     setRentalsLoading(true);
@@ -137,9 +141,70 @@ export default function VehicleCatalogue() {
     });
   }, [cars, search, category]);
 
+  // Pagination calculations
+  const totalPages = Math.ceil(filteredCars.length / carsPerPage);
+  const startIndex = (currentPage - 1) * carsPerPage;
+  const endIndex = startIndex + carsPerPage;
+  const currentCars = filteredCars.slice(startIndex, endIndex);
+
+  // Reset to page 1 when search or category changes
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [search, category]);
+
   const categories = useMemo(() => 
     Array.from(new Set(cars.map(car => car.category || ''))).filter(Boolean), [cars]
   );
+
+  const handlePageChange = (page: number) => {
+    setCurrentPage(page);
+    // Scroll to top of the cars grid
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
+  const renderPageNumbers = () => {
+    const pageNumbers = [];
+    const maxVisiblePages = 5;
+    
+    if (totalPages <= maxVisiblePages) {
+      // Show all pages if total is less than max visible
+      for (let i = 1; i <= totalPages; i++) {
+        pageNumbers.push(i);
+      }
+    } else {
+      // Show first page, current page area, and last page
+      if (currentPage <= 3) {
+        // Show first 3 pages + ... + last page
+        for (let i = 1; i <= 3; i++) {
+          pageNumbers.push(i);
+        }
+        if (totalPages > 4) {
+          pageNumbers.push('...');
+          pageNumbers.push(totalPages);
+        }
+      } else if (currentPage >= totalPages - 2) {
+        // Show first page + ... + last 3 pages
+        pageNumbers.push(1);
+        if (totalPages > 4) {
+          pageNumbers.push('...');
+        }
+        for (let i = totalPages - 2; i <= totalPages; i++) {
+          pageNumbers.push(i);
+        }
+      } else {
+        // Show first + ... + current-1, current, current+1 + ... + last
+        pageNumbers.push(1);
+        pageNumbers.push('...');
+        for (let i = currentPage - 1; i <= currentPage + 1; i++) {
+          pageNumbers.push(i);
+        }
+        pageNumbers.push('...');
+        pageNumbers.push(totalPages);
+      }
+    }
+    
+    return pageNumbers;
+  };
 
   async function handleTradeInSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -328,19 +393,86 @@ export default function VehicleCatalogue() {
                   </div>
                 </div>
               ) : (
-                                 <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6 p-6">
-                   {filteredCars.map((car: any, index: number) => (
-                     <div key={car.id} className="relative transform transition-all duration-300 hover:scale-105 hover:shadow-2xl">
-                       <CarCard
-                         car={car}
-                         onSelect={() => setSelectedCar(car)}
-                       />
-                     </div>
-                   ))}
-                 </div>
+                <div>
+                  {/* Cars Grid */}
+                  <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6 p-6 mb-8">
+                    {currentCars.map((car: any, index: number) => (
+                      <div key={car.id} className="relative transform transition-all duration-300 hover:scale-105 hover:shadow-2xl">
+                        <CarCard
+                          car={car}
+                          onSelect={() => setSelectedCar(car)}
+                        />
+                      </div>
+                    ))}
+                  </div>
+
+                  {/* Pagination */}
+                  {totalPages > 1 && (
+                    <div className="glass-panel rounded-2xl p-6 shadow-xl border border-white/20 backdrop-blur-xl">
+                      <div className="flex items-center justify-between">
+                        {/* Results info */}
+                        <div className="text-white/80 text-sm">
+                          Showing {startIndex + 1}-{Math.min(endIndex, filteredCars.length)} of {filteredCars.length} vehicles
+                        </div>
+
+                        {/* Pagination controls */}
+                        <div className="flex items-center gap-2">
+                          {/* Previous button */}
+                          <button
+                            onClick={() => handlePageChange(currentPage - 1)}
+                            disabled={currentPage === 1}
+                            className={`flex items-center gap-1 px-3 py-2 rounded-lg text-sm font-medium transition-all duration-300 ${
+                              currentPage === 1
+                                ? 'bg-white/10 text-white/40 cursor-not-allowed'
+                                : 'bg-white/20 text-white hover:bg-white/30 hover:text-yellow-400'
+                            }`}
+                          >
+                            <ChevronLeft className="w-4 h-4" />
+                            <span className="hidden sm:inline">Previous</span>
+                          </button>
+
+                          {/* Page numbers */}
+                          <div className="flex items-center gap-1">
+                            {renderPageNumbers().map((pageNum, index) => (
+                              <button
+                                key={index}
+                                onClick={() => typeof pageNum === 'number' && handlePageChange(pageNum)}
+                                disabled={pageNum === '...'}
+                                className={`px-3 py-2 rounded-lg text-sm font-medium transition-all duration-300 ${
+                                  pageNum === currentPage
+                                    ? 'bg-gradient-to-r from-yellow-400 to-yellow-500 text-black shadow-lg'
+                                    : pageNum === '...'
+                                    ? 'text-white/60 cursor-default'
+                                    : 'bg-white/20 text-white hover:bg-white/30 hover:text-yellow-400'
+                                }`}
+                              >
+                                {pageNum}
+                              </button>
+                            ))}
+                          </div>
+
+                          {/* Next button */}
+                          <button
+                            onClick={() => handlePageChange(currentPage + 1)}
+                            disabled={currentPage === totalPages}
+                            className={`flex items-center gap-1 px-3 py-2 rounded-lg text-sm font-medium transition-all duration-300 ${
+                              currentPage === totalPages
+                                ? 'bg-white/10 text-white/40 cursor-not-allowed'
+                                : 'bg-white/20 text-white hover:bg-white/30 hover:text-yellow-400'
+                            }`}
+                          >
+                            <span className="hidden sm:inline">Next</span>
+                            <ChevronRight className="w-4 h-4" />
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+                </div>
               )}
             </motion.section>
           )}
+          
           {/* Rentals Grid */}
           {showRentals && (
             <motion.section
@@ -385,6 +517,7 @@ export default function VehicleCatalogue() {
               )}
             </motion.section>
           )}
+          
           {/* Car Detail Modal */}
           {selectedCar && (
             <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm">

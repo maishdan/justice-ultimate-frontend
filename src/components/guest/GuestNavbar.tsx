@@ -10,7 +10,7 @@ export default function GuestNavbar() {
       <div className="hidden md:flex gap-6 items-center">
         <a href="/" className="hover:text-green-600 dark:hover:text-yellow-400 font-medium">Home</a>
         <a href="/services" className="hover:text-green-600 dark:hover:text-yellow-400 font-medium">Services</a>
-        <a href="/vehicle-catalogue" className="hover:text-green-600 dark:hover:text-yellow-400 font-medium">Showroom</a>
+        <a href="/catalogue" className="hover:text-green-600 dark:hover:text-yellow-400 font-medium">Showroom</a>
         <a href="/about" className="hover:text-green-600 dark:hover:text-yellow-400 font-medium">Company</a>
         <a href="/contact" className="hover:text-green-600 dark:hover:text-yellow-400 font-medium">Contact Us</a>
       </div>
