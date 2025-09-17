@@ -74,17 +74,11 @@ export default function Header() {
   }, []);
 
   const navLinks = [
-    { label: t('home'), path: '/' },
-    { label: t('services'), path: '/services' },
-    { label: t('Cars'), path: '/vehicle-catalogue' },
-    {
-      label: t('company'), path: '#', subMenu: [
-        { label: t('news'), path: '/news' },
-        { label: t('successStories'), path: '/success-stories' },
-        { label: t('about'), path: '/about' },
-      ]
-    },
-    { label: t('contact'), path: '/contact' },
+    { label: 'Home', path: '/' },
+    { label: 'services', path: '/services' },
+    { label: 'CATALOGUE', path: '/vehicle-catalogue' },
+    { label: 'Videos', path: '/videos' },
+    { label: 'Contact', path: '/contact' },
   ];
 
   const handleLogout = async () => {
