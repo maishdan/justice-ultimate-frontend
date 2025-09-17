@@ -174,7 +174,7 @@ export default function MyCars() {
           <p className="text-gray-600">Manage your owned vehicles and view rental history</p>
         </div>
         <div className="flex gap-4">
-          <Button onClick={() => window.location.href = '/vehicle-catalogue'}>
+          <Button onClick={() => window.location.href = '/catalogue'}>
             <AiFillCar className="mr-2" />
             Add New Car
           </Button>

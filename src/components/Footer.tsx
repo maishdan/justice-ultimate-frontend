@@ -53,7 +53,7 @@ export default function Footer() {
             <h3 className="text-xl font-bold text-white mb-4">Our Services</h3>
             <ul className="space-y-2">
               <li>
-                <Link to="/vehicle-catalogue" className="text-white/80 hover:text-yellow-400 transition-colors duration-300">
+                <Link to="/catalogue" className="text-white/80 hover:text-yellow-400 transition-colors duration-300">
                   Vehicle Catalogue
                 </Link>
               </li>

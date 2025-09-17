@@ -34,7 +34,7 @@ export default function CarDetailPage() {
         {car.description && <p className="text-white mb-4">{car.description}</p>}
         {/* Add more specs as needed */}
         <div className="flex gap-4 mt-6">
-          <Link to="/vehicle-catalogue">
+          <Link to="/catalogue">
             <Button variant="outline">Back to Catalogue</Button>
           </Link>
           {/* Add booking/purchase buttons here if needed */}

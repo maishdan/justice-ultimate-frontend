@@ -77,7 +77,7 @@ export default function Vehicles() {
           <p className="text-blue-100 mt-2">Manage your owned, booked, and delivered vehicles.</p>
         </div>
         <div className="flex gap-4 ml-auto">
-          <Button onClick={() => window.location.href = '/vehicle-catalogue'}>
+          <Button onClick={() => window.location.href = '/catalogue'}>
             <AiFillCar className="mr-2" />Add New Car
           </Button>
           <Button variant="outline"><FiSettings className="mr-2" />Vehicle Settings</Button>

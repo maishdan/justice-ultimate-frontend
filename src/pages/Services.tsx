@@ -123,7 +123,7 @@ export default function Services() {
                   Get Started
                 </Button>
               </Link>
-              <Link to="/vehicle-catalogue">
+              <Link to="/catalogue">
                 <Button 
                   variant="outline" 
                   size="lg" 
@@ -176,7 +176,7 @@ export default function Services() {
                     {service.desc}
                   </p>
                   <Link 
-                    to="/vehicle-catalogue" 
+                    to="/catalogue" 
                     className="inline-flex items-center text-yellow-400 hover:text-yellow-300 transition-colors duration-300 font-medium group-hover:translate-x-1 transform transition-transform duration-300"
                   >
                     Explore More →

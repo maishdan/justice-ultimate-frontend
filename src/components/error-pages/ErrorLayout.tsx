@@ -25,7 +25,7 @@ export default function ErrorLayout({ code, title, message, icon }: ErrorLayoutP
           <Button variant="default" onClick={() => location.href = "/"}>
             Go to Home
           </Button>
-          <Button variant="outline" onClick={() => location.href = "/vehicle-catalogue"}>
+          <Button variant="outline" onClick={() => location.href = "/catalogue"}>
             Browse Vehicles
           </Button>
           <Button variant="outline" onClick={() => location.href = "/contact"}>

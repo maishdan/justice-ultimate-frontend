@@ -332,7 +332,7 @@ export default function Contact() {
                   <h3 className="text-xl font-bold text-yellow-400 mb-4">Quick Actions</h3>
                   <div className="flex flex-col sm:flex-row gap-3">
                     <Link
-                      to="/vehicle-catalogue"
+                      to="/catalogue"
                       className="bg-gradient-to-r from-green-500 to-green-600 hover:from-green-400 hover:to-green-500 text-white font-semibold py-2 px-4 rounded-xl transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-xl flex items-center justify-center gap-2"
                     >
                       <Car className="w-4 h-4" /> View Cars
