@@ -108,74 +108,100 @@ function App() {
     }
   }, [i18n.language]);
 
-  // WhatsApp tip show every minute
+  // WhatsApp tip show every minute (global functionality)
   useEffect(() => {
-    const tip = document.getElementById('wa-tip');
     const showTip = () => {
+      const tip = document.getElementById('wa-tip');
       if (!tip) return;
       tip.classList.remove('hidden');
       tip.classList.add('flex');
-      setTimeout(() => { tip.classList.add('hidden'); tip.classList.remove('flex'); }, 4000);
+      setTimeout(() => { 
+        if (tip) {
+          tip.classList.add('hidden'); 
+          tip.classList.remove('flex'); 
+        }
+      }, 4000);
     };
+    
     const interval = setInterval(showTip, 60000);
     // initial slight delay
-    setTimeout(showTip, 3000);
-    return () => clearInterval(interval);
+    const initialTimer = setTimeout(showTip, 3000);
+    
+    return () => {
+      clearInterval(interval);
+      clearTimeout(initialTimer);
+    };
   }, []);
 
   return (
     <UserProfileProvider>
+      {/* Global WhatsApp Widget Styles */}
+      <style>{`
+        .whatsapp-floating-widget {
+          position: fixed !important;
+          bottom: 1.5rem !important;
+          right: 1.5rem !important;
+          z-index: 2147483647 !important;
+          pointer-events: none !important;
+        }
+        .whatsapp-floating-widget > * {
+          pointer-events: auto !important;
+        }
+      `}</style>
+      
       <InstallPrompt />
       <Header />
+      {/* Enhanced Floating WhatsApp Widget (Global - Above All Content) */}
+      <div className="whatsapp-floating-widget fixed z-[2147483647] bottom-6 right-6 flex flex-col items-end gap-3 pointer-events-none" style={{ zIndex: 2147483647 }}>
+        {/* Enhanced Popup Message with Animation */}
+        <div 
+          id="wa-tip" 
+          className="hidden glass-panel px-4 py-3 rounded-xl shadow-2xl border border-white/20 backdrop-blur-xl pointer-events-auto transform translate-x-2 animate-bounce"
+          style={{
+            background: 'rgba(37, 211, 102, 0.95)',
+            backdropFilter: 'blur(20px)',
+          }}
+        >
+          <div className="text-white text-sm font-medium flex items-center gap-2">
+            <div className="w-2 h-2 bg-white rounded-full animate-pulse"></div>
+            We're online — Chat with us on WhatsApp!
+          </div>
+          <div className="absolute -bottom-1 right-4 w-0 h-0 border-l-4 border-r-4 border-t-4 border-transparent border-t-[#25D366]"></div>
+        </div>
+        
+        {/* Enhanced WhatsApp Button */}
+        <a
+          href="https://wa.me/254722827458?text=Hello%2C%20I%27m%20interested%20in%20learning%20more%20about%20your%20vehicles%20and%20services.%20Could%20you%20please%20assist%20me%3F"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="pointer-events-auto group relative flex items-center justify-center h-16 w-16 rounded-full bg-gradient-to-r from-[#25D366] to-[#128C7E] shadow-2xl hover:shadow-[0_0_30px_rgba(37,211,102,0.6)] transition-all duration-300 transform hover:scale-110"
+          style={{ zIndex: 2147483647 }}
+          aria-label="WhatsApp Support"
+        >
+          {/* Pulse Animation Ring */}
+          <div className="absolute inset-0 rounded-full bg-[#25D366] animate-ping opacity-75"></div>
+          
+          {/* WhatsApp Icon */}
+          <svg 
+            xmlns="http://www.w3.org/2000/svg" 
+            viewBox="0 0 32 32" 
+            fill="white" 
+            className="h-9 w-9 relative z-10 group-hover:scale-110 transition-transform duration-300"
+          >
+            <path d="M19.11 17.59c-.27-.14-1.59-.79-1.83-.88-.24-.09-.42-.14-.6.14-.18.27-.69.88-.84 1.06-.15.18-.31.2-.58.07-.27-.14-1.16-.43-2.2-1.36-.81-.72-1.36-1.61-1.52-1.88-.15-.27-.02-.41.11-.55.11-.11.27-.29.4-.43.13-.15.18-.25.27-.43.09-.18.05-.32-.02-.45-.07-.14-.6-1.45-.82-1.98-.22-.53-.44-.45-.6-.46-.15-.01-.32-.01-.49-.01-.18 0-.45.07-.68.32-.24.27-.9.88-.9 2.15 0 1.27.92 2.5 1.05 2.67.13.18 1.81 2.75 4.4 3.86.62.27 1.1.43 1.48.55.62.2 1.18.17 1.62.1.49-.07 1.59-.65 1.82-1.28.22-.63.22-1.16.15-1.28-.07-.11-.24-.18-.51-.32z"/>
+            <path d="M26.07 5.93C23.56 3.42 20.37 2 17 2 9.83 2 4 7.83 4 15c0 2.29.61 4.52 1.77 6.48L4 30l8.69-1.69C14.61 28.39 15.8 28.6 17 28.6c7.17 0 13-5.83 13-13 0-3.37-1.42-6.56-3.93-9.07zM17 26.6c-1.05 0-2.09-.18-3.09-.54l-.22-.08-5.14 1 1-5.02-.1-.23C8.5 20.03 8 17.55 8 15 8 8.93 12.93 4 19 4c3.09 0 6 1.2 8.21 3.4C29.41 9.6 30.6 12.51 30.6 15.6c0 6.07-4.93 11-11 11z"/>
+          </svg>
+          
+          {/* Badge Notification */}
+          <div className="absolute -top-1 -right-1 w-4 h-4 bg-red-500 rounded-full flex items-center justify-center">
+            <span className="text-white text-xs font-bold">1</span>
+          </div>
+        </a>
+      </div>
+
       <div className="app-background min-h-screen transition-colors duration-300 clean-container" style={{ paddingTop: '64px' }}>
         <ErrorBoundary>
           <main className="main-content-responsive smooth-scroll">
-            {/* Enhanced Floating WhatsApp Widget (Front-most) */}
-            <div className="fixed z-[999999] bottom-6 right-6 flex flex-col items-end gap-3 pointer-events-none">
-              {/* Enhanced Popup Message with Animation */}
-              <div 
-                id="wa-tip" 
-                className="hidden glass-panel px-4 py-3 rounded-xl shadow-2xl border border-white/20 backdrop-blur-xl pointer-events-auto transform translate-x-2 animate-bounce"
-                style={{
-                  background: 'rgba(37, 211, 102, 0.95)',
-                  backdropFilter: 'blur(20px)',
-                }}
-              >
-                <div className="text-white text-sm font-medium flex items-center gap-2">
-                  <div className="w-2 h-2 bg-white rounded-full animate-pulse"></div>
-                  We're online — Chat with us on WhatsApp!
-                </div>
-                <div className="absolute -bottom-1 right-4 w-0 h-0 border-l-4 border-r-4 border-t-4 border-transparent border-t-[#25D366]"></div>
-              </div>
-              
-              {/* Enhanced WhatsApp Button */}
-              <a
-                href="https://wa.me/254722827458?text=Hello%2C%20I%27m%20interested%20in%20learning%20more%20about%20your%20vehicles%20and%20services.%20Could%20you%20please%20assist%20me%3F"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="pointer-events-auto group relative flex items-center justify-center h-16 w-16 rounded-full bg-gradient-to-r from-[#25D366] to-[#128C7E] shadow-2xl hover:shadow-[0_0_30px_rgba(37,211,102,0.6)] transition-all duration-300 transform hover:scale-110 z-[999999]"
-                aria-label="WhatsApp Support"
-              >
-                {/* Pulse Animation Ring */}
-                <div className="absolute inset-0 rounded-full bg-[#25D366] animate-ping opacity-75"></div>
-                
-                {/* WhatsApp Icon */}
-                <svg 
-                  xmlns="http://www.w3.org/2000/svg" 
-                  viewBox="0 0 32 32" 
-                  fill="white" 
-                  className="h-9 w-9 relative z-10 group-hover:scale-110 transition-transform duration-300"
-                >
-                  <path d="M19.11 17.59c-.27-.14-1.59-.79-1.83-.88-.24-.09-.42-.14-.6.14-.18.27-.69.88-.84 1.06-.15.18-.31.2-.58.07-.27-.14-1.16-.43-2.2-1.36-.81-.72-1.36-1.61-1.52-1.88-.15-.27-.02-.41.11-.55.11-.11.27-.29.4-.43.13-.15.18-.25.27-.43.09-.18.05-.32-.02-.45-.07-.14-.6-1.45-.82-1.98-.22-.53-.44-.45-.6-.46-.15-.01-.32-.01-.49-.01-.18 0-.45.07-.68.32-.24.27-.9.88-.9 2.15 0 1.27.92 2.5 1.05 2.67.13.18 1.81 2.75 4.4 3.86.62.27 1.1.43 1.48.55.62.2 1.18.17 1.62.1.49-.07 1.59-.65 1.82-1.28.22-.63.22-1.16.15-1.28-.07-.11-.24-.18-.51-.32z"/>
-                  <path d="M26.07 5.93C23.56 3.42 20.37 2 17 2 9.83 2 4 7.83 4 15c0 2.29.61 4.52 1.77 6.48L4 30l8.69-1.69C14.61 28.39 15.8 28.6 17 28.6c7.17 0 13-5.83 13-13 0-3.37-1.42-6.56-3.93-9.07zM17 26.6c-1.05 0-2.09-.18-3.09-.54l-.22-.08-5.14 1 1-5.02-.1-.23C8.5 20.03 8 17.55 8 15 8 8.93 12.93 4 19 4c3.09 0 6 1.2 8.21 3.4C29.41 9.6 30.6 12.51 30.6 15.6c0 6.07-4.93 11-11 11z"/>
-                </svg>
-                
-                {/* Badge Notification */}
-                <div className="absolute -top-1 -right-1 w-4 h-4 bg-red-500 rounded-full flex items-center justify-center">
-                  <span className="text-white text-xs font-bold">1</span>
-                </div>
-              </a>
-            </div>
             <Routes>
               <Route path="/" element={<LandingPage />} />
               <Route path="/services" element={<Services />} />
