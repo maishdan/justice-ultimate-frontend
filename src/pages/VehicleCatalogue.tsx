@@ -17,6 +17,7 @@ export default function VehicleCatalogue() {
   const [error, setError] = useState('');
   const [search, setSearch] = useState('');
   const [category, setCategory] = useState('');
+  const [sortBy, setSortBy] = useState<'newest' | 'price_low' | 'price_high'>('newest');
   const [searchParams, setSearchParams] = useSearchParams();
   const [page, setPage] = useState<number>(parseInt(searchParams.get('page') || '1'));
   const [channel, setChannel] = useState<RealtimeChannel | null>(null);
@@ -161,10 +162,22 @@ export default function VehicleCatalogue() {
   const carsPerPage = 10;
   const totalPages = Math.max(1, Math.ceil(filteredCars.length / carsPerPage));
   const currentPage = Math.min(Math.max(1, page), totalPages);
+  const sortedCars = useMemo(() => {
+    const list = [...filteredCars];
+    if (sortBy === 'newest') {
+      list.sort((a: any, b: any) => (b.specs?.year || b.year || 0) - (a.specs?.year || a.year || 0));
+    } else if (sortBy === 'price_low') {
+      list.sort((a: any, b: any) => (a.price || 0) - (b.price || 0));
+    } else if (sortBy === 'price_high') {
+      list.sort((a: any, b: any) => (b.price || 0) - (a.price || 0));
+    }
+    return list;
+  }, [filteredCars, sortBy]);
+
   const paginatedCars = useMemo(() => {
     const start = (currentPage - 1) * carsPerPage;
-    return filteredCars.slice(start, start + carsPerPage);
-  }, [filteredCars, currentPage]);
+    return sortedCars.slice(start, start + carsPerPage);
+  }, [sortedCars, currentPage]);
 
   useEffect(() => {
     setSearchParams(prev => {
@@ -426,6 +439,17 @@ export default function VehicleCatalogue() {
                     {categories.map(cat => (
                       <option key={cat} value={cat}>{cat}</option>
                     ))}
+                  </select>
+                </div>
+                <div className="relative w-full md:w-1/4">
+                  <select
+                    value={sortBy}
+                    onChange={e => setSortBy(e.target.value as any)}
+                    className="w-full pl-4 pr-4 py-3 rounded-xl bg-white/10 border border-white/20 text-white backdrop-blur-sm focus:outline-none focus:ring-2 focus:ring-yellow-400/50 focus:border-yellow-400/50 transition-all duration-300 appearance-none cursor-pointer"
+                  >
+                    <option value="newest">Sort: Newest</option>
+                    <option value="price_low">Sort: Price (Low to High)</option>
+                    <option value="price_high">Sort: Price (High to Low)</option>
                   </select>
                 </div>
               </div>
