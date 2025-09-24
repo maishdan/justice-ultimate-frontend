@@ -22,6 +22,18 @@ export default function Footer() {
           boxShadow: '0 8px 32px 0 rgba(31, 38, 135, 0.37)'
         }}
       >
+        {/* Trusted Partners - Real Car Brand Logos */}
+        <div className="mb-10">
+          <h3 className="text-center text-white/90 text-sm md:text-base font-semibold mb-4">Trusted by leading automotive brands</h3>
+          <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 gap-6 items-center justify-items-center opacity-90">
+            <img src="https://upload.wikimedia.org/wikipedia/commons/9/9d/Toyota_logo.png" alt="Toyota" className="h-8 md:h-10 object-contain" />
+            <img src="https://upload.wikimedia.org/wikipedia/commons/9/90/Mercedes-Logo.svg" alt="Mercedes-Benz" className="h-8 md:h-10 object-contain" />
+            <img src="https://upload.wikimedia.org/wikipedia/commons/3/3d/BMW_logo_%28gray%29.svg" alt="BMW" className="h-8 md:h-10 object-contain" />
+            <img src="https://upload.wikimedia.org/wikipedia/commons/6/6f/Audi_logo_detail.svg" alt="Audi" className="h-8 md:h-10 object-contain" />
+            <img src="https://upload.wikimedia.org/wikipedia/commons/5/5e/Volkswagen_logo_2019.svg" alt="Volkswagen" className="h-8 md:h-10 object-contain" />
+            <img src="https://upload.wikimedia.org/wikipedia/commons/8/8e/Nissan_2020_logo.svg" alt="Nissan" className="h-8 md:h-10 object-contain" />
+          </div>
+        </div>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 mb-8">
           {/* Justice Ultimate Automobiles */}
           <div>

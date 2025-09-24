@@ -234,7 +234,7 @@ export default function ChatBotWidget() {
                 <span className="text-sm">🤖</span>
               </div>
               <span>JusticeAI</span>
-              <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse"></div>
+              <div className="w-2 h-2 bg-green-400 rounded-full"></div>
             </div>
             <button onClick={() => setIsOpen(false)} className="text-white hover:text-red-300 transition-colors text-lg">✕</button>
           </div>
@@ -275,8 +275,8 @@ export default function ChatBotWidget() {
         className="group relative bg-gradient-to-r from-blue-600 to-green-500 p-4 rounded-full shadow-2xl hover:shadow-[0_0_30px_rgba(59,130,246,0.6)] transition-all duration-300 transform hover:scale-110 z-[999999]"
         aria-label="Open JusticeAI Chat"
       >
-        {/* Pulse Animation Ring */}
-        <div className="absolute inset-0 rounded-full bg-blue-500 animate-ping opacity-75"></div>
+        {/* Static glow ring (no blinking) */}
+        <div className="absolute inset-0 rounded-full bg-blue-500/20"></div>
         
         {/* Chat Icon */}
         <BsFillChatDotsFill size={24} className="text-white relative z-10 group-hover:scale-110 transition-transform duration-300" />
