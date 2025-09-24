@@ -34,6 +34,26 @@ export default function VehicleCatalogue() {
   const [rentals, setRentals] = useState<any[]>([]);
   const [rentalsLoading, setRentalsLoading] = useState(false);
   const [rentalsError, setRentalsError] = useState('');
+  
+  // Car Management State
+  const [showCarEditor, setShowCarEditor] = useState(false);
+  const [editingCar, setEditingCar] = useState<any>(null);
+  const [carForm, setCarForm] = useState({
+    name: '',
+    brand: '',
+    model: '',
+    year: '',
+    price: '',
+    fuel_type: '',
+    transmission: '',
+    drive_type: '',
+    colors: [''],
+    description: '',
+    main_image: '',
+    additional_images: [''],
+    location: 'Nairobi, Kenya',
+    status: 'published'
+  });
 
   async function fetchRentals() {
     setRentalsLoading(true);
@@ -196,6 +216,90 @@ export default function VehicleCatalogue() {
     setTradeInForm(prev => ({ ...prev, car_images: Array.from(e.target.files ?? []) }));
   }
 
+  // Car Management Functions
+  const openCarEditor = (car: any) => {
+    setEditingCar(car);
+    setCarForm({
+      name: car.name || '',
+      brand: car.brand || '',
+      model: car.model || '',
+      year: car.year || '',
+      price: car.price?.toString() || '',
+      fuel_type: car.fuel_type || '',
+      transmission: car.transmission || '',
+      drive_type: car.drive_type || '',
+      colors: car.colors || [''],
+      description: car.description || '',
+      main_image: car.main_image || '',
+      additional_images: car.additional_images || [''],
+      location: car.location || 'Nairobi, Kenya',
+      status: car.status || 'published'
+    });
+    setShowCarEditor(true);
+  };
+
+  const saveCarChanges = async () => {
+    try {
+      const carData = {
+        ...carForm,
+        price: parseFloat(carForm.price) || 0,
+        colors: carForm.colors.filter(color => color.trim() !== ''),
+        additional_images: carForm.additional_images.filter(img => img.trim() !== '')
+      };
+
+      if (editingCar) {
+        // Update existing car
+        const { error } = await supabase
+          .from('cars')
+          .update(carData)
+          .eq('id', editingCar.id);
+        
+        if (error) throw error;
+        
+        // Update local state
+        setCars(prev => prev.map(car => 
+          car.id === editingCar.id ? { ...car, ...carData } : car
+        ));
+      } else {
+        // Add new car
+        const { data, error } = await supabase
+          .from('cars')
+          .insert([carData])
+          .select()
+          .single();
+        
+        if (error) throw error;
+        
+        // Add to local state
+        setCars(prev => [data, ...prev]);
+      }
+      
+      setShowCarEditor(false);
+      setEditingCar(null);
+    } catch (error) {
+      console.error('Error saving car:', error);
+      alert('Error saving car. Please try again.');
+    }
+  };
+
+  const deleteCar = async (carId: string) => {
+    if (!confirm('Are you sure you want to delete this car?')) return;
+    
+    try {
+      const { error } = await supabase
+        .from('cars')
+        .delete()
+        .eq('id', carId);
+      
+      if (error) throw error;
+      
+      setCars(prev => prev.filter(car => car.id !== carId));
+    } catch (error) {
+      console.error('Error deleting car:', error);
+      alert('Error deleting car. Please try again.');
+    }
+  };
+
   return (
     <div 
       className="min-h-screen w-full pt-0"
@@ -246,6 +350,19 @@ export default function VehicleCatalogue() {
                 </motion.h1>
               </div>
               <div className="flex gap-4 items-center justify-end">
+                <Button 
+                  className="bg-gradient-to-r from-purple-500 to-pink-400 text-white font-bold px-6 py-3 rounded-xl shadow-lg hover:from-purple-400 hover:to-pink-300 transition-all duration-300" 
+                  onClick={() => {
+                    setEditingCar(null);
+                    setCarForm({
+                      name: '', brand: '', model: '', year: '', price: '', fuel_type: '', transmission: '', drive_type: '',
+                      colors: [''], description: '', main_image: '', additional_images: [''], location: 'Nairobi, Kenya', status: 'published'
+                    });
+                    setShowCarEditor(true);
+                  }}
+                >
+                  + Add Car
+                </Button>
                 <Button className="bg-gradient-to-r from-green-500 to-blue-400 text-white font-bold px-6 py-3 rounded-xl shadow-lg hover:from-green-400 hover:to-blue-300 transition-all duration-300" onClick={() => navigate('/rentals')}>
                   View Rentals
                 </Button>
@@ -364,7 +481,30 @@ export default function VehicleCatalogue() {
               ) : (
                 <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6 p-6">
                   {paginatedCars.map((car: any) => (
-                     <div key={car.id} className="relative transform transition-all duration-300 hover:scale-105 hover:shadow-2xl">
+                     <div key={car.id} className="relative transform transition-all duration-300 hover:scale-105 hover:shadow-2xl group">
+                       {/* Edit/Delete buttons for database cars */}
+                       {car.source === 'database' && (
+                         <div className="absolute top-2 right-2 z-10 opacity-0 group-hover:opacity-100 transition-opacity flex gap-1">
+                           <button
+                             onClick={(e) => {
+                               e.stopPropagation();
+                               openCarEditor(car);
+                             }}
+                             className="bg-blue-500 hover:bg-blue-600 text-white p-1 rounded text-xs"
+                           >
+                             ✏️
+                           </button>
+                           <button
+                             onClick={(e) => {
+                               e.stopPropagation();
+                               deleteCar(car.id);
+                             }}
+                             className="bg-red-500 hover:bg-red-600 text-white p-1 rounded text-xs"
+                           >
+                             🗑️
+                           </button>
+                         </div>
+                       )}
                        <div onClick={() => navigate(`/car/${car.id}`)}>
                          <CarCard
                            car={car}
@@ -553,6 +693,172 @@ export default function VehicleCatalogue() {
               </div>
             </div>
           </motion.section>
+
+          {/* Car Editor Modal */}
+          {showCarEditor && (
+            <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm overflow-y-auto">
+              <div className="glass-panel rounded-2xl p-6 shadow-2xl border border-white/20 backdrop-blur-xl max-w-2xl w-full m-4 max-h-[90vh] overflow-y-auto">
+                <div className="flex justify-between items-center mb-6">
+                  <h2 className="text-2xl font-bold text-white">
+                    {editingCar ? 'Edit Car' : 'Add New Car'}
+                  </h2>
+                  <button 
+                    onClick={() => setShowCarEditor(false)}
+                    className="text-white/60 hover:text-white text-2xl"
+                  >
+                    ✕
+                  </button>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 space-y-2">
+                  <input
+                    placeholder="Car Name"
+                    value={carForm.name}
+                    onChange={(e) => setCarForm({...carForm, name: e.target.value})}
+                    className="input bg-white/10 border border-yellow-400/30 text-white placeholder-yellow-200 w-full p-3 rounded-lg"
+                  />
+                  <input
+                    placeholder="Brand"
+                    value={carForm.brand}
+                    onChange={(e) => setCarForm({...carForm, brand: e.target.value})}
+                    className="input bg-white/10 border border-yellow-400/30 text-white placeholder-yellow-200 w-full p-3 rounded-lg"
+                  />
+                  <input
+                    placeholder="Model"
+                    value={carForm.model}
+                    onChange={(e) => setCarForm({...carForm, model: e.target.value})}
+                    className="input bg-white/10 border border-yellow-400/30 text-white placeholder-yellow-200 w-full p-3 rounded-lg"
+                  />
+                  <input
+                    placeholder="Year"
+                    value={carForm.year}
+                    onChange={(e) => setCarForm({...carForm, year: e.target.value})}
+                    className="input bg-white/10 border border-yellow-400/30 text-white placeholder-yellow-200 w-full p-3 rounded-lg"
+                  />
+                  <input
+                    placeholder="Price (KES)"
+                    type="number"
+                    value={carForm.price}
+                    onChange={(e) => setCarForm({...carForm, price: e.target.value})}
+                    className="input bg-white/10 border border-yellow-400/30 text-white placeholder-yellow-200 w-full p-3 rounded-lg"
+                  />
+                  <select
+                    value={carForm.fuel_type}
+                    onChange={(e) => setCarForm({...carForm, fuel_type: e.target.value})}
+                    className="input bg-white/10 border border-yellow-400/30 text-white w-full p-3 rounded-lg"
+                  >
+                    <option value="">Select Fuel Type</option>
+                    <option value="Petrol">Petrol</option>
+                    <option value="Diesel">Diesel</option>
+                    <option value="Hybrid">Hybrid</option>
+                    <option value="Electric">Electric</option>
+                  </select>
+                  <select
+                    value={carForm.transmission}
+                    onChange={(e) => setCarForm({...carForm, transmission: e.target.value})}
+                    className="input bg-white/10 border border-yellow-400/30 text-white w-full p-3 rounded-lg"
+                  >
+                    <option value="">Select Transmission</option>
+                    <option value="Manual">Manual</option>
+                    <option value="Automatic">Automatic</option>
+                    <option value="CVT">CVT</option>
+                  </select>
+                  <select
+                    value={carForm.drive_type}
+                    onChange={(e) => setCarForm({...carForm, drive_type: e.target.value})}
+                    className="input bg-white/10 border border-yellow-400/30 text-white w-full p-3 rounded-lg"
+                  >
+                    <option value="">Select Drive Type</option>
+                    <option value="FWD">Front Wheel Drive</option>
+                    <option value="RWD">Rear Wheel Drive</option>
+                    <option value="AWD">All Wheel Drive</option>
+                    <option value="4WD">4 Wheel Drive</option>
+                  </select>
+                </div>
+
+                <div className="mt-4">
+                  <label className="block text-yellow-200 font-semibold mb-2">Colors (one per line)</label>
+                  <textarea
+                    value={carForm.colors.join('\n')}
+                    onChange={(e) => setCarForm({...carForm, colors: e.target.value.split('\n')})}
+                    className="input bg-white/10 border border-yellow-400/30 text-white placeholder-yellow-200 w-full p-3 rounded-lg"
+                    placeholder="White&#10;Black&#10;Silver"
+                    rows={3}
+                  />
+                </div>
+
+                <div className="mt-4">
+                  <label className="block text-yellow-200 font-semibold mb-2">Description</label>
+                  <textarea
+                    value={carForm.description}
+                    onChange={(e) => setCarForm({...carForm, description: e.target.value})}
+                    className="input bg-white/10 border border-yellow-400/30 text-white placeholder-yellow-200 w-full p-3 rounded-lg"
+                    placeholder="Car description..."
+                    rows={3}
+                  />
+                </div>
+
+                <div className="mt-4">
+                  <label className="block text-yellow-200 font-semibold mb-2">Main Image URL</label>
+                  <input
+                    placeholder="https://example.com/car-image.jpg"
+                    value={carForm.main_image}
+                    onChange={(e) => setCarForm({...carForm, main_image: e.target.value})}
+                    className="input bg-white/10 border border-yellow-400/30 text-white placeholder-yellow-200 w-full p-3 rounded-lg"
+                  />
+                </div>
+
+                <div className="mt-4">
+                  <label className="block text-yellow-200 font-semibold mb-2">Additional Images (one URL per line)</label>
+                  <textarea
+                    value={carForm.additional_images.join('\n')}
+                    onChange={(e) => setCarForm({...carForm, additional_images: e.target.value.split('\n')})}
+                    className="input bg-white/10 border border-yellow-400/30 text-white placeholder-yellow-200 w-full p-3 rounded-lg"
+                    placeholder="https://example.com/image1.jpg&#10;https://example.com/image2.jpg"
+                    rows={3}
+                  />
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
+                  <div>
+                    <label className="block text-yellow-200 font-semibold mb-2">Location</label>
+                    <input
+                      value={carForm.location}
+                      onChange={(e) => setCarForm({...carForm, location: e.target.value})}
+                      className="input bg-white/10 border border-yellow-400/30 text-white placeholder-yellow-200 w-full p-3 rounded-lg"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-yellow-200 font-semibold mb-2">Status</label>
+                    <select
+                      value={carForm.status}
+                      onChange={(e) => setCarForm({...carForm, status: e.target.value})}
+                      className="input bg-white/10 border border-yellow-400/30 text-white w-full p-3 rounded-lg"
+                    >
+                      <option value="published">Published</option>
+                      <option value="draft">Draft</option>
+                      <option value="sold">Sold</option>
+                    </select>
+                  </div>
+                </div>
+
+                <div className="flex gap-4 mt-6">
+                  <button
+                    onClick={saveCarChanges}
+                    className="flex-1 bg-gradient-to-r from-green-500 to-blue-500 text-white font-bold py-3 rounded-lg shadow-lg hover:from-green-400 hover:to-blue-400 transition-all duration-300"
+                  >
+                    {editingCar ? 'Update Car' : 'Add Car'}
+                  </button>
+                  <button
+                    onClick={() => setShowCarEditor(false)}
+                    className="flex-1 bg-gray-600 hover:bg-gray-500 text-white font-bold py-3 rounded-lg transition-all duration-300"
+                  >
+                    Cancel
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
 
           {/* Trade-In Modal */}
           {showTradeIn && (

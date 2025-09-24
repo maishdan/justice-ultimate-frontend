@@ -72,15 +72,64 @@ const LoadingScreen: React.FC<LoadingScreenProps> = ({ text = 'Loading...', prog
       <div 
         className="glass-panel rounded-3xl p-12 shadow-2xl border border-white/30 backdrop-blur-xl relative z-10 max-w-md w-full mx-4"
       >
-        {/* Enhanced Loading Spinner */}
-        <div 
-          className="relative mb-8"
-        >
-          <div className="absolute inset-0 bg-gradient-to-r from-yellow-400 to-green-500 rounded-full blur-lg opacity-30 animate-pulse"></div>
-          <div className="relative w-20 h-20 mx-auto">
-            <div className="loading-spinner w-full h-full border-4 border-white/20 border-t-yellow-400 rounded-full animate-spin"></div>
+        {/* 3D Car Animation */}
+        <div className="relative mb-8 flex flex-col items-center">
+          {/* Car Container with 3D Effect */}
+          <div className="relative w-32 h-20 mb-4">
+            {/* Car Body */}
+            <div className="car-body absolute inset-0 bg-gradient-to-r from-yellow-400 via-yellow-500 to-green-500 rounded-xl shadow-2xl transform-gpu perspective-1000">
+              {/* Car Details */}
+              <div className="absolute top-2 left-4 w-6 h-3 bg-white/30 rounded-sm"></div> {/* Windshield */}
+              <div className="absolute top-2 right-4 w-6 h-3 bg-white/30 rounded-sm"></div> {/* Rear Window */}
+              <div className="absolute bottom-1 left-2 w-4 h-4 bg-gray-800 rounded-full"></div> {/* Front Wheel */}
+              <div className="absolute bottom-1 right-2 w-4 h-4 bg-gray-800 rounded-full"></div> {/* Rear Wheel */}
+              {/* Headlights */}
+              <div className="absolute top-4 left-0 w-2 h-2 bg-white rounded-full shadow-lg"></div>
+              <div className="absolute bottom-4 left-0 w-2 h-2 bg-white rounded-full shadow-lg"></div>
+            </div>
+            
+            {/* Animated Movement Effect */}
+            <div className="absolute inset-0 car-move-animation">
+              <div className="car-shadow absolute bottom-0 left-0 w-full h-2 bg-black/20 rounded-full blur-sm"></div>
+            </div>
+          </div>
+
+          {/* Enhanced Loading Spinner behind car */}
+          <div className="relative">
+            <div className="absolute inset-0 bg-gradient-to-r from-yellow-400 to-green-500 rounded-full blur-lg opacity-30 animate-pulse"></div>
+            <div className="relative w-16 h-16 mx-auto">
+              <div className="loading-spinner w-full h-full border-4 border-white/20 border-t-yellow-400 rounded-full animate-spin"></div>
+            </div>
           </div>
         </div>
+
+        {/* Car Animation Styles */}
+        <style jsx>{`
+          .car-body {
+            animation: carFloat 3s ease-in-out infinite, carMove 8s linear infinite;
+          }
+          
+          .car-move-animation {
+            animation: moveHorizontal 6s ease-in-out infinite;
+          }
+          
+          @keyframes carFloat {
+            0%, 100% { transform: translateY(0px) rotateX(0deg); }
+            50% { transform: translateY(-8px) rotateX(-5deg); }
+          }
+          
+          @keyframes carMove {
+            0%, 100% { transform: translateX(0px) perspective(200px) rotateY(0deg); }
+            25% { transform: translateX(20px) perspective(200px) rotateY(10deg); }
+            50% { transform: translateX(0px) perspective(200px) rotateY(0deg); }
+            75% { transform: translateX(-20px) perspective(200px) rotateY(-10deg); }
+          }
+          
+          @keyframes moveHorizontal {
+            0%, 100% { transform: translateX(0px); }
+            50% { transform: translateX(10px); }
+          }
+        `}</style>
 
         {/* Loading Text */}
         <h2 

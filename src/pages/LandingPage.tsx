@@ -77,13 +77,21 @@ export default function LandingPage() {
         >
           {/* Hero Glass Panel with Enhanced Effects */}
           <div className="glass-panel mx-auto max-w-6xl rounded-3xl p-4 sm:p-6 md:p-8 lg:p-12 shadow-2xl border border-white/20 backdrop-blur-xl">
-            <motion.h2 
+            <motion.h1 
               className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl xl:text-6xl font-extrabold leading-tight mb-4 sm:mb-6 text-adaptive-xl"
               initial={{ opacity: 0, y: 30 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.8, delay: 0.2 }}
             >
-              Drive Your <span className="text-yellow-400 animate-pulse drop-shadow-[0_0_20px_rgba(250,204,21,0.5)]">Dream Today</span>
+              Welcome to <span className="text-yellow-400 animate-pulse drop-shadow-[0_0_20px_rgba(250,204,21,0.5)]">Justice Ultimate Automobiles</span>
+            </motion.h1>
+            <motion.h2 
+              className="text-xl sm:text-2xl md:text-3xl lg:text-4xl font-bold leading-tight mb-4 text-white/95"
+              initial={{ opacity: 0, y: 30 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.8, delay: 0.3 }}
+            >
+              Drive Your <span className="text-green-400 drop-shadow-[0_0_15px_rgba(34,197,94,0.5)]">Dream Today</span>
             </motion.h2>
             <motion.p 
               className="text-lg md:text-xl mb-8 max-w-2xl mx-auto text-white/90 leading-relaxed"
@@ -91,7 +99,7 @@ export default function LandingPage() {
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.8, delay: 0.4 }}
             >
-              🚗 Experience global automotive excellence – from luxury car rentals to smart, secure bookings across all continents.
+              🚗 Welcome to the future of automotive excellence! Experience premium vehicle solutions from luxury car rentals to smart, secure bookings across all continents. Your journey starts here with Justice Ultimate Automobiles.
             </motion.p>
             <motion.div 
               className="flex flex-col md:flex-row justify-center gap-6"
