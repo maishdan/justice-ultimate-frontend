@@ -133,9 +133,32 @@ function App() {
     };
   }, []);
 
+  // Ensure WhatsApp widget is always visible (Fallback protection)
+  useEffect(() => {
+    const ensureWhatsAppVisibility = () => {
+      const widget = document.querySelector('.whatsapp-floating-widget');
+      if (widget) {
+        // Force maximum z-index and visibility
+        widget.style.zIndex = '2147483647';
+        widget.style.position = 'fixed';
+        widget.style.bottom = '1.5rem';
+        widget.style.right = '1.5rem';
+        widget.style.visibility = 'visible';
+        widget.style.opacity = '1';
+        widget.style.display = 'flex';
+      }
+    };
+
+    // Run immediately and then every 5 seconds as a safety check
+    ensureWhatsAppVisibility();
+    const visibilityInterval = setInterval(ensureWhatsAppVisibility, 5000);
+
+    return () => clearInterval(visibilityInterval);
+  }, []);
+
   return (
     <UserProfileProvider>
-      {/* Global WhatsApp Widget Styles */}
+      {/* Global WhatsApp Widget Styles - Maximum Priority */}
       <style>{`
         .whatsapp-floating-widget {
           position: fixed !important;
@@ -143,16 +166,81 @@ function App() {
           right: 1.5rem !important;
           z-index: 2147483647 !important;
           pointer-events: none !important;
+          display: flex !important;
+          flex-direction: column !important;
+          align-items: flex-end !important;
+          gap: 0.75rem !important;
+          visibility: visible !important;
+          opacity: 1 !important;
+          transform: none !important;
         }
         .whatsapp-floating-widget > * {
           pointer-events: auto !important;
+        }
+        .whatsapp-btn {
+          position: relative !important;
+          display: flex !important;
+          align-items: center !important;
+          justify-content: center !important;
+          width: 4rem !important;
+          height: 4rem !important;
+          border-radius: 50% !important;
+          background: linear-gradient(135deg, #25D366 0%, #128C7E 100%) !important;
+          box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25), 0 0 30px rgba(37, 211, 102, 0.4) !important;
+          transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+          z-index: 2147483647 !important;
+          border: none !important;
+          outline: none !important;
+          text-decoration: none !important;
+        }
+        .whatsapp-btn:hover {
+          transform: scale(1.1) !important;
+          box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.35), 0 0 40px rgba(37, 211, 102, 0.6) !important;
+        }
+        .whatsapp-btn:focus {
+          outline: 2px solid #25D366 !important;
+          outline-offset: 2px !important;
+        }
+        /* Ensure visibility on all screen sizes */
+        @media (max-width: 768px) {
+          .whatsapp-floating-widget {
+            bottom: 1rem !important;
+            right: 1rem !important;
+          }
+          .whatsapp-btn {
+            width: 3.5rem !important;
+            height: 3.5rem !important;
+          }
+        }
+        
+        /* Ensure WhatsApp button is never hidden */
+        .whatsapp-floating-widget {
+          will-change: transform !important;
+        }
+        
+        /* Force visibility over any possible conflicts */
+        body .whatsapp-floating-widget {
+          z-index: 2147483647 !important;
+          position: fixed !important;
+          display: flex !important;
+        }
+        
+        html .whatsapp-floating-widget {
+          z-index: 2147483647 !important;
+          position: fixed !important;
+          display: flex !important;
         }
       `}</style>
       
       <InstallPrompt />
       <Header />
       {/* Enhanced Floating WhatsApp Widget (Global - Above All Content) */}
-      <div className="whatsapp-floating-widget fixed z-[2147483647] bottom-6 right-6 flex flex-col items-end gap-3 pointer-events-none" style={{ zIndex: 2147483647 }}>
+      <div 
+        className="whatsapp-floating-widget fixed z-[2147483647] bottom-6 right-6 flex flex-col items-end gap-3 pointer-events-none" 
+        style={{ zIndex: 2147483647 }}
+        data-testid="whatsapp-floating-widget"
+        id="whatsapp-floating-widget"
+      >
         {/* Enhanced Popup Message with Animation */}
         <div 
           id="wa-tip" 
@@ -174,9 +262,10 @@ function App() {
           href="https://wa.me/254722827458?text=Hello%2C%20I%27m%20interested%20in%20learning%20more%20about%20your%20vehicles%20and%20services.%20Could%20you%20please%20assist%20me%3F"
           target="_blank"
           rel="noopener noreferrer"
-          className="pointer-events-auto group relative flex items-center justify-center h-16 w-16 rounded-full bg-gradient-to-r from-[#25D366] to-[#128C7E] shadow-2xl hover:shadow-[0_0_30px_rgba(37,211,102,0.6)] transition-all duration-300 transform hover:scale-110"
+          className="whatsapp-btn pointer-events-auto group"
           style={{ zIndex: 2147483647 }}
-          aria-label="WhatsApp Support"
+          aria-label="WhatsApp Support - Contact Justice Ultimate Automobiles"
+          title="Chat with us on WhatsApp"
         >
           {/* Pulse Animation Ring */}
           <div className="absolute inset-0 rounded-full bg-[#25D366] animate-ping opacity-75"></div>
