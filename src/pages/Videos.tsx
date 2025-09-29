@@ -18,8 +18,9 @@ export default function Videos() {
   // Local video templates from the videos folder
   const localTemplates = [
     { id: 1, title: 'Showroom Highlights', src: '/videos/drive 3.mp4', type: 'local', description: 'Tour our premium showroom facilities' },
-    { id: 2, title: 'Customer Testimonials', src: '/videos/drive .mp4', type: 'local', description: 'Hear from our satisfied customers' },
-    { id: 3, title: 'Behind the Scenes', src: '/videos/drive 1.mp4', type: 'local', description: 'See how we prepare your vehicles' },
+    { id: 2, title: 'Showroom Highlights', src: '/videos/drive .mp4', type: 'local', description: 'Car Previews ' },
+    { id: 3, title: 'Vehicles On The Road', src: '/videos/drive 1.mp4', type: 'local', description: 'See how the cars are!' },
+    { id: 3, title: 'Featured Today @Justice Ultimate Automobiles ', src: '/videos/drive 2.mp4', type: 'local', description: 'Toyota Land Cruiser GR' },
   ];
 
   // Sample embedded videos (can be managed from admin)
