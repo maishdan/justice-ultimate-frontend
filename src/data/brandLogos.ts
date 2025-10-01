@@ -3,7 +3,7 @@ export interface BrandLogo {
   src: string;
 }
 
-// Real brand logo URLs (from Wikipedia Commons or official SVGs)
+// Real brand logo URLs (from Wikipedia Commons or official SVGs / vector sources)
 export const brandLogos: BrandLogo[] = [
   { alt: 'Mercedes-Benz', src: 'https://upload.wikimedia.org/wikipedia/commons/9/90/Mercedes-Logo.svg' },
   { alt: 'BMW', src: 'https://upload.wikimedia.org/wikipedia/commons/3/3d/BMW_logo_%28gray%29.svg' },
@@ -49,6 +49,13 @@ export const brandLogos: BrandLogo[] = [
   { alt: 'GMC', src: 'https://upload.wikimedia.org/wikipedia/commons/9/9e/GMC-Logo.svg' },
   { alt: 'Cadillac', src: 'https://upload.wikimedia.org/wikipedia/commons/7/7b/Cadillac_logo.svg' },
   { alt: 'Chrysler', src: 'https://upload.wikimedia.org/wikipedia/commons/9/90/Chrysler_logo_2010.svg' },
+
+  // Additional / motorbike or Africa-common brands
+  { alt: 'Bajaj', src: 'https://upload.wikimedia.org/wikipedia/commons/3/3d/Bajaj_logo.svg' },
+  { alt: 'TVS', src: 'https://upload.wikimedia.org/wikipedia/commons/4/4b/TVS_logo.svg' },
+  { alt: 'Yamaha', src: 'https://upload.wikimedia.org/wikipedia/commons/4/4e/Yamaha_logo.svg' },
+  { alt: 'Harley-Davidson', src: 'https://upload.wikimedia.org/wikipedia/commons/3/3a/Harley_Davidson_logo.svg' },
+  { alt: 'Ducati', src: 'https://upload.wikimedia.org/wikipedia/commons/5/5c/Ducati_logo.svg' },
+  { alt: 'Kawasaki', src: 'https://upload.wikimedia.org/wikipedia/commons/2/2e/Kawasaki_logo.svg' },
+  { alt: 'Hero MotoCorp', src: 'https://upload.wikimedia.org/wikipedia/commons/8/83/Hero_MotoCorp_logo.svg' }
 ];
-
-
