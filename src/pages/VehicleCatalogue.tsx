@@ -6,6 +6,9 @@ import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { supabase } from '../lib/supabaseClient';
 import { Search, Filter } from 'lucide-react';
 import Footer from "../components/Footer";
+// Marquee import removed; using StepMarquee for step-based display
+import StepMarquee from "../components/ui/StepMarquee";
+import { brandLogos } from "../data/brandLogos";
 import { RealtimeChannel } from '@supabase/supabase-js';
 import { CarCard } from '../components/CarCard';
 // removed unused type import and page import
@@ -16,6 +19,8 @@ export default function VehicleCatalogue() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [search, setSearch] = useState('');
+  const [showSuggestions, setShowSuggestions] = useState(false);
+  const [highlightIndex, setHighlightIndex] = useState(0);
   const [category, setCategory] = useState('');
   const [sortBy, setSortBy] = useState<'newest' | 'price_low' | 'price_high'>('newest');
   const [searchParams, setSearchParams] = useSearchParams();
@@ -158,6 +163,28 @@ export default function VehicleCatalogue() {
       return matchesSearch && matchesCategory;
     });
   }, [cars, search, category]);
+
+  const suggestions = useMemo(() => {
+    if (!search.trim()) return [] as any[];
+    const query = search.toLowerCase();
+    const byScore = (c: any) => {
+      let score = 0;
+      const name = (c.name || c.title || '').toLowerCase();
+      const brand = (c.brand || c.make || '').toLowerCase();
+      const model = (c.model || '').toLowerCase();
+      if (name.includes(query)) score += 3;
+      if (brand.includes(query)) score += 2;
+      if (model.includes(query)) score += 2;
+      if ((c.description || '').toLowerCase().includes(query)) score += 1;
+      return score;
+    };
+    return [...cars]
+      .map(c => ({ c, score: byScore(c) }))
+      .filter(x => x.score > 0)
+      .sort((a, b) => b.score - a.score)
+      .slice(0, 8)
+      .map(x => x.c);
+  }, [cars, search]);
 
   const carsPerPage = 10;
   const totalPages = Math.max(1, Math.ceil(filteredCars.length / carsPerPage));
@@ -408,6 +435,17 @@ export default function VehicleCatalogue() {
              </motion.p>
           </motion.section>
 
+          {/* Brand Marquee under catalogue header */}
+          <div className="mb-8">
+            <StepMarquee
+              items={brandLogos}
+              intervalMs={30000}
+              renderItem={(b) => (
+                <img src={b.src} alt={b.alt} className="h-10 md:h-12 object-contain opacity-95" />
+              )}
+            />
+          </div>
+
                      {/* Search and Filter Section with Enhanced Glass Morphism */}
            <motion.section
              className="mb-12"
@@ -423,10 +461,42 @@ export default function VehicleCatalogue() {
                   <input
                     type="text"
                     value={search}
-                    onChange={e => setSearch(e.target.value)}
+                    onChange={e => { setSearch(e.target.value); setShowSuggestions(true); setHighlightIndex(0); }}
+                    onFocus={() => setShowSuggestions(true)}
+                    onKeyDown={(e) => {
+                      if (!showSuggestions || suggestions.length === 0) return;
+                      if (e.key === 'ArrowDown') { e.preventDefault(); setHighlightIndex(i => Math.min(i + 1, suggestions.length - 1)); }
+                      if (e.key === 'ArrowUp') { e.preventDefault(); setHighlightIndex(i => Math.max(i - 1, 0)); }
+                      if (e.key === 'Enter') {
+                        e.preventDefault();
+                        const sel = suggestions[highlightIndex];
+                        if (sel?.id) navigate(`/car/${sel.id}`);
+                      }
+                      if (e.key === 'Escape') { setShowSuggestions(false); }
+                    }}
                     placeholder="Search by name or brand..."
                     className="w-full pl-10 pr-4 py-3 rounded-xl bg-white/10 border border-white/20 text-white placeholder-white/60 backdrop-blur-sm focus:outline-none focus:ring-2 focus:ring-yellow-400/50 focus:border-yellow-400/50 transition-all duration-300"
                   />
+                  {showSuggestions && suggestions.length > 0 && (
+                    <div className="absolute z-20 mt-2 w-full glass-panel rounded-xl border border-white/20 backdrop-blur-xl overflow-hidden">
+                      <ul>
+                        {suggestions.map((s: any, idx: number) => (
+                          <li
+                            key={s.id || s.slug || idx}
+                            onMouseDown={(e) => { e.preventDefault(); navigate(`/car/${s.id}`); }}
+                            className={`px-3 py-2 cursor-pointer flex items-center gap-2 ${idx === highlightIndex ? 'bg-white/10' : ''}`}
+                          >
+                            <img src={s.image?.[0] || s.main_image || s.additional_images?.[0] || '/images/placeholder-car.jpg'} alt="" className="w-10 h-8 object-cover rounded" />
+                            <div className="flex-1">
+                              <div className="text-white text-sm font-medium">{s.name || s.title}</div>
+                              <div className="text-white/70 text-xs">{s.brand || s.make} {s.model} {s.specs?.year || s.year}</div>
+                            </div>
+                            <div className="text-yellow-300 text-xs font-semibold">{(s.currency ?? 'KES') === 'KES' ? 'Ksh' : '$'} {s.price?.toLocaleString?.()}</div>
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  )}
                 </div>
                 <div className="relative w-full md:w-1/4">
                   <Filter className="absolute left-3 top-1/2 transform -translate-y-1/2 text-white/60 w-5 h-5" />

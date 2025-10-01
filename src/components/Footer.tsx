@@ -1,9 +1,12 @@
 // src/components/Footer.tsx
-import React from 'react';
+// React import removed as it's unused in this file
 import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
+// Marquee import removed; using StepMarquee for step-based display
+import StepMarquee from './ui/StepMarquee';
+import { brandLogos } from '../data/brandLogos';
 import { Github } from "lucide-react";
-import { FaHome, FaTachometerAlt, FaEnvelope, FaPhone, FaWhatsapp, FaFileAlt, FaLock, FaCookieBite } from 'react-icons/fa';
+import { FaHome, FaTachometerAlt, FaEnvelope, FaPhone, FaWhatsapp } from 'react-icons/fa';
 
 export default function Footer() {
   return (
@@ -22,17 +25,16 @@ export default function Footer() {
           boxShadow: '0 8px 32px 0 rgba(31, 38, 135, 0.37)'
         }}
       >
-        {/* Trusted Partners - Real Car Brand Logos */}
+        {/* Trusted Partners - Real Car Brand Logos (Step by step 60s each) */}
         <div className="mb-10">
           <h3 className="text-center text-white/90 text-sm md:text-base font-semibold mb-4">Trusted by leading automotive brands</h3>
-          <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 gap-6 items-center justify-items-center opacity-90">
-            <img src="https://upload.wikimedia.org/wikipedia/commons/9/9d/Toyota_logo.png" alt="Toyota" className="h-8 md:h-10 object-contain" />
-            <img src="https://upload.wikimedia.org/wikipedia/commons/9/90/Mercedes-Logo.svg" alt="Mercedes-Benz" className="h-8 md:h-10 object-contain" />
-            <img src="https://upload.wikimedia.org/wikipedia/commons/3/3d/BMW_logo_%28gray%29.svg" alt="BMW" className="h-8 md:h-10 object-contain" />
-            <img src="https://upload.wikimedia.org/wikipedia/commons/6/6f/Audi_logo_detail.svg" alt="Audi" className="h-8 md:h-10 object-contain" />
-            <img src="https://upload.wikimedia.org/wikipedia/commons/5/5e/Volkswagen_logo_2019.svg" alt="Volkswagen" className="h-8 md:h-10 object-contain" />
-            <img src="https://upload.wikimedia.org/wikipedia/commons/8/8e/Nissan_2020_logo.svg" alt="Nissan" className="h-8 md:h-10 object-contain" />
-          </div>
+          <StepMarquee
+            items={brandLogos}
+            intervalMs={30000}
+            renderItem={(b) => (
+              <img src={b.src} alt={b.alt} className="h-10 md:h-12 object-contain opacity-95" />
+            )}
+          />
         </div>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 mb-8">
           {/* Justice Ultimate Automobiles */}

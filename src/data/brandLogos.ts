@@ -1,0 +1,54 @@
+export interface BrandLogo {
+  alt: string;
+  src: string;
+}
+
+// Real brand logo URLs (from Wikipedia Commons or official SVGs)
+export const brandLogos: BrandLogo[] = [
+  { alt: 'Mercedes-Benz', src: 'https://upload.wikimedia.org/wikipedia/commons/9/90/Mercedes-Logo.svg' },
+  { alt: 'BMW', src: 'https://upload.wikimedia.org/wikipedia/commons/3/3d/BMW_logo_%28gray%29.svg' },
+  { alt: 'Audi', src: 'https://upload.wikimedia.org/wikipedia/commons/6/6f/Audi_logo_detail.svg' },
+  { alt: 'Volkswagen', src: 'https://upload.wikimedia.org/wikipedia/commons/5/5e/Volkswagen_logo_2019.svg' },
+  { alt: 'Toyota', src: 'https://upload.wikimedia.org/wikipedia/commons/9/9d/Toyota_logo.png' },
+  { alt: 'Nissan', src: 'https://upload.wikimedia.org/wikipedia/commons/8/8e/Nissan_2020_logo.svg' },
+  { alt: 'Honda', src: 'https://upload.wikimedia.org/wikipedia/commons/7/7b/Honda_logo_logotype_emblem.png' },
+  { alt: 'Tesla', src: 'https://upload.wikimedia.org/wikipedia/commons/b/bd/Tesla_Motors.svg' },
+  { alt: 'Ford', src: 'https://upload.wikimedia.org/wikipedia/commons/3/3e/Ford_logo_flat.svg' },
+  { alt: 'Chevrolet', src: 'https://upload.wikimedia.org/wikipedia/commons/2/21/Chevrolet_logo.svg' },
+  { alt: 'Porsche', src: 'https://upload.wikimedia.org/wikipedia/en/2/2d/Porsche_Crest.svg' },
+  { alt: 'Ferrari', src: 'https://upload.wikimedia.org/wikipedia/en/3/3d/Ferrari-Logo.svg' },
+  { alt: 'Lamborghini', src: 'https://upload.wikimedia.org/wikipedia/en/8/8b/Lamborghini_Logo.svg' },
+  { alt: 'Jaguar', src: 'https://upload.wikimedia.org/wikipedia/en/3/3a/Jaguar_Cars_logo.png' },
+  { alt: 'Land Rover', src: 'https://upload.wikimedia.org/wikipedia/commons/4/4a/Land_Rover_logo_black.svg' },
+  { alt: 'Lexus', src: 'https://upload.wikimedia.org/wikipedia/commons/2/2f/Lexus_division_emblem.svg' },
+  { alt: 'Hyundai', src: 'https://upload.wikimedia.org/wikipedia/commons/4/45/Hyundai_logo.svg' },
+  { alt: 'Kia', src: 'https://upload.wikimedia.org/wikipedia/commons/6/65/Kia-logo.png' },
+  { alt: 'Subaru', src: 'https://upload.wikimedia.org/wikipedia/commons/b/b9/Subaru_logo_new.png' },
+  { alt: 'Mazda', src: 'https://upload.wikimedia.org/wikipedia/commons/a/a3/Mazda_logo_with_emblem.svg' },
+  { alt: 'Volvo', src: 'https://upload.wikimedia.org/wikipedia/commons/6/6f/Volvo_Iron_Mark.svg' },
+  { alt: 'Peugeot', src: 'https://upload.wikimedia.org/wikipedia/commons/0/0e/Peugeot_2021_Logo.svg' },
+  { alt: 'Renault', src: 'https://upload.wikimedia.org/wikipedia/commons/7/70/Renault_2021_Logo.svg' },
+  { alt: 'Citroën', src: 'https://upload.wikimedia.org/wikipedia/commons/7/76/Citroen_2022_logo.svg' },
+  { alt: 'Opel', src: 'https://upload.wikimedia.org/wikipedia/commons/0/0a/Opel_2023_logo.svg' },
+  { alt: 'Skoda', src: 'https://upload.wikimedia.org/wikipedia/commons/f/f7/%C5%A0koda_Auto_logo_%282023%29.svg' },
+  { alt: 'Seat', src: 'https://upload.wikimedia.org/wikipedia/commons/5/52/SEAT_2021_logo.svg' },
+  { alt: 'Mitsubishi', src: 'https://upload.wikimedia.org/wikipedia/commons/8/89/Mitsubishi_Motors.svg' },
+  { alt: 'Suzuki', src: 'https://upload.wikimedia.org/wikipedia/commons/6/6f/Suzuki_Motor_Corporation_Logo.svg' },
+  { alt: 'Infiniti', src: 'https://upload.wikimedia.org/wikipedia/commons/1/10/Infiniti-Logo.svg' },
+  { alt: 'Acura', src: 'https://upload.wikimedia.org/wikipedia/commons/1/16/Acura_logo.svg' },
+  { alt: 'Alfa Romeo', src: 'https://upload.wikimedia.org/wikipedia/commons/7/7f/Alfa_Romeo_Logo_2015.svg' },
+  { alt: 'Maserati', src: 'https://upload.wikimedia.org/wikipedia/en/5/54/Maserati_logo_2020.svg' },
+  { alt: 'Bentley', src: 'https://upload.wikimedia.org/wikipedia/en/5/5e/Bentley_logo.svg' },
+  { alt: 'Rolls-Royce', src: 'https://upload.wikimedia.org/wikipedia/commons/7/7c/Rolls-Royce_Motor_Cars_logo.svg' },
+  { alt: 'Aston Martin', src: 'https://upload.wikimedia.org/wikipedia/en/0/02/Aston_Martin_wordmark_rogo_2021.svg' },
+  { alt: 'McLaren', src: 'https://upload.wikimedia.org/wikipedia/en/5/55/McLaren_Automotive_Logo.svg' },
+  { alt: 'Bugatti', src: 'https://upload.wikimedia.org/wikipedia/commons/3/3e/Bugatti_Logo.svg' },
+  { alt: 'Dodge', src: 'https://upload.wikimedia.org/wikipedia/commons/2/2e/Dodge_logo_2010.svg' },
+  { alt: 'Jeep', src: 'https://upload.wikimedia.org/wikipedia/commons/1/1d/Jeep_logo.svg' },
+  { alt: 'RAM', src: 'https://upload.wikimedia.org/wikipedia/commons/9/90/Ram_Trucks_logo.svg' },
+  { alt: 'GMC', src: 'https://upload.wikimedia.org/wikipedia/commons/9/9e/GMC-Logo.svg' },
+  { alt: 'Cadillac', src: 'https://upload.wikimedia.org/wikipedia/commons/7/7b/Cadillac_logo.svg' },
+  { alt: 'Chrysler', src: 'https://upload.wikimedia.org/wikipedia/commons/9/90/Chrysler_logo_2010.svg' },
+];
+
+

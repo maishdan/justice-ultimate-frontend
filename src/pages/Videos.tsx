@@ -5,26 +5,38 @@ import { Button } from "../components/ui/button";
 import { Video, Play, Upload, Globe, Plus, X } from "lucide-react";
 
 export default function Videos() {
-  const [videos, setVideos] = useState([]);
-  const [selectedVideo, setSelectedVideo] = useState(null);
+  type VideoItem = {
+    id: number;
+    title: string;
+    type: 'local' | 'youtube' | 'tiktok';
+    src: string;
+    description?: string;
+  };
+
+  const [videos, setVideos] = useState<VideoItem[]>([]);
   const [showAddModal, setShowAddModal] = useState(false);
-  const [newVideoForm, setNewVideoForm] = useState({
+  const [newVideoForm, setNewVideoForm] = useState<{
+    title: string;
+    type: 'local' | 'youtube' | 'tiktok';
+    src: string;
+    description: string;
+  }>({
     title: '',
-    type: 'local', // 'local', 'youtube', 'tiktok'
+    type: 'local',
     src: '',
     description: ''
   });
 
   // Local video templates from the videos folder
-  const localTemplates = [
+  const localTemplates: VideoItem[] = [
     { id: 1, title: 'Showroom Highlights', src: '/videos/drive 3.mp4', type: 'local', description: 'Tour our premium showroom facilities' },
     { id: 2, title: 'Showroom Highlights', src: '/videos/drive .mp4', type: 'local', description: 'Car Previews ' },
     { id: 3, title: 'Vehicles On The Road', src: '/videos/drive 1.mp4', type: 'local', description: 'See how the cars are!' },
-    { id: 3, title: 'Featured Today @Justice Ultimate Automobiles ', src: '/videos/drive 2.mp4', type: 'local', description: 'Toyota Land Cruiser GR' },
+    { id: 4, title: 'Featured Today @Justice Ultimate Automobiles', src: '/videos/drive 2.mp4', type: 'local', description: 'Toyota Land Cruiser GR' },
   ];
 
   // Sample embedded videos (can be managed from admin)
-  const embeddedVideos = [
+  const embeddedVideos: VideoItem[] = [
     {
       id: 4,
       title: 'Car Review: Latest Models',
@@ -45,7 +57,15 @@ export default function Videos() {
     // Load videos from localStorage or default templates
     const savedVideos = localStorage.getItem('justice_videos');
     if (savedVideos) {
-      setVideos(JSON.parse(savedVideos));
+      const saved: VideoItem[] = JSON.parse(savedVideos) as VideoItem[];
+      // Ensure the four local templates are present by src uniqueness
+      const bySrc = new Map<string, VideoItem>(saved.map(v => [v.src, v] as const));
+      for (const tmpl of localTemplates) {
+        if (!bySrc.has(tmpl.src)) bySrc.set(tmpl.src, tmpl);
+      }
+      const merged = Array.from(bySrc.values());
+      setVideos(merged);
+      localStorage.setItem('justice_videos', JSON.stringify(merged));
     } else {
       const allVideos = [...localTemplates, ...embeddedVideos];
       setVideos(allVideos);
@@ -69,13 +89,13 @@ export default function Videos() {
     setShowAddModal(false);
   };
 
-  const removeVideo = (id) => {
-    const updatedVideos = videos.filter(v => v.id !== id);
+  const removeVideo = (id: number) => {
+    const updatedVideos = videos.filter((v) => v.id !== id);
     setVideos(updatedVideos);
     localStorage.setItem('justice_videos', JSON.stringify(updatedVideos));
   };
 
-  const getVideoEmbed = (video) => {
+  const getVideoEmbed = (video: VideoItem) => {
     switch (video.type) {
       case 'youtube':
         return (
@@ -156,7 +176,7 @@ export default function Videos() {
 
           {/* Videos Grid */}
           <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6 mt-8">
-            {videos.map((video, i) => (
+            {videos.map((video: VideoItem, i: number) => (
               <motion.div
                 key={video.id}
                 className="glass-panel rounded-2xl p-4 shadow-2xl border border-white/20 backdrop-blur-xl group hover:shadow-[0_0_30px_rgba(59,130,246,0.3)] transition-all duration-300"
@@ -255,9 +275,9 @@ export default function Videos() {
 
                 <div>
                   <label className="block text-white/80 text-sm font-medium mb-2">Type</label>
-                  <select
+                <select
                     value={newVideoForm.type}
-                    onChange={(e) => setNewVideoForm({...newVideoForm, type: e.target.value})}
+                    onChange={(e) => setNewVideoForm({...newVideoForm, type: e.target.value as 'local' | 'youtube' | 'tiktok'})}
                     className="w-full p-3 rounded-lg bg-white/10 border border-white/20 text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
                   >
                     <option value="local">Local Video</option>

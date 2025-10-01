@@ -1,8 +1,10 @@
 // src/pages/LandingPage.tsx
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import LoadingScreen from '../components/ui/LoadingScreen';
 import { motion } from "framer-motion";
 import { Button } from "../components/ui/button";
+import StepMarquee from "../components/ui/StepMarquee";
+import { brandLogos } from "../data/brandLogos";
 import { Github } from "lucide-react";
 import { Link, useLocation } from "react-router-dom";
 import { FaHome, FaTachometerAlt, FaEnvelopeOpenText } from "react-icons/fa";
@@ -121,21 +123,31 @@ export default function LandingPage() {
           </div>
         </motion.section>
 
-        {/* Featured Cars of the Day - Slideshow */}
+        {/* Featured Today with local video and marquee */}
         <section className="px-6 md:px-20 mb-8">
           <div className="glass-panel mx-auto max-w-6xl rounded-2xl p-6 shadow-2xl border border-white/20 backdrop-blur-xl">
             <h3 className="text-2xl font-bold text-yellow-400 mb-4">Featured Today</h3>
-            <div className="relative h-48 flex items-center justify-center">
-              <style>{`
-                @keyframes fadeDaily { 0%{opacity:0} 8%{opacity:1} 28%{opacity:1} 36%{opacity:0} 100%{opacity:0} }
-              `}</style>
-              {[
-                '/images/mercedes-benz-s-class.png',
-                '/images/tesla-model-x.png',
-                '/images/1967-ford-mustang.png',
-              ].map((src, i) => (
-                <img key={i} src={src} className="absolute h-48 w-80 object-cover rounded-xl border border-white/20 shadow" style={{ animation: `fadeDaily 24s infinite`, animationDelay: `${i*8}s` }} />
-              ))}
+            <div className="relative">
+              <video
+                src="/videos/drive 2.mp4"
+                className="w-full h-64 md:h-80 object-cover rounded-xl border border-white/20 shadow"
+                controls
+                preload="metadata"
+              />
+              <div className="absolute bottom-3 right-3">
+                <Link to="/vehicle-catalogue">
+                  <Button className="bg-yellow-400 text-black hover:bg-yellow-300 font-semibold rounded-lg px-4 py-2">View Details</Button>
+                </Link>
+              </div>
+            </div>
+            <div className="mt-6">
+              <StepMarquee
+                items={brandLogos}
+                intervalMs={30000}
+                renderItem={(b) => (
+                  <img src={b.src} alt={b.alt} className="h-10 md:h-12 object-contain opacity-95" />
+                )}
+              />
             </div>
           </div>
         </section>
