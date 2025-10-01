@@ -128,8 +128,8 @@ export default function CarDetailPage() {
                   <Link to="/vehicle-catalogue"><Button>Search</Button></Link>
                 </div>
               </div>
-              <a href="tel:+254748222222" className="block w-full text-center px-4 py-3 bg-green-600 hover:bg-green-700 text-white rounded-xl">+254 748-222-222</a>
-              <a href="mailto:inquiry@alhusnainmotors.co.ke" className="block w-full text-center px-4 py-3 bg-white/10 hover:bg白/20 text-white rounded-xl">inquiry@alhusnainmotors.co.ke</a>
+              <a href="tel:+254748222222" className="block w-full text-center px-4 py-3 bg-green-600 hover:bg-green-700 text-white rounded-xl">+254 7228 27458 -0751 5555 44</a>
+              <a href="mailto:justicevincentt@gmail.com" className="block w-full text-center px-4 py-3 bg-white/10 hover:bg白/20 text-white rounded-xl">justicevincentt@gmail.com</a>
               <a
                 href={`https://wa.me/254722827458?text=I'm%20interested%20in%20${encodeURIComponent(car.name)}%20(${encodeURIComponent(car.stockId || car.id)}).`}
                 target="_blank" rel="noreferrer"
